@@ -319,6 +319,69 @@ button {
   cursor: pointer;
 }
 
+.account-menu-container {
+  position: relative;
+}
+
+.account-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 224px;
+  padding: 7px;
+  border: 1px solid #e7ebf1;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 14px 36px rgb(23 35 56 / 14%);
+}
+
+.account-menu[hidden] {
+  display: none;
+}
+
+.account-menu-heading {
+  display: grid;
+  gap: 4px;
+  padding: 10px 11px 12px;
+}
+
+.account-menu-heading strong {
+  overflow: hidden;
+  color: #27344a;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu-heading span {
+  color: #8994a5;
+  font-size: 11px;
+}
+
+.account-menu-item {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 11px;
+  border-top: 1px solid #edf0f4;
+  border-radius: 0 0 8px 8px;
+  color: #b13d3d;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background-color 140ms ease;
+}
+
+.account-menu-item:hover {
+  background: #fff4f3;
+}
+
+.account-menu-item > span {
+  font-size: 16px;
+}
+
 .avatar {
   display: inline-grid;
   width: 31px;

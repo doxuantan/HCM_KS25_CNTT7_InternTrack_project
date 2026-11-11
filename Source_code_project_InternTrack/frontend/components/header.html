@@ -30,11 +30,31 @@
   <span class="notification-dot" aria-hidden="true"></span>
 </button>
 
-<button class="profile-button" type="button" aria-label="Tài khoản Nguyễn Minh Anh">
-  <span class="avatar avatar-blue">MA</span>
-  <span class="profile-details">
-    <strong>Nguyễn Minh Anh</strong>
-    <span>Quản trị viên</span>
-  </span>
-  <span class="profile-chevron" aria-hidden="true">⌄</span>
-</button>
+<div class="account-menu-container" data-account-menu>
+  <button
+    class="profile-button"
+    type="button"
+    data-account-toggle
+    aria-label="Tài khoản Nguyễn Minh Anh"
+    aria-haspopup="menu"
+    aria-controls="account-menu"
+    aria-expanded="false"
+  >
+    <span class="avatar avatar-blue">MA</span>
+    <span class="profile-details">
+      <strong>Nguyễn Minh Anh</strong>
+      <span>Quản trị viên</span>
+    </span>
+    <span class="profile-chevron" aria-hidden="true">⌄</span>
+  </button>
+  <div class="account-menu" id="account-menu" role="menu" aria-label="Tùy chọn tài khoản" hidden>
+    <div class="account-menu-heading">
+      <strong>Nguyễn Minh Anh</strong>
+      <span>Quản trị viên</span>
+    </div>
+    <a class="account-menu-item" href="login.html" role="menuitem" data-logout-link>
+      <span aria-hidden="true">↪</span>
+      Đăng xuất
+    </a>
+  </div>
+</div>

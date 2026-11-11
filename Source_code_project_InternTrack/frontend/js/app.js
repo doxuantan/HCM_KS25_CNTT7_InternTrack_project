@@ -28,9 +28,46 @@ function setupSidebar() {
   });
 }
 
+function setupAccountMenu() {
+  const container = document.querySelector("[data-account-menu]");
+  const toggle = container?.querySelector("[data-account-toggle]");
+  const menu = container?.querySelector("#account-menu");
+
+  if (
+    !(container instanceof HTMLElement) ||
+    !(toggle instanceof HTMLButtonElement) ||
+    !(menu instanceof HTMLElement)
+  ) {
+    throw new Error("Account menu controls are missing from the page.");
+  }
+
+  const setMenuOpen = (isOpen) => {
+    menu.hidden = !isOpen;
+    toggle.setAttribute("aria-expanded", String(isOpen));
+  };
+
+  toggle.addEventListener("click", () => {
+    setMenuOpen(menu.hidden);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (event.target instanceof Node && !container.contains(event.target)) {
+      setMenuOpen(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) {
+      setMenuOpen(false);
+      toggle.focus();
+    }
+  });
+}
+
 try {
   await loadComponents();
   setupSidebar();
+  setupAccountMenu();
 } catch (error) {
   console.error("The application layout could not be initialized.", error);
   const main = document.querySelector("#main-content");
