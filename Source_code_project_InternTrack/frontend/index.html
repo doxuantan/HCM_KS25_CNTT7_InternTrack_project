@@ -3,14 +3,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f5f7fb">
-    <meta name="description" content="Giao diện quản lý InterTrack">
+    <meta name="theme-color" content="#101a2b">
+    <meta name="description" content="InterTrack - Nền tảng quản lý quá trình thực tập dành cho sinh viên.">
     <title>InterTrack | Tổng quan</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <script type="module" src="assets/js/app.js"></script>
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="module" src="js/app.js"></script>
   </head>
   <body>
-    <div class="app-shell">
+    <div class="app-shell" id="overview">
       <div class="sidebar-backdrop" data-sidebar-backdrop></div>
       <aside class="sidebar" id="app-sidebar" data-component="sidebar" aria-label="Điều hướng chính"></aside>
 
@@ -62,7 +63,7 @@
             </article>
           </section>
 
-          <section class="panel projects-panel" aria-labelledby="projects-heading">
+          <section class="panel projects-panel" id="projects" aria-labelledby="projects-heading">
             <div class="panel-heading">
               <div>
                 <h2 id="projects-heading">Dự án gần đây</h2>
