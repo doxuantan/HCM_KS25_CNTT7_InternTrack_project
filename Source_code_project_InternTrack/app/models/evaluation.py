@@ -29,3 +29,9 @@ class Evaluation(Base):
     team = relationship("Team")
     evaluator = relationship("User", foreign_keys=[evaluator_id])
     period = relationship("InternshipPeriod")
+    details = relationship(
+        "EvaluationDetail",
+        back_populates="evaluation",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

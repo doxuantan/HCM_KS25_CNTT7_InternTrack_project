@@ -26,3 +26,9 @@ class Team(Base):
 
     period = relationship("InternshipPeriod")
     supervisor = relationship("Lecturer")
+    members = relationship(
+        "TeamMember",
+        back_populates="team",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
