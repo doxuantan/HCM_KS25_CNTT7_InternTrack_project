@@ -1,27 +1,28 @@
+from pathlib import Path
+from typing import Literal
+
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    # Database
-    DATABASE_URL: str
-
-    # App secret
-    SECRET_KEY: str
-
-    # JWT settings
-    JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-
-    # CORS
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
+    DATABASE_URL: str = Field(min_length=1)
+    SECRET_KEY: SecretStr = Field(min_length=32)
+    JWT_ALGORITHM: Literal["HS256"] = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, gt=0)
+    ALLOWED_ORIGINS: list[str] = Field(
+        default_factory=lambda: ["http://localhost:3000"]
+    )
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=PROJECT_ROOT / ".env",
         env_file_encoding="utf-8",
         case_sensitive=True,
+        extra="ignore",
     )
 
 
-# Singleton instance để import dùng chung toàn app
 settings = Settings()
