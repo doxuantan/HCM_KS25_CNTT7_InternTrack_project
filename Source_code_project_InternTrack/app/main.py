@@ -1,6 +1,8 @@
 from fastapi import FastAPI,Depends
 from app.db.database import Base,engine,get_db
 from sqlalchemy import text
+from sqlalchemy.orm import Session
+import app.models
 
 
 
