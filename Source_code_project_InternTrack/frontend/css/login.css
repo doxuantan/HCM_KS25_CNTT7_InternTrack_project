@@ -373,6 +373,43 @@ body.login-page {
   margin-left: 4px;
 }
 
+.register-form-side {
+  align-items: start;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.register-card {
+  margin: auto 0;
+}
+
+.register-form {
+  gap: 15px;
+}
+
+.register-form .form-field {
+  gap: 6px;
+}
+
+.register-form .form-control {
+  min-height: 43px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.register-terms {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.register-terms input {
+  margin-top: 2px;
+}
+
+.register-login-link {
+  margin-top: 23px;
+}
+
 .login-back-link {
   display: inline-flex;
   align-items: center;
@@ -422,6 +459,15 @@ body.login-page {
 
   .login-card {
     width: min(100%, 440px);
+  }
+
+  .register-form-side {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  .register-card {
+    margin: 0;
   }
 
   .login-mobile-brand {

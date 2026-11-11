@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a2b">
+  <meta name="description" content="Tạo tài khoản sinh viên trên InterTrack để quản lý quá trình thực tập.">
+  <title>Đăng ký | InterTrack</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/login.css">
+  <script type="module" src="js/register.js"></script>
+</head>
+<body class="login-page">
+  <main class="login-layout">
+    <section class="login-showcase" aria-label="Giới thiệu InterTrack">
+      <a class="login-brand" href="index.html" aria-label="InterTrack - Trang tổng quan">
+        <img src="logo.svg" alt="">
+        <span class="login-brand-copy">
+          <span>InterTrack</span>
+          <small>QUẢN LÝ THỰC TẬP</small>
+        </span>
+      </a>
+
+      <div class="login-showcase-content">
+        <p class="login-kicker">Bắt đầu từ hôm nay</p>
+        <h1>Mỗi trải nghiệm <span>đều đáng nhớ.</span></h1>
+        <p class="login-showcase-description">
+          Tạo tài khoản để ghi lại hành trình thực tập, theo dõi nhiệm vụ
+          và kết nối với người hướng dẫn của bạn.
+        </p>
+        <ul class="login-feature-list">
+          <li><span class="login-feature-check" aria-hidden="true">✓</span> Hồ sơ thực tập được quản lý tập trung</li>
+          <li><span class="login-feature-check" aria-hidden="true">✓</span> Tiến độ và nhật ký luôn trong tầm tay</li>
+          <li><span class="login-feature-check" aria-hidden="true">✓</span> Dễ dàng phối hợp với giảng viên hướng dẫn</li>
+        </ul>
+      </div>
+
+      <p class="login-showcase-footer">© 2026 InterTrack · Đồng hành cùng hành trình nghề nghiệp của bạn</p>
+    </section>
+
+    <section class="login-form-side register-form-side" aria-labelledby="register-title">
+      <div class="login-card register-card">
+        <a class="login-mobile-brand" href="index.html" aria-label="InterTrack - Trang tổng quan">
+          <img src="logo.svg" alt="">
+          <span>InterTrack</span>
+        </a>
+
+        <h1 class="login-heading" id="register-title">Tạo tài khoản</h1>
+        <p class="login-subheading">Đăng ký tài khoản sinh viên để bắt đầu theo dõi kỳ thực tập.</p>
+
+        <form class="login-form register-form" data-register-form>
+          <label class="form-field" for="full-name">
+            <span class="form-label">Họ và tên</span>
+            <input
+              class="form-control"
+              id="full-name"
+              name="full_name"
+              type="text"
+              autocomplete="name"
+              placeholder="Nguyễn Văn A"
+              maxlength="100"
+              required
+            >
+          </label>
+
+          <label class="form-field" for="student-code">
+            <span class="form-label">Mã số sinh viên</span>
+            <input
+              class="form-control"
+              id="student-code"
+              name="student_code"
+              type="text"
+              autocomplete="off"
+              placeholder="Ví dụ: 22521234"
+              maxlength="30"
+              required
+            >
+          </label>
+
+          <label class="form-field" for="register-email">
+            <span class="form-label">Email sinh viên</span>
+            <input
+              class="form-control"
+              id="register-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="tenban@university.edu.vn"
+              maxlength="255"
+              required
+            >
+          </label>
+
+          <label class="form-field" for="register-password">
+            <span class="form-label">Mật khẩu</span>
+            <span class="login-input-wrap has-action">
+              <input
+                class="form-control"
+                id="register-password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Tối thiểu 8 ký tự"
+                minlength="8"
+                required
+              >
+              <button
+                class="password-toggle"
+                type="button"
+                data-password-toggle
+                aria-label="Hiện mật khẩu"
+                aria-controls="register-password"
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2.5 12s3.3-6 9.5-6 9.5 6 9.5 6-3.3 6-9.5 6-9.5-6-9.5-6Z"></path>
+                  <circle cx="12" cy="12" r="2.5"></circle>
+                </svg>
+              </button>
+            </span>
+          </label>
+
+          <label class="form-field" for="confirm-password">
+            <span class="form-label">Xác nhận mật khẩu</span>
+            <span class="login-input-wrap has-action">
+              <input
+                class="form-control"
+                id="confirm-password"
+                name="confirm_password"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Nhập lại mật khẩu"
+                minlength="8"
+                required
+              >
+              <button
+                class="password-toggle"
+                type="button"
+                data-password-toggle
+                aria-label="Hiện mật khẩu"
+                aria-controls="confirm-password"
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2.5 12s3.3-6 9.5-6 9.5 6 9.5 6-3.3 6-9.5 6-9.5-6-9.5-6Z"></path>
+                  <circle cx="12" cy="12" r="2.5"></circle>
+                </svg>
+              </button>
+            </span>
+          </label>
+
+          <label class="remember-option register-terms" for="accept-terms">
+            <input id="accept-terms" name="accept_terms" type="checkbox" required>
+            <span>Tôi xác nhận thông tin trên là chính xác.</span>
+          </label>
+
+          <p class="login-message" data-register-message role="status" aria-live="polite" hidden></p>
+
+          <button class="button button-primary button-block login-submit" type="submit">
+            Tạo tài khoản
+            <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <p class="login-register register-login-link">Đã có tài khoản?<a class="login-link" href="login.html">Đăng nhập</a></p>
+        <a class="login-back-link" href="index.html"><span aria-hidden="true">←</span> Quay về trang tổng quan</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
