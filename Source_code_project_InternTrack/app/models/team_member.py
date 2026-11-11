@@ -19,6 +19,4 @@ class TeamMember(Base):
     joined_at = Column(DateTime, nullable=False, server_default=func.now())
 
     team = relationship("Team", back_populates="members")
-    members = relationship("TeamMember", back_populates="team",
-                           cascade="all, delete-orphan", passive_deletes=True)
     student = relationship("Student")
