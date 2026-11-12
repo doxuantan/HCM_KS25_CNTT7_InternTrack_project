@@ -1,4 +1,5 @@
 import { loadComponents } from "./component-loader.js";
+import { logout, requireAuth } from "./auth.js";
 
 function setupSidebar() {
   const toggle = document.querySelector("[data-sidebar-toggle]");
@@ -28,18 +29,38 @@ function setupSidebar() {
   });
 }
 
-function setupAccountMenu() {
+function setupAccountMenu(user) {
   const container = document.querySelector("[data-account-menu]");
   const toggle = container?.querySelector("[data-account-toggle]");
   const menu = container?.querySelector("#account-menu");
+  const logoutLink = container?.querySelector("[data-logout-link]");
 
   if (
     !(container instanceof HTMLElement) ||
     !(toggle instanceof HTMLButtonElement) ||
-    !(menu instanceof HTMLElement)
+    !(menu instanceof HTMLElement) ||
+    !(logoutLink instanceof HTMLAnchorElement)
   ) {
     throw new Error("Account menu controls are missing from the page.");
   }
+
+  const roleLabels = {
+    ADMIN: "Quản trị viên",
+    SUPERVISOR: "Giảng viên hướng dẫn",
+    STUDENT: "Sinh viên",
+  };
+  const roleLabel = roleLabels[user.role] || user.role;
+  container.querySelectorAll("[data-user-name]").forEach((element) => {
+    element.textContent = user.full_name;
+  });
+  container.querySelectorAll("[data-user-role]").forEach((element) => {
+    element.textContent = roleLabel;
+  });
+  toggle.setAttribute("aria-label", `Tài khoản ${user.full_name}`);
+  logoutLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    logout();
+  });
 
   const setMenuOpen = (isOpen) => {
     menu.hidden = !isOpen;
@@ -65,9 +86,12 @@ function setupAccountMenu() {
 }
 
 try {
-  await loadComponents();
-  setupSidebar();
-  setupAccountMenu();
+  const user = await requireAuth();
+  if (user) {
+    await loadComponents();
+    setupSidebar();
+    setupAccountMenu(user);
+  }
 } catch (error) {
   console.error("The application layout could not be initialized.", error);
   const main = document.querySelector("#main-content");
