@@ -25,6 +25,13 @@ export async function login(email, password, remember = false) {
   return result.user;
 }
 
+export async function register(email, password, fullName) {
+  return apiRequest("auth/register", {
+    method: "POST",
+    body: { email, password, full_name: fullName },
+  });
+}
+
 export async function getCurrentUser() {
   return apiRequest("auth/me");
 }
