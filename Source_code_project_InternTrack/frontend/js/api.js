@@ -58,28 +58,40 @@ async function readResponse(response) {
 }
 
 export async function apiRequest(path, options = {}) {
-  const { body, headers: requestHeaders, ...requestOptions } = options;
+  const { body, headers: requestHeaders, auth = true, ...requestOptions } = options;
   const headers = new Headers(requestHeaders);
   const token = getAccessToken();
 
-  if (token) {
+  if (auth && token) {
     headers.set("Authorization", "Bearer " + token);
   }
   if (body !== undefined && !(body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(
-    new URL(`${API_BASE_URL}/${path.replace(/^\/+/, "")}`, window.location.href),
-    {
-      ...requestOptions,
-      headers,
-      body:
-        body === undefined || body instanceof FormData
-          ? body
-          : JSON.stringify(body),
-    },
-  );
+  let response;
+  try {
+    response = await fetch(
+      new URL(`${API_BASE_URL}/${path.replace(/^\/+/, "")}`, window.location.href),
+      {
+        ...requestOptions,
+        headers,
+        body:
+          body === undefined || body instanceof FormData
+            ? body
+            : JSON.stringify(body),
+      },
+    );
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new ApiError(
+        "Không thể kết nối máy chủ. Vui lòng kiểm tra API, kết nối mạng và cấu hình CORS.",
+        0,
+      );
+    }
+    throw error;
+  }
+
   const payload = await readResponse(response);
 
   if (!response.ok) {

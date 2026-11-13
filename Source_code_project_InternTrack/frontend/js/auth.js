@@ -10,12 +10,17 @@ export async function login(email, password, remember = false) {
   const result = await apiRequest("auth/login", {
     method: "POST",
     body: { email, password },
+    auth: false,
   });
 
   if (
     typeof result?.access_token !== "string" ||
     !result.access_token ||
-    !result.user ||
+    typeof result.token_type !== "string" ||
+    result.token_type.toLowerCase() !== "bearer" ||
+    typeof result.user !== "object" ||
+    result.user === null ||
+    Array.isArray(result.user) ||
     !Object.hasOwn(ROLE_HOME, result.user.role)
   ) {
     throw new Error("API đăng nhập trả về dữ liệu không hợp lệ.");
@@ -29,6 +34,7 @@ export async function register(email, password, fullName) {
   return apiRequest("auth/register", {
     method: "POST",
     body: { email, password, full_name: fullName },
+    auth: false,
   });
 }
 

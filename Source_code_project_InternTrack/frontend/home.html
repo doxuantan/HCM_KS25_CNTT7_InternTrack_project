@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101a2b">
   <meta name="description" content="InterTrack giúp bạn theo dõi nhật ký, nhiệm vụ và tiến độ thực tập.">
+  <meta name="api-base-url" content="http://localhost:8000/api/v1">
   <title>InterTrack | Tổng quan</title>
   <link rel="icon" type="image/svg+xml" href="logo.svg">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/home.css">
+  <script type="module" src="js/home.js"></script>
 </head>
 <body class="home-page">
   <header class="home-header">
@@ -18,8 +20,9 @@
       <span>InterTrack</span>
     </a>
     <nav class="home-nav" aria-label="Điều hướng">
-      <a class="button button-secondary" href="login.html">Đăng nhập</a>
-      <a class="button button-primary" href="register.html">Đăng ký</a>
+      <a class="button button-secondary" href="login.html" data-public-login>Đăng nhập</a>
+      <a class="button button-primary" href="register.html" data-public-register>Đăng ký</a>
+      <button class="button button-secondary" type="button" data-home-logout hidden>Đăng xuất</button>
     </nav>
   </header>
 
@@ -32,9 +35,10 @@
         trong một không gian được kết nối với giảng viên hướng dẫn.
       </p>
       <div class="home-actions">
-        <a class="button button-primary" href="login.html">Đăng nhập để tiếp tục <span aria-hidden="true">→</span></a>
-        <a class="home-register-link" href="register.html">Chưa có tài khoản? Đăng ký</a>
+        <a class="button button-primary" href="login.html" data-public-login>Đăng nhập để tiếp tục <span aria-hidden="true">→</span></a>
+        <a class="home-register-link" href="register.html" data-public-register>Chưa có tài khoản? Đăng ký</a>
       </div>
+      <p class="home-role-notice" data-role-notice role="status" aria-live="polite" hidden></p>
     </section>
 
     <section class="home-features" aria-label="Tính năng InterTrack">
