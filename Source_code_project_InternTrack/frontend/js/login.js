@@ -1,5 +1,5 @@
-import { ApiError } from "./api.js";
-import { login, navigateByRole } from "./auth.js";
+import { ApiError, getAccessToken } from "./api.js";
+import { getCurrentUser, login, navigateByRole } from "./auth.js";
 
 const passwordToggle = document.querySelector("[data-password-toggle]");
 const passwordInput = document.querySelector("#password");
@@ -90,9 +90,11 @@ function showLoginError(error) {
     loginMessage.textContent = "Quá nhiều lần đăng nhập. Vui lòng chờ và thử lại.";
   } else if (error instanceof ApiError && error.status >= 500) {
     loginMessage.textContent = "Máy chủ đang gặp sự cố. Vui lòng thử lại sau.";
+  } else if (error instanceof ApiError && error.status === 0) {
+    loginMessage.textContent = error.message;
   } else if (error instanceof TypeError) {
     loginMessage.textContent =
-      "Không thể kết nối máy chủ. Vui lòng kiểm tra kết nối và thử lại.";
+      "Không thể kết nối máy chủ. Vui lòng kiểm tra API, kết nối mạng và cấu hình CORS.";
   } else {
     loginMessage.textContent = "Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.";
   }
@@ -154,3 +156,33 @@ loginForm.addEventListener("submit", async (event) => {
     }
   }
 });
+
+async function redirectAuthenticatedUser() {
+  try {
+    if (!getAccessToken()) {
+      return;
+    }
+
+    isSubmitting = true;
+    submitButton.disabled = true;
+    submitButton.setAttribute("aria-busy", "true");
+    loginMessage.textContent = "Đang kiểm tra phiên đăng nhập...";
+    loginMessage.hidden = false;
+    loginMessage.setAttribute("role", "status");
+
+    const user = await getCurrentUser();
+    navigateByRole(user.role);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      clearLoginMessage();
+      return;
+    }
+    showLoginError(error);
+  } finally {
+    isSubmitting = false;
+    submitButton.disabled = false;
+    submitButton.removeAttribute("aria-busy");
+  }
+}
+
+void redirectAuthenticatedUser();

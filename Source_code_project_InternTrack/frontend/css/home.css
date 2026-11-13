@@ -96,6 +96,17 @@ body.home-page {
   min-height: 46px;
 }
 
+.home-role-notice {
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  border: 1px solid #f0d7a4;
+  border-radius: 10px;
+  background: #fff8e8;
+  color: #73521a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .home-register-link {
   padding: 10px 4px;
   color: #287c72;
