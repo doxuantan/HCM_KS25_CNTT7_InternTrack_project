@@ -30,25 +30,47 @@ def get_current_user(
         raise unauthorized from None
 
     subject = payload.get("sub")
-    if not isinstance(subject, str) or not subject.isdecimal():
+    if not isinstance(subject, str) or not subject.isascii() or not subject.isdecimal():
         raise unauthorized
 
-    user = db.get(User, int(subject))
-    if user is None or not user.is_active:
+    try:
+        user_id = int(subject)
+    except ValueError:
+        raise unauthorized from None
+
+    user = db.get(User, user_id)
+    if user is None:
         raise unauthorized
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account is inactive.",
+        )
     return user
 
 
-def require_roles(*allowed_roles: UserRole) -> Callable[..., User]:
+def require_roles(*allowed_roles: UserRole | str) -> Callable[..., User]:
     if not allowed_roles:
         raise ValueError("At least one role must be specified.")
-    if any(not isinstance(role, UserRole) for role in allowed_roles):
-        raise TypeError("Allowed roles must be UserRole values.")
+
+    normalized_roles = set()
+    for role in allowed_roles:
+        if isinstance(role, UserRole):
+            normalized_roles.add(role.value)
+        elif isinstance(role, str) and role.strip():
+            normalized_roles.add(role.strip().upper())
+        else:
+            raise TypeError("Allowed roles must be non-empty strings or UserRole values.")
 
     def role_dependency(
         user: User = Depends(get_current_user),
     ) -> User:
-        if user.role not in allowed_roles:
+        user_role = (
+            user.role.value
+            if isinstance(user.role, UserRole)
+            else str(user.role).strip().upper()
+        )
+        if user_role not in normalized_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to access this resource.",
