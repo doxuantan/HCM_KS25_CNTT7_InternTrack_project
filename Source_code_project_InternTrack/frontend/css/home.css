@@ -1,0 +1,213 @@
+body.home-page {
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 82% 28%, rgb(91 178 158 / 13%), transparent 32%),
+    #f6f8fb;
+  color: #172338;
+}
+
+.home-header,
+.home-main,
+.home-footer {
+  width: min(1120px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+.home-header {
+  display: flex;
+  min-height: 92px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e8edf2;
+}
+
+.home-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: #172338;
+  font-family: "Manrope", sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.home-brand img {
+  width: 40px;
+  height: 40px;
+}
+
+.home-nav,
+.home-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-main {
+  display: grid;
+  min-height: min(700px, calc(100vh - 150px));
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  align-items: center;
+  gap: clamp(40px, 8vw, 110px);
+  padding-block: 72px;
+}
+
+.home-intro {
+  max-width: 650px;
+}
+
+.home-kicker {
+  margin: 0 0 20px;
+  color: #287c72;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.home-intro h1 {
+  margin: 0;
+  color: #172338;
+  font-family: "Manrope", sans-serif;
+  font-size: clamp(38px, 5.5vw, 66px);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1.08;
+}
+
+.home-intro h1 span {
+  color: #287c72;
+}
+
+.home-description {
+  max-width: 560px;
+  margin: 24px 0 0;
+  color: #66748a;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.home-actions {
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+.home-actions .button {
+  min-height: 46px;
+}
+
+.home-register-link {
+  padding: 10px 4px;
+  color: #287c72;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.home-features {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid #e7edf0;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 88%);
+  box-shadow: 0 24px 64px rgb(23 35 56 / 8%);
+}
+
+.home-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 8px 0;
+}
+
+.home-feature-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 11px;
+  background: #eaf5f2;
+  color: #287c72;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.home-feature h2 {
+  margin: 0;
+  color: #20283a;
+  font-size: 14px;
+}
+
+.home-feature p {
+  margin: 5px 0 0;
+  color: #7b8799;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.home-access-note {
+  margin: 4px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid #edf0f5;
+  color: #7b8799;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.home-footer {
+  padding: 0 0 24px;
+  color: #8a93a5;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .home-header,
+  .home-main,
+  .home-footer {
+    width: min(100% - 36px, 560px);
+  }
+
+  .home-header {
+    min-height: 76px;
+  }
+
+  .home-main {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-block: 64px;
+  }
+}
+
+@media (max-width: 420px) {
+  .home-header,
+  .home-main,
+  .home-footer {
+    width: min(100% - 28px, 560px);
+  }
+
+  .home-brand {
+    font-size: 17px;
+  }
+
+  .home-brand img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .home-nav {
+    gap: 7px;
+  }
+
+  .home-nav .button {
+    min-height: 36px;
+    padding-inline: 10px;
+    font-size: 11px;
+  }
+
+  .home-features {
+    padding: 18px;
+  }
+}
