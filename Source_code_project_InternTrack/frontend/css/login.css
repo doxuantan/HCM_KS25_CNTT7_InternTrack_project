@@ -240,6 +240,16 @@ body.login-page {
   box-shadow: 0 0 0 4px rgb(40 124 114 / 11%);
 }
 
+.login-field-error {
+  color: #b42318;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.login-field-error[hidden] {
+  display: none;
+}
+
 .login-input-wrap.has-action .form-control {
   padding-right: 54px;
 }
