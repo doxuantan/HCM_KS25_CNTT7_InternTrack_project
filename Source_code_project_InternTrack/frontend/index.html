@@ -4,15 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#101a2b">
-    <meta name="description" content="InterTrack - Nền tảng quản lý quá trình thực tập dành cho sinh viên.">
+    <meta name="description" content="Bảng điều khiển sinh viên InterTrack.">
     <meta name="api-base-url" content="http://localhost:8000/api/v1">
-    <title>InterTrack | Tổng quan</title>
+    <title>Bảng điều khiển sinh viên | InterTrack</title>
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/student-dashboard.css">
     <script type="module" src="js/app.js"></script>
   </head>
-  <body>
+  <body class="student-dashboard" data-allowed-roles="STUDENT" data-dashboard="student">
     <div class="app-shell" id="overview">
       <div class="sidebar-backdrop" data-sidebar-backdrop></div>
       <aside class="sidebar" id="app-sidebar" data-component="sidebar" aria-label="Điều hướng chính"></aside>
@@ -20,97 +21,150 @@
       <div class="app-main">
         <header class="topbar" data-component="header"></header>
 
-        <main class="content" id="main-content" tabindex="-1">
-          <div class="page-heading">
+        <main class="content" id="main-content" tabindex="-1" aria-busy="true">
+          <div class="page-heading student-page-heading">
             <div>
-              <p class="eyebrow">Bảng điều khiển</p>
-              <h1>Tổng quan</h1>
-              <p class="page-description">Chào mừng bạn quay lại InterTrack.</p>
+              <p class="eyebrow">Không gian sinh viên</p>
+              <h1>Xin chào, <span data-student-name>sinh viên</span></h1>
+              <p class="page-description">Theo dõi công việc và hành trình thực tập của bạn.</p>
             </div>
-            <button class="button button-primary" type="button">+ Tạo mới</button>
           </div>
 
-          <section class="summary-grid" aria-label="Tóm tắt hoạt động">
-            <article class="summary-card">
+          <section class="summary-grid student-summary-grid" aria-label="Thống kê công việc">
+            <article class="summary-card student-stat-card">
               <div class="summary-card-top">
-                <span class="summary-label">Tổng dự án</span>
+                <span class="summary-label">Tổng số công việc</span>
                 <span class="summary-icon summary-icon-blue" aria-hidden="true">▦</span>
               </div>
-              <p class="summary-value">24</p>
-              <p class="summary-note"><span class="positive">↑ 12%</span> so với tháng trước</p>
+              <p class="summary-value" data-task-total>—</p>
+              <p class="summary-note" data-task-total-note>Chờ dữ liệu từ API công việc</p>
             </article>
-            <article class="summary-card">
+            <article class="summary-card student-stat-card">
+              <div class="summary-card-top">
+                <span class="summary-label">Đã hoàn thành</span>
+                <span class="summary-icon summary-icon-green" aria-hidden="true">✓</span>
+              </div>
+              <p class="summary-value" data-task-done>—</p>
+              <p class="summary-note">Trạng thái DONE</p>
+            </article>
+            <article class="summary-card student-stat-card">
               <div class="summary-card-top">
                 <span class="summary-label">Đang thực hiện</span>
                 <span class="summary-icon summary-icon-violet" aria-hidden="true">◷</span>
               </div>
-              <p class="summary-value">08</p>
-              <p class="summary-note">Trong tổng số 24 dự án</p>
+              <p class="summary-value" data-task-in-progress>—</p>
+              <p class="summary-note">Trạng thái IN_PROGRESS</p>
             </article>
-            <article class="summary-card">
+            <article class="summary-card student-stat-card">
               <div class="summary-card-top">
-                <span class="summary-label">Công việc hoàn thành</span>
-                <span class="summary-icon summary-icon-green" aria-hidden="true">✓</span>
+                <span class="summary-label">Chưa bắt đầu</span>
+                <span class="summary-icon summary-icon-orange" aria-hidden="true">○</span>
               </div>
-              <p class="summary-value">86</p>
-              <p class="summary-note"><span class="positive">↑ 8%</span> so với tháng trước</p>
-            </article>
-            <article class="summary-card">
-              <div class="summary-card-top">
-                <span class="summary-label">Thành viên</span>
-                <span class="summary-icon summary-icon-orange" aria-hidden="true">♙</span>
-              </div>
-              <p class="summary-value">12</p>
-              <p class="summary-note">Đang hoạt động</p>
+              <p class="summary-value" data-task-todo>—</p>
+              <p class="summary-note">Trạng thái TODO</p>
             </article>
           </section>
 
-          <section class="panel projects-panel" id="projects" aria-labelledby="projects-heading">
-            <div class="panel-heading">
-              <div>
-                <h2 id="projects-heading">Dự án gần đây</h2>
-                <p class="muted">Theo dõi tiến độ các dự án của bạn</p>
-              </div>
-              <a class="text-link" href="#projects">Xem tất cả <span aria-hidden="true">→</span></a>
+          <div class="student-dashboard-grid">
+            <div class="student-main-column">
+              <section class="panel student-progress-panel" id="progress" aria-labelledby="progress-heading">
+                <div class="panel-heading student-panel-heading">
+                  <div>
+                    <h2 id="progress-heading">Tiến độ công việc</h2>
+                    <p class="muted">Tỷ lệ công việc hợp lệ đã hoàn thành</p>
+                  </div>
+                  <strong class="student-progress-value" data-task-progress-value>—</strong>
+                </div>
+                <div class="student-progress-content">
+                  <div
+                    class="student-progress-track"
+                    role="progressbar"
+                    aria-label="Tiến độ hoàn thành công việc"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuetext="Chưa có dữ liệu"
+                    data-task-progress-bar
+                    hidden
+                  >
+                    <span data-task-progress-fill></span>
+                  </div>
+                  <p class="student-progress-note" data-task-progress-note role="status">
+                    Chưa thể tính tiến độ vì API công việc chưa được cung cấp.
+                  </p>
+                </div>
+              </section>
+
+              <section class="panel student-tasks-panel" id="tasks" aria-labelledby="tasks-heading">
+                <div class="panel-heading student-panel-heading">
+                  <div>
+                    <h2 id="tasks-heading">Công việc của tôi</h2>
+                    <p class="muted">Các trạng thái khác TODO, IN_PROGRESS và DONE không tính vào thống kê.</p>
+                  </div>
+                </div>
+                <div class="table-scroll student-table-scroll">
+                  <table class="data-table student-task-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">STT</th>
+                        <th scope="col">Tên công việc</th>
+                        <th scope="col">Hạn hoàn thành</th>
+                        <th scope="col">Ưu tiên</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col">Tiến độ</th>
+                      </tr>
+                    </thead>
+                    <tbody data-task-rows aria-busy="true">
+                      <tr>
+                        <td class="student-state-cell" colspan="6">
+                          <div class="student-state" data-state="loading" data-task-state role="status" aria-live="polite">
+                            Đang tải thông tin sinh viên...
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
             </div>
 
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Tên dự án</th>
-                    <th scope="col">Trạng thái</th>
-                    <th scope="col">Tiến độ</th>
-                    <th scope="col">Hạn hoàn thành</th>
-                    <th scope="col">Phụ trách</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><span class="project-name">Nâng cấp nền tảng</span><span class="table-subtitle">Sản phẩm</span></td>
-                    <td><span class="status status-in-progress">Đang thực hiện</span></td>
-                    <td><div class="progress-cell"><div class="progress-track"><span style="width: 72%"></span></div><span>72%</span></div></td>
-                    <td>25 Tháng 11, 2026</td>
-                    <td><span class="avatar avatar-blue">MA</span> Minh Anh</td>
-                  </tr>
-                  <tr>
-                    <td><span class="project-name">Website thương mại</span><span class="table-subtitle">Phát triển</span></td>
-                    <td><span class="status status-review">Đang đánh giá</span></td>
-                    <td><div class="progress-cell"><div class="progress-track"><span style="width: 48%"></span></div><span>48%</span></div></td>
-                    <td>02 Tháng 12, 2026</td>
-                    <td><span class="avatar avatar-pink">QT</span> Quang Trần</td>
-                  </tr>
-                  <tr>
-                    <td><span class="project-name">Chiến dịch cuối năm</span><span class="table-subtitle">Tiếp thị</span></td>
-                    <td><span class="status status-completed">Hoàn thành</span></td>
-                    <td><div class="progress-cell"><div class="progress-track"><span style="width: 100%"></span></div><span>100%</span></div></td>
-                    <td>08 Tháng 11, 2026</td>
-                    <td><span class="avatar avatar-green">HL</span> Hà Linh</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
+            <aside class="student-side-column" aria-label="Thông tin thực tập">
+              <section class="panel student-info-panel" id="internship-info" aria-labelledby="internship-heading">
+                <div class="panel-heading student-panel-heading">
+                  <div>
+                    <h2 id="internship-heading">Thông tin thực tập</h2>
+                    <p class="muted">Thông tin được cung cấp bởi chương trình thực tập</p>
+                  </div>
+                </div>
+                <dl class="student-info-list">
+                  <div>
+                    <dt>Nhóm thực tập</dt>
+                    <dd data-team-name>Chưa có dữ liệu</dd>
+                  </div>
+                  <div>
+                    <dt>Thời gian thực tập</dt>
+                    <dd data-internship-period>Chưa có dữ liệu</dd>
+                  </div>
+                  <div>
+                    <dt>Giảng viên hướng dẫn</dt>
+                    <dd data-supervisor-name>Chưa có dữ liệu</dd>
+                  </div>
+                </dl>
+                <p class="student-source-note">API thông tin nhóm và kỳ thực tập chưa được cung cấp.</p>
+              </section>
+
+              <section class="panel student-activity-panel" id="activity" aria-labelledby="activity-heading">
+                <div class="panel-heading student-panel-heading">
+                  <div>
+                    <h2 id="activity-heading">Hoạt động gần đây</h2>
+                    <p class="muted">Cập nhật mới nhất trong kỳ thực tập</p>
+                  </div>
+                </div>
+                <div class="student-activity-empty" data-activity-state role="status">
+                  Chưa có dữ liệu hoạt động. API thông báo chưa được triển khai.
+                </div>
+              </section>
+            </aside>
+          </div>
         </main>
 
         <footer class="footer" data-component="footer"></footer>
