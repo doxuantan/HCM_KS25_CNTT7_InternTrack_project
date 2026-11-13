@@ -1,5 +1,14 @@
 import { loadComponents } from "./component-loader.js";
 import { logout, requireAuth } from "./auth.js";
+import { initializeStudentDashboard } from "./student-dashboard.js";
+
+function getUserInitials(fullName) {
+  const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+  return nameParts
+    .slice(-2)
+    .map((part) => Array.from(part)[0].toLocaleUpperCase("vi-VN"))
+    .join("") || "SV";
+}
 
 function setupSidebar() {
   const toggle = document.querySelector("[data-sidebar-toggle]");
@@ -56,6 +65,10 @@ function setupAccountMenu(user) {
   container.querySelectorAll("[data-user-role]").forEach((element) => {
     element.textContent = roleLabel;
   });
+  const initials = container.querySelector("[data-user-initials]");
+  if (initials) {
+    initials.textContent = getUserInitials(user.full_name);
+  }
   toggle.setAttribute("aria-label", `Tài khoản ${user.full_name}`);
   logoutLink.addEventListener("click", (event) => {
     event.preventDefault();
@@ -91,11 +104,15 @@ try {
     await loadComponents();
     setupSidebar();
     setupAccountMenu(user);
+    if (document.body.dataset.dashboard === "student") {
+      initializeStudentDashboard(user);
+    }
   }
 } catch (error) {
   console.error("The application layout could not be initialized.", error);
   const main = document.querySelector("#main-content");
   if (main) {
+    main.setAttribute("aria-busy", "false");
     const message = document.createElement("p");
     message.className = "load-error";
     message.setAttribute("role", "alert");
