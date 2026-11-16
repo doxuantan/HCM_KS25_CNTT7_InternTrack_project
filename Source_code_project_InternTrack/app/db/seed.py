@@ -10,9 +10,10 @@ Có thể chạy nhiều lần: script kiểm tra dữ liệu đã có trước 
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.security import hash_password
 from app.db.database import SessionLocal
 from app.models import (
     EvaluationCriteria,
@@ -21,12 +22,22 @@ from app.models import (
     Student,
     Team,
     TeamMember,
+    User,
 )
 from app.models.internship_period import PeriodStatus
 from app.models.team import TeamStatus
+from app.models.user import UserRole
 
 
 PERIOD_NAME = "Kỳ thực tập mẫu 2026-2027"
+SAMPLE_ACCOUNTS = (
+    ("admin@example.com", "Admin@123", "Admin InternTrack", UserRole.ADMIN),
+    ("teacher1@example.com", "Teacher@123", "Giảng viên 1", UserRole.SUPERVISOR),
+    ("teacher2@example.com", "Teacher@123", "Giảng viên 2", UserRole.SUPERVISOR),
+    ("student1@example.com", "Student@123", "Sinh viên 1", UserRole.STUDENT),
+    ("student2@example.com", "Student@123", "Sinh viên 2", UserRole.STUDENT),
+    ("student3@example.com", "Student@123", "Sinh viên 3", UserRole.STUDENT),
+)
 
 # SRS nêu tên 6 tiêu chí, không quy định trọng số.
 # Seed mẫu đặt trọng số bằng nhau (1.00) cho mỗi tiêu chí.
@@ -62,6 +73,34 @@ CRITERIA = [
         "weight": Decimal("1.00"),
     },
 ]
+
+
+def seed_accounts(db: Session) -> int:
+    created_count = 0
+
+    for email, password, full_name, role in SAMPLE_ACCOUNTS:
+        existing_user = db.scalar(
+            select(User.id).where(func.lower(User.email) == email)
+        )
+        if existing_user is not None:
+            print(f"[ĐÃ CÓ] Tài khoản: {email}")
+            continue
+
+        db.add(
+            User(
+                email=email,
+                password_hash=hash_password(password),
+                full_name=full_name,
+                role=role,
+                is_active=True,
+            )
+        )
+        db.flush()
+        created_count += 1
+        print(f"[TẠO MỚI] Tài khoản: {email} ({role.value})")
+
+    print(f"Tổng tài khoản được thêm mới: {created_count}/{len(SAMPLE_ACCOUNTS)}")
+    return created_count
 
 
 def seed_period(db: Session) -> InternshipPeriod:
@@ -207,6 +246,7 @@ def main() -> None:
     db = SessionLocal()
 
     try:
+        seed_accounts(db)
         period = seed_period(db)
         seed_criteria(db)
         seed_teams_and_members(db, period)

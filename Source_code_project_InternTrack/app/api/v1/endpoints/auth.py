@@ -9,6 +9,8 @@ from app.db.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User, UserRole
 from app.schemas.auth import (
+    ChangePasswordRequest,
+    ChangePasswordResponse,
     LoginRequest,
     LogoutResponse,
     RegisterRequest,
@@ -114,3 +116,43 @@ def logout(
 @router.get("/me", response_model=UserResponse)
 def get_me(user: User = Depends(get_current_user)) -> UserResponse:
     return UserResponse.model_validate(user)
+
+
+@router.put(
+    "/change-password",
+    response_model=ChangePasswordResponse,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "Current password is incorrect."},
+        status.HTTP_401_UNAUTHORIZED: {"description": "Authentication is required."},
+    },
+)
+def change_password(
+    payload: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ChangePasswordResponse:
+    if not verify_password(payload.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect.",
+        )
+
+    try:
+        password_hash = hash_password(payload.new_password)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Password must not exceed 72 UTF-8 bytes.",
+        ) from None
+
+    current_user.password_hash = password_hash
+    try:
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to change the password at this time.",
+        ) from None
+
+    return ChangePasswordResponse()

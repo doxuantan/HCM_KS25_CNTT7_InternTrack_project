@@ -52,6 +52,28 @@ class RegisterRequest(BaseModel):
         return value.strip() if isinstance(value, str) else value
 
 
+class ChangePasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(
+        min_length=8,
+        description="At least 8 characters and no more than 72 UTF-8 bytes.",
+    )
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password_byte_length(cls, value: str) -> str:
+        try:
+            password_bytes = value.encode("utf-8")
+        except UnicodeEncodeError:
+            raise ValueError("Password must be valid UTF-8.") from None
+
+        if len(password_bytes) > 72:
+            raise ValueError("Password must not exceed 72 UTF-8 bytes.")
+        return value
+
+
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -76,3 +98,7 @@ class LogoutResponse(BaseModel):
     message: str = (
         "Logout acknowledged. This stateless access token remains valid until it expires."
     )
+
+
+class ChangePasswordResponse(BaseModel):
+    message: str = "Password changed successfully."
