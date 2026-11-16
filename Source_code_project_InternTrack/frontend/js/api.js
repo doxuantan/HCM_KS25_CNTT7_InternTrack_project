@@ -19,6 +19,16 @@ export function getAccessToken() {
   return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
 }
 
+export function getAuthSessionPersistence() {
+  if (localStorage.getItem(TOKEN_KEY)) {
+    return "Đã chọn ghi nhớ phiên trên trình duyệt.";
+  }
+  if (sessionStorage.getItem(TOKEN_KEY)) {
+    return "Phiên đăng nhập được lưu trong tab hiện tại.";
+  }
+  return "Chưa có phiên đăng nhập.";
+}
+
 export function setAuthSession(accessToken, remember = false) {
   clearAuthSession();
   const storage = remember ? localStorage : sessionStorage;

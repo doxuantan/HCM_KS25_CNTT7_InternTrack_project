@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.routing import APIRoute
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -12,12 +14,38 @@ from app.schemas.auth import (
     LoginRequest,
     LogoutResponse,
     RegisterRequest,
+    ChangePasswordRequest,
+    ChangePasswordResponse,
     TokenResponse,
     UserResponse,
 )
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+class _PasswordChangeRoute(APIRoute):
+    def get_route_handler(self):
+        route_handler = super().get_route_handler()
+
+        async def handler(request: Request):
+            try:
+                return await route_handler(request)
+            except RequestValidationError as error:
+                sanitized_errors = [
+                    {
+                        key: value
+                        for key, value in item.items()
+                        if key != "input"
+                    }
+                    for item in error.errors()
+                ]
+                raise RequestValidationError(sanitized_errors) from None
+
+        return handler
+
+
+change_password_router = APIRouter(route_class=_PasswordChangeRoute)
 
 
 @router.post(
@@ -111,6 +139,47 @@ def logout(
     return LogoutResponse()
 
 
+@change_password_router.put(
+    "/change-password",
+    response_model=ChangePasswordResponse,
+)
+def change_password(
+    payload: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ChangePasswordResponse:
+    if not verify_password(payload.current_password, current_user.password_hash):
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect.",
+        )
+
+    try:
+        password_hash = hash_password(payload.new_password)
+    except ValueError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="New password must not exceed 72 UTF-8 bytes.",
+        ) from None
+
+    current_user.password_hash = password_hash
+    try:
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to update the password at this time.",
+        ) from None
+
+    return ChangePasswordResponse()
+
+
 @router.get("/me", response_model=UserResponse)
 def get_me(user: User = Depends(get_current_user)) -> UserResponse:
     return UserResponse.model_validate(user)
+
+
+router.include_router(change_password_router)

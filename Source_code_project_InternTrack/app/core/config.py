@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = Field(min_length=1)
     SECRET_KEY: SecretStr = Field(min_length=32)
     DEFAULT_ADMIN_PASSWORD: SecretStr | None = None
+    SAMPLE_USER_PASSWORD: SecretStr | None = None
     JWT_ALGORITHM: Literal["HS256"] = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, gt=0)
     ALLOWED_ORIGINS: list[str] = Field(
