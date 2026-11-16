@@ -27,4 +27,15 @@ class User(Base):
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())
 
     # Quan hệ 1-1 với students
-    student = relationship("Student", back_populates="user", uselist=False)
+    student = relationship(
+        "Student",
+        back_populates="user",
+        uselist=False,
+        passive_deletes=True,
+    )
+    lecturer = relationship(
+        "Lecturer",
+        back_populates="user",
+        uselist=False,
+        passive_deletes=True,
+    )

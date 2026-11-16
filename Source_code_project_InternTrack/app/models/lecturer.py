@@ -14,4 +14,4 @@ class Lecturer(Base):
     department = Column(String(100), nullable=True)
     phone = Column(String(20), nullable=True)
 
-    user = relationship("User")
+    user = relationship("User", back_populates="lecturer")
