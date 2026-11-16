@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#153a72">
+    <meta name="description" content="Bảng điều khiển quản trị hệ thống InterTrack.">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Quản trị hệ thống | InterTrack</title>
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <script type="module" src="js/admin.js"></script>
+  </head>
+  <body
+    class="admin-dashboard"
+    data-allowed-roles="ADMIN"
+    data-dashboard="admin"
+  >
+    <div class="app-shell">
+      <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+      <aside class="sidebar admin-sidebar" id="app-sidebar" aria-label="Điều hướng quản trị">
+        <a class="brand" href="admin.html" aria-label="InterTrack - Quản trị">
+          <img class="brand-mark" src="logo.svg" alt="">
+          <span class="brand-copy">
+            <span>InterTrack</span>
+            <span class="brand-tagline">QUẢN TRỊ HỆ THỐNG</span>
+          </span>
+        </a>
+
+        <div class="workspace-switcher">
+          <span class="workspace-mark" aria-hidden="true">IT</span>
+          <span class="workspace-details">
+            <strong>Không gian quản trị</strong>
+            <span>Dữ liệu trực tiếp từ hệ thống</span>
+          </span>
+        </div>
+
+        <nav class="navigation admin-navigation" aria-label="Menu quản trị">
+          <p class="navigation-label">HỆ THỐNG</p>
+          <a class="nav-link is-active" href="#overview" data-view-target="overview" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">▦</span>
+            <span>Tổng quan</span>
+          </a>
+          <a class="nav-link" href="#users" data-view-target="users">
+            <span class="nav-icon" aria-hidden="true">♙</span>
+            <span>Quản lý người dùng</span>
+          </a>
+          <a class="nav-link" href="#supervisors" data-view-target="supervisors">
+            <span class="nav-icon" aria-hidden="true">◇</span>
+            <span>Quản lý giảng viên</span>
+          </a>
+          <a class="nav-link" href="#students" data-view-target="students">
+            <span class="nav-icon" aria-hidden="true">♧</span>
+            <span>Quản lý sinh viên</span>
+          </a>
+          <a class="nav-link" href="#periods" data-view-target="periods">
+            <span class="nav-icon" aria-hidden="true">▣</span>
+            <span>Kỳ thực tập</span>
+          </a>
+          <a class="nav-link" href="#teams" data-view-target="teams">
+            <span class="nav-icon" aria-hidden="true">⌘</span>
+            <span>Nhóm thực tập</span>
+          </a>
+          <p class="navigation-label navigation-label-spaced">CÁ NHÂN</p>
+          <a class="nav-link" href="#system" data-view-target="system">
+            <span class="nav-icon" aria-hidden="true">⚙</span>
+            <span>Quản lý hệ thống</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <button class="sidebar-logout" type="button" data-logout>
+            <span aria-hidden="true">↪</span>
+            Đăng xuất
+          </button>
+        </div>
+      </aside>
+
+      <div class="app-main">
+        <header class="topbar admin-topbar">
+          <button
+            class="icon-button menu-toggle"
+            type="button"
+            data-sidebar-toggle
+            aria-controls="app-sidebar"
+            aria-expanded="false"
+            aria-label="Mở menu điều hướng"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <a class="brand brand-mobile" href="admin.html" aria-label="InterTrack - Quản trị">
+            <img class="brand-mark" src="logo.svg" alt="">
+            <span>InterTrack</span>
+          </a>
+          <span class="topbar-context">
+            Quản trị hệ thống <span aria-hidden="true">/</span>
+            <strong data-topbar-title>Tổng quan</strong>
+          </span>
+          <label class="admin-search" data-global-search-wrap>
+            <span class="admin-search-icon" aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              data-global-search
+              aria-label="Tìm kiếm trong danh sách hiện tại"
+              placeholder="Tìm người dùng, giảng viên..."
+            >
+          </label>
+          <span class="topbar-spacer"></span>
+          <div class="account-menu-container" data-account-menu>
+            <button
+              class="profile-button"
+              type="button"
+              data-account-toggle
+              aria-label="Tài khoản quản trị"
+              aria-haspopup="menu"
+              aria-controls="account-menu"
+              aria-expanded="false"
+            >
+              <span class="avatar avatar-blue" data-user-initials>AD</span>
+              <span class="profile-details">
+                <strong data-user-name>Quản trị viên</strong>
+                <span data-user-role>Quản trị viên</span>
+              </span>
+              <span class="profile-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="account-menu" id="account-menu" role="menu" aria-label="Tùy chọn tài khoản" hidden>
+              <div class="account-menu-heading">
+                <strong data-user-name>Quản trị viên</strong>
+                <span data-user-role>Quản trị viên</span>
+              </div>
+              <button class="account-menu-item" type="button" role="menuitem" data-logout>
+                <span aria-hidden="true">↪</span>
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main class="content admin-content" id="main-content" tabindex="-1" aria-busy="true">
+          <div class="admin-alert" data-admin-alert role="alert" hidden></div>
+
+          <section class="admin-view" data-view-panel="overview" aria-labelledby="overview-title">
+            <div class="page-heading admin-page-heading">
+              <div>
+                <p class="eyebrow">Bảng điều khiển</p>
+                <h1 id="overview-title">Tổng quan hệ thống</h1>
+                <p class="page-description">Số liệu được lấy từ các API đang có của InternTrack.</p>
+              </div>
+              <button class="button button-secondary" type="button" data-refresh-view>
+                Làm mới dữ liệu
+              </button>
+            </div>
+
+            <section class="admin-stat-grid" aria-label="Thống kê hệ thống">
+              <article class="summary-card admin-stat-card">
+                <div class="summary-card-top">
+                  <span class="summary-label">Tổng người dùng</span>
+                  <span class="admin-stat-icon admin-stat-icon-blue" aria-hidden="true">♙</span>
+                </div>
+                <p class="summary-value" data-stat-value="users">—</p>
+                <p class="summary-note" data-stat-note="users">Đang tải từ API người dùng</p>
+              </article>
+              <article class="summary-card admin-stat-card">
+                <div class="summary-card-top">
+                  <span class="summary-label">Quản trị viên</span>
+                  <span class="admin-stat-icon admin-stat-icon-violet" aria-hidden="true">◆</span>
+                </div>
+                <p class="summary-value" data-stat-value="admins">—</p>
+                <p class="summary-note" data-stat-note="admins">Tổng role ADMIN</p>
+              </article>
+              <article class="summary-card admin-stat-card">
+                <div class="summary-card-top">
+                  <span class="summary-label">Giảng viên</span>
+                  <span class="admin-stat-icon admin-stat-icon-teal" aria-hidden="true">◇</span>
+                </div>
+                <p class="summary-value" data-stat-value="supervisors">—</p>
+                <p class="summary-note" data-stat-note="supervisors">Tổng role SUPERVISOR</p>
+              </article>
+              <article class="summary-card admin-stat-card">
+                <div class="summary-card-top">
+                  <span class="summary-label">Sinh viên</span>
+                  <span class="admin-stat-icon admin-stat-icon-green" aria-hidden="true">♧</span>
+                </div>
+                <p class="summary-value" data-stat-value="students">—</p>
+                <p class="summary-note" data-stat-note="students">Tổng role STUDENT</p>
+              </article>
+              <article class="summary-card admin-stat-card">
+                <div class="summary-card-top">
+                  <span class="summary-label">Kỳ thực tập</span>
+                  <span class="admin-stat-icon admin-stat-icon-orange" aria-hidden="true">▣</span>
+                </div>
+                <p class="summary-value" data-stat-value="periods">—</p>
+                <p class="summary-note" data-stat-note="periods">Đang tải từ API kỳ thực tập</p>
+              </article>
+              <article class="summary-card admin-stat-card">
+                <div class="summary-card-top">
+                  <span class="summary-label">Nhóm thực tập</span>
+                  <span class="admin-stat-icon admin-stat-icon-slate" aria-hidden="true">⌘</span>
+                </div>
+                <p class="summary-value" data-stat-value="teams">—</p>
+                <p class="summary-note" data-stat-note="teams">Backend chưa cung cấp API nhóm</p>
+              </article>
+            </section>
+
+            <section class="panel admin-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Người dùng gần đây</h2>
+                  <p class="muted">Tối đa 5 bản ghi gần nhất trong danh sách API.</p>
+                </div>
+                <button class="text-link admin-text-button" type="button" data-view-target="users">
+                  Quản lý người dùng
+                </button>
+              </div>
+              <div class="table-scroll">
+                <table class="data-table admin-table admin-recent-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Họ tên</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Vai trò</th>
+                      <th scope="col">Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody data-recent-users aria-busy="true">
+                    <tr><td class="admin-table-state" colspan="4">Đang tải dữ liệu...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section class="admin-view" data-view-panel="users" aria-labelledby="users-title" hidden>
+            <div class="page-heading admin-page-heading">
+              <div>
+                <p class="eyebrow">Quản trị tài khoản</p>
+                <h1 id="users-title">Quản lý người dùng</h1>
+                <p class="page-description">Tìm kiếm, cập nhật trạng thái và quản lý thông tin tài khoản.</p>
+              </div>
+              <button class="button button-primary" type="button" data-create-user>+ Thêm người dùng</button>
+            </div>
+            <section class="panel admin-panel">
+              <div class="admin-toolbar">
+                <div class="admin-filter">
+                  <label for="user-role-filter">Vai trò</label>
+                  <select class="form-control" id="user-role-filter" data-user-role-filter>
+                    <option value="">Tất cả vai trò</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="SUPERVISOR">SUPERVISOR</option>
+                    <option value="STUDENT">STUDENT</option>
+                  </select>
+                </div>
+                <div class="admin-filter">
+                  <label for="user-status-filter">Trạng thái</label>
+                  <select class="form-control" id="user-status-filter" data-user-status-filter>
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="inactive">Đã khóa</option>
+                  </select>
+                </div>
+                <button class="button button-secondary" type="button" data-refresh-view>Làm mới</button>
+              </div>
+              <div class="table-scroll">
+                <table class="data-table admin-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Người dùng</th>
+                      <th scope="col">Vai trò</th>
+                      <th scope="col">Trạng thái</th>
+                      <th scope="col">Ngày tạo</th>
+                      <th scope="col">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody data-users-rows aria-busy="true">
+                    <tr><td class="admin-table-state" colspan="5">Đang tải danh sách...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="admin-table-footnote" data-users-count></p>
+            </section>
+          </section>
+
+          <section class="admin-view" data-view-panel="supervisors" aria-labelledby="supervisors-title" hidden>
+            <div class="page-heading admin-page-heading">
+              <div>
+                <p class="eyebrow">Hồ sơ giảng viên</p>
+                <h1 id="supervisors-title">Quản lý giảng viên</h1>
+                <p class="page-description">Danh sách lấy từ hồ sơ Lecturer trong API người dùng.</p>
+              </div>
+            </div>
+            <section class="panel admin-panel">
+              <div class="admin-toolbar">
+                <div class="admin-filter">
+                  <label for="supervisor-status-filter">Trạng thái tài khoản</label>
+                  <select class="form-control" id="supervisor-status-filter" data-people-status-filter>
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="inactive">Đã khóa</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-scroll">
+                <table class="data-table admin-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Giảng viên</th>
+                      <th scope="col">Mã giảng viên</th>
+                      <th scope="col">Khoa / bộ môn</th>
+                      <th scope="col">Trạng thái</th>
+                      <th scope="col">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody data-supervisors-rows aria-busy="true">
+                    <tr><td class="admin-table-state" colspan="5">Đang tải danh sách...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section class="admin-view" data-view-panel="students" aria-labelledby="students-title" hidden>
+            <div class="page-heading admin-page-heading">
+              <div>
+                <p class="eyebrow">Hồ sơ sinh viên</p>
+                <h1 id="students-title">Quản lý sinh viên</h1>
+                <p class="page-description">Danh sách lấy từ hồ sơ Student trong API người dùng.</p>
+              </div>
+            </div>
+            <section class="panel admin-panel">
+              <div class="admin-toolbar">
+                <div class="admin-filter">
+                  <label for="student-status-filter">Trạng thái tài khoản</label>
+                  <select class="form-control" id="student-status-filter" data-people-status-filter>
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="inactive">Đã khóa</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-scroll">
+                <table class="data-table admin-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Sinh viên</th>
+                      <th scope="col">Mã sinh viên</th>
+                      <th scope="col">Lớp / ngành</th>
+                      <th scope="col">Trạng thái</th>
+                      <th scope="col">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody data-students-rows aria-busy="true">
+                    <tr><td class="admin-table-state" colspan="5">Đang tải danh sách...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section class="admin-view" data-view-panel="periods" aria-labelledby="periods-title" hidden>
+            <div class="page-heading admin-page-heading">
+              <div>
+                <p class="eyebrow">Quản lý chương trình</p>
+                <h1 id="periods-title">Kỳ thực tập</h1>
+                <p class="page-description">Tạo, cập nhật trạng thái và quản lý kỳ thực tập từ backend.</p>
+              </div>
+              <button class="button button-primary" type="button" data-create-period>+ Thêm kỳ thực tập</button>
+            </div>
+            <section class="panel admin-panel">
+              <div class="admin-toolbar">
+                <div class="admin-filter">
+                  <label for="period-status-filter">Trạng thái</label>
+                  <select class="form-control" id="period-status-filter" data-period-status-filter>
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="UPCOMING">Sắp diễn ra</option>
+                    <option value="ACTIVE">Đang diễn ra</option>
+                    <option value="COMPLETED">Đã hoàn thành</option>
+                  </select>
+                </div>
+                <button class="button button-secondary" type="button" data-refresh-view>Làm mới</button>
+              </div>
+              <div class="table-scroll">
+                <table class="data-table admin-table admin-period-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Kỳ thực tập</th>
+                      <th scope="col">Ngày bắt đầu</th>
+                      <th scope="col">Ngày kết thúc</th>
+                      <th scope="col">Trạng thái</th>
+                      <th scope="col">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody data-periods-rows aria-busy="true">
+                    <tr><td class="admin-table-state" colspan="5">Đang tải danh sách...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section class="admin-view" data-view-panel="teams" aria-labelledby="teams-title" hidden>
+            <div class="page-heading admin-page-heading">
+              <div>
+                <p class="eyebrow">Quản lý thực tập</p>
+                <h1 id="teams-title">Nhóm thực tập</h1>
+                <p class="page-description">Chức năng sẽ khả dụng khi backend đăng ký API nhóm.</p>
+              </div>
+            </div>
+            <section class="panel admin-unavailable">
+              <span class="admin-unavailable-icon" aria-hidden="true">⌘</span>
+              <h2>API nhóm thực tập chưa được cung cấp</h2>
+              <p>
+                Backend hiện chưa đăng ký endpoint quản lý nhóm trong API v1.
+                Không có dữ liệu hoặc thao tác nhóm nào được giả lập trên giao diện này.
+              </p>
+            </section>
+          </section>
+
+          <section class="admin-view" data-view-panel="system" aria-labelledby="system-title" hidden>
+            <div class="page-heading admin-page-heading">
+              <div>
+                <p class="eyebrow">Tài khoản và bảo mật</p>
+                <h1 id="system-title">Quản lý hệ thống</h1>
+                <p class="page-description">Thông tin phiên quản trị và bảo mật tài khoản hiện tại.</p>
+              </div>
+            </div>
+            <div class="admin-system-grid">
+              <section class="panel admin-panel admin-account-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>Tài khoản đang đăng nhập</h2>
+                    <p class="muted">Thông tin lấy từ GET /auth/me.</p>
+                  </div>
+                </div>
+                <dl class="admin-account-list">
+                  <div><dt>Họ tên</dt><dd data-system-name>—</dd></div>
+                  <div><dt>Email</dt><dd data-system-email>—</dd></div>
+                  <div><dt>Vai trò</dt><dd data-system-role>—</dd></div>
+                  <div><dt>ID tài khoản</dt><dd data-system-id>—</dd></div>
+                  <div><dt>Phiên</dt><dd data-system-session>JWT hiện tại; token không hiển thị trên trang.</dd></div>
+                </dl>
+                <div class="admin-account-actions">
+                  <button class="button button-secondary" type="button" data-system-logout>Đăng xuất</button>
+                </div>
+              </section>
+
+              <section class="panel admin-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>Đổi mật khẩu</h2>
+                    <p class="muted">Mật khẩu mới cần ít nhất 8 ký tự và tối đa 72 byte UTF-8.</p>
+                  </div>
+                </div>
+                <form class="admin-password-form" data-password-form>
+                  <label class="form-field" for="current-password">
+                    <span class="form-label">Mật khẩu hiện tại</span>
+                    <input class="form-control" id="current-password" name="current_password" type="password" autocomplete="current-password" required>
+                  </label>
+                  <label class="form-field" for="new-password">
+                    <span class="form-label">Mật khẩu mới</span>
+                    <input class="form-control" id="new-password" name="new_password" type="password" autocomplete="new-password" minlength="8" required>
+                  </label>
+                  <label class="form-field" for="confirm-password">
+                    <span class="form-label">Nhập lại mật khẩu mới</span>
+                    <input class="form-control" id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required>
+                  </label>
+                  <p class="admin-form-message" data-password-message role="status" hidden></p>
+                  <button class="button button-primary" type="submit">Cập nhật mật khẩu</button>
+                </form>
+              </section>
+            </div>
+          </section>
+        </main>
+
+        <footer class="footer admin-footer">
+          <span>© 2026 InterTrack · Khu vực quản trị</span>
+          <span>Dữ liệu hiển thị theo quyền truy cập tài khoản</span>
+        </footer>
+      </div>
+    </div>
+
+    <dialog class="modal admin-dialog" data-user-dialog>
+      <form class="admin-dialog-form" data-user-form>
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title" data-user-dialog-title>Thêm người dùng</h2>
+            <p class="form-hint">Không thể thay đổi vai trò hoặc mật khẩu từ form chỉnh sửa.</p>
+          </div>
+          <button class="modal-close" type="button" data-close-dialog aria-label="Đóng">×</button>
+        </div>
+        <div class="modal-body admin-form-grid">
+          <label class="form-field" for="user-full-name">
+            <span class="form-label">Họ và tên</span>
+            <input class="form-control" id="user-full-name" name="full_name" type="text" maxlength="100" required>
+          </label>
+          <label class="form-field" for="user-email">
+            <span class="form-label">Email</span>
+            <input class="form-control" id="user-email" name="email" type="email" maxlength="255" autocomplete="email" required>
+          </label>
+          <label class="form-field" for="user-phone">
+            <span class="form-label">Số điện thoại (không bắt buộc)</span>
+            <input class="form-control" id="user-phone" name="phone" type="tel" maxlength="20">
+          </label>
+          <label class="form-field" for="user-role" data-create-only>
+            <span class="form-label">Vai trò</span>
+            <select class="form-control" id="user-role" name="role">
+              <option value="STUDENT">Sinh viên</option>
+              <option value="SUPERVISOR">Giảng viên</option>
+            </select>
+          </label>
+          <label class="form-field admin-form-wide" for="user-password" data-create-only>
+            <span class="form-label">Mật khẩu khởi tạo</span>
+            <input class="form-control" id="user-password" name="password" type="password" autocomplete="new-password" minlength="8">
+            <span class="form-hint">Tối thiểu 8 ký tự, tối đa 72 byte UTF-8.</span>
+          </label>
+          <fieldset class="admin-profile-fields admin-form-wide" data-profile-fields="STUDENT">
+            <legend>Hồ sơ sinh viên</legend>
+            <label class="form-field" for="student-code">
+              <span class="form-label">Mã sinh viên</span>
+              <input class="form-control" id="student-code" name="student_code" type="text" maxlength="30">
+            </label>
+            <label class="form-field" for="student-class">
+              <span class="form-label">Lớp</span>
+              <input class="form-control" id="student-class" name="class_name" type="text" maxlength="100">
+            </label>
+            <label class="form-field" for="student-major">
+              <span class="form-label">Ngành học</span>
+              <input class="form-control" id="student-major" name="major" type="text" maxlength="100">
+            </label>
+            <label class="form-field" for="student-phone">
+              <span class="form-label">Điện thoại hồ sơ (không bắt buộc)</span>
+              <input class="form-control" id="student-phone" name="student_phone" type="tel" maxlength="20">
+            </label>
+          </fieldset>
+          <fieldset class="admin-profile-fields admin-form-wide" data-profile-fields="SUPERVISOR" hidden>
+            <legend>Hồ sơ giảng viên</legend>
+            <label class="form-field" for="lecturer-code">
+              <span class="form-label">Mã giảng viên</span>
+              <input class="form-control" id="lecturer-code" name="lecturer_code" type="text" maxlength="30">
+            </label>
+            <label class="form-field" for="lecturer-department">
+              <span class="form-label">Khoa / bộ môn</span>
+              <input class="form-control" id="lecturer-department" name="department" type="text" maxlength="100">
+            </label>
+            <label class="form-field" for="lecturer-phone">
+              <span class="form-label">Điện thoại hồ sơ (không bắt buộc)</span>
+              <input class="form-control" id="lecturer-phone" name="lecturer_phone" type="tel" maxlength="20">
+            </label>
+          </fieldset>
+          <p class="admin-form-message admin-form-wide" data-user-form-message role="alert" hidden></p>
+        </div>
+        <div class="modal-footer">
+          <button class="button button-secondary" type="button" data-close-dialog>Hủy</button>
+          <button class="button button-primary" type="submit" data-user-submit>Lưu người dùng</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal admin-dialog" data-detail-dialog>
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" data-detail-title>Chi tiết</h2>
+          <p class="form-hint" data-detail-subtitle>Thông tin lấy từ backend.</p>
+        </div>
+        <button class="modal-close" type="button" data-close-dialog aria-label="Đóng">×</button>
+      </div>
+      <div class="modal-body">
+        <dl class="admin-detail-list" data-detail-list></dl>
+      </div>
+      <div class="modal-footer">
+        <button class="button button-secondary" type="button" data-close-dialog>Đóng</button>
+      </div>
+    </dialog>
+
+    <dialog class="modal admin-dialog" data-period-dialog>
+      <form class="admin-dialog-form" data-period-form>
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title" data-period-dialog-title>Thêm kỳ thực tập</h2>
+            <p class="form-hint">Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.</p>
+          </div>
+          <button class="modal-close" type="button" data-close-dialog aria-label="Đóng">×</button>
+        </div>
+        <div class="modal-body admin-form-grid">
+          <label class="form-field admin-form-wide" for="period-name">
+            <span class="form-label">Tên kỳ thực tập</span>
+            <input class="form-control" id="period-name" name="name" type="text" maxlength="150" required>
+          </label>
+          <label class="form-field admin-form-wide" for="period-description">
+            <span class="form-label">Mô tả (không bắt buộc)</span>
+            <textarea class="form-control" id="period-description" name="description"></textarea>
+          </label>
+          <label class="form-field" for="period-start-date">
+            <span class="form-label">Ngày bắt đầu</span>
+            <input class="form-control" id="period-start-date" name="start_date" type="date" required>
+          </label>
+          <label class="form-field" for="period-end-date">
+            <span class="form-label">Ngày kết thúc</span>
+            <input class="form-control" id="period-end-date" name="end_date" type="date" required>
+          </label>
+          <label class="form-field" for="period-report-deadline">
+            <span class="form-label">Hạn nộp báo cáo (không bắt buộc)</span>
+            <input class="form-control" id="period-report-deadline" name="report_deadline" type="datetime-local">
+          </label>
+          <label class="form-field" for="period-status">
+            <span class="form-label">Trạng thái ban đầu</span>
+            <select class="form-control" id="period-status" name="status">
+              <option value="UPCOMING">Sắp diễn ra</option>
+              <option value="ACTIVE">Đang diễn ra</option>
+              <option value="COMPLETED">Đã hoàn thành</option>
+            </select>
+          </label>
+          <p class="admin-form-message admin-form-wide" data-period-form-message role="alert" hidden></p>
+        </div>
+        <div class="modal-footer">
+          <button class="button button-secondary" type="button" data-close-dialog>Hủy</button>
+          <button class="button button-primary" type="submit" data-period-submit>Lưu kỳ thực tập</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

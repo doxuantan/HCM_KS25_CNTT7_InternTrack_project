@@ -34,6 +34,20 @@ class LoginRequest(BaseModel):
         return _normalize_email(value)
 
 
+class ChangePasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password_byte_length(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("New password must not exceed 72 UTF-8 bytes.")
+        return value
+
+
 class RegisterRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -76,3 +90,7 @@ class LogoutResponse(BaseModel):
     message: str = (
         "Logout acknowledged. This stateless access token remains valid until it expires."
     )
+
+
+class ChangePasswordResponse(BaseModel):
+    message: str = "Password changed successfully."

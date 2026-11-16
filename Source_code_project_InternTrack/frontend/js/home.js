@@ -17,7 +17,7 @@ async function initializeHomeSession() {
     }
 
     const user = await getCurrentUser();
-    if (user.role === "STUDENT") {
+    if (user.role === "ADMIN" || user.role === "STUDENT") {
       navigateByRole(user.role);
       return;
     }
