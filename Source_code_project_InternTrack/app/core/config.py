@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     SAMPLE_USER_PASSWORD: SecretStr | None = None
     JWT_ALGORITHM: Literal["HS256"] = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, gt=0)
+    MAX_ATTACHMENT_SIZE_MB: int = Field(default=10, gt=0)
+    ATTACHMENT_STORAGE_DIR: Path = Path("storage/uploads")
     ALLOWED_ORIGINS: list[str] = Field(
         default_factory=lambda: ["http://localhost:3000"]
     )
@@ -26,6 +28,13 @@ class Settings(BaseSettings):
         case_sensitive=True,
         extra="ignore",
     )
+
+    @property
+    def attachment_storage_path(self) -> Path:
+        storage_path = self.ATTACHMENT_STORAGE_DIR
+        if not storage_path.is_absolute():
+            storage_path = PROJECT_ROOT / storage_path
+        return storage_path.resolve()
 
 
 settings = Settings()
