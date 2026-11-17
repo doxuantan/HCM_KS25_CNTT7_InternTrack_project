@@ -3,7 +3,10 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
+from app.dependencies.auth import get_current_user
+from app.dependencies.permissions import require_role
 from app.models.internship_period import PeriodStatus
+from app.models.user import UserRole
 from app.schemas.internship import (
     InternshipCreate,
     InternshipUpdate,
@@ -15,7 +18,8 @@ from app.services import internship_service as service
 
 router = APIRouter(
     prefix="/internship-periods",
-    tags=["Internships"]
+    tags=["Internships"],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -41,7 +45,8 @@ def get_internship(
 @router.post(
     "",
     response_model=InternshipResponse,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
 )
 def create_internship(
     data: InternshipCreate,
@@ -52,7 +57,8 @@ def create_internship(
 
 @router.put(
     "/{internship_id}",
-    response_model=InternshipResponse
+    response_model=InternshipResponse,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
 )
 def update_internship(
     internship_id: int,
@@ -68,7 +74,8 @@ def update_internship(
 
 @router.patch(
     "/{internship_id}/status",
-    response_model=InternshipResponse
+    response_model=InternshipResponse,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
 )
 def update_internship_status(
     internship_id: int,
@@ -84,7 +91,8 @@ def update_internship_status(
 
 @router.delete(
     "/{internship_id}",
-    status_code=status.HTTP_204_NO_CONTENT
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
 )
 def delete_internship(
     internship_id: int,
