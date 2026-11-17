@@ -106,8 +106,10 @@ export async function apiRequest(path, options = {}) {
 
   if (!response.ok) {
     const message =
-      typeof payload?.detail === "string"
-        ? payload.detail
+      typeof payload?.message === "string"
+        ? payload.message
+        : typeof payload?.detail === "string"
+          ? payload.detail
         : `Yêu cầu thất bại (${response.status}).`;
 
     if (response.status === 401 && token) {
@@ -116,6 +118,16 @@ export async function apiRequest(path, options = {}) {
     }
 
     throw new ApiError(message, response.status, payload);
+  }
+
+  if (
+    payload !== null &&
+    typeof payload === "object" &&
+    !Array.isArray(payload) &&
+    payload.success === true &&
+    Object.hasOwn(payload, "data")
+  ) {
+    return payload.data;
   }
 
   return payload;
