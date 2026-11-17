@@ -1,3 +1,5 @@
+import { apiRequest } from "./api.js";
+
 const VALID_TASK_STATUSES = new Set(["TODO", "IN_PROGRESS", "DONE"]);
 const TASK_STATUS_LABELS = Object.freeze({
   TODO: "Chưa bắt đầu",
@@ -56,6 +58,54 @@ function formatDeadline(deadline) {
     timeZone: "Asia/Ho_Chi_Minh",
     year: "numeric",
   }).format(date);
+}
+
+function formatPeriod(team) {
+  const period = team.period;
+  const startDate = formatDeadline(period?.start_date);
+  const endDate = formatDeadline(period?.end_date);
+  return period?.name
+    ? `${period.name} (${startDate} – ${endDate})`
+    : `${startDate} – ${endDate}`;
+}
+
+function renderTeamInfo(teams) {
+  const teamName = document.querySelector("[data-team-name]");
+  const period = document.querySelector("[data-internship-period]");
+  const supervisor = document.querySelector("[data-supervisor-name]");
+  const note = document.querySelector("[data-team-source-note]");
+
+  if (!Array.isArray(teams)) {
+    throw new TypeError("Team data must be an array.");
+  }
+  if (teams.length === 0) {
+    if (teamName) teamName.textContent = "Chưa được phân nhóm";
+    if (period) period.textContent = "Chưa có dữ liệu";
+    if (supervisor) supervisor.textContent = "Chưa có dữ liệu";
+    if (note) note.textContent = "Bạn chưa được phân vào nhóm thực tập nào.";
+    return;
+  }
+
+  const team = teams[0];
+  if (
+    team === null ||
+    typeof team !== "object" ||
+    typeof team.team_name !== "string" ||
+    !team.period ||
+    typeof team.period !== "object"
+  ) {
+    throw new TypeError("Team data is invalid.");
+  }
+
+  if (teamName) teamName.textContent = team.team_name;
+  if (period) period.textContent = formatPeriod(team);
+  if (supervisor) {
+    supervisor.textContent =
+      typeof team.supervisor?.full_name === "string"
+        ? team.supervisor.full_name
+        : "Chưa có dữ liệu";
+  }
+  if (note) note.textContent = "Thông tin nhóm trong kỳ thực tập gần nhất.";
 }
 
 function createCell(content, className = "") {
@@ -213,7 +263,7 @@ export function renderTaskDashboard(tasks) {
   taskRows.setAttribute("aria-busy", "false");
 }
 
-export function initializeStudentDashboard(user) {
+export async function initializeStudentDashboard(user) {
   const studentName = document.querySelector("[data-student-name]");
   const mainContent = document.querySelector("#main-content");
 
@@ -225,6 +275,26 @@ export function initializeStudentDashboard(user) {
   }
   if (mainContent instanceof HTMLElement) {
     mainContent.setAttribute("aria-busy", "false");
+  }
+
+  try {
+    renderTeamInfo(await apiRequest("teams/me"));
+  } catch (error) {
+    console.error("Student team summary could not be loaded.", error);
+    for (const selector of [
+      "[data-team-name]",
+      "[data-internship-period]",
+      "[data-supervisor-name]",
+    ]) {
+      const element = document.querySelector(selector);
+      if (element) {
+        element.textContent = "Không thể tải dữ liệu";
+      }
+    }
+    const note = document.querySelector("[data-team-source-note]");
+    if (note) {
+      note.textContent = "Không thể tải thông tin nhóm. Vui lòng thử lại sau.";
+    }
   }
 
   renderTaskState(

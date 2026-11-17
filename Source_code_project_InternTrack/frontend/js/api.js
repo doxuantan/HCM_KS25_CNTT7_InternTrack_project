@@ -32,7 +32,7 @@ export function clearAuthSession() {
 
 function redirectToLogin() {
   if (!window.location.pathname.endsWith("/login.html")) {
-    window.location.replace(new URL("./login.html", window.location.href));
+    window.location.replace(new URL("../login.html", import.meta.url));
   }
 }
 

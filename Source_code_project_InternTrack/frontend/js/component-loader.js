@@ -8,7 +8,7 @@ export async function loadComponents() {
         throw new Error(`Missing container for the "${name}" component.`);
       }
 
-      const response = await fetch(`components/${name}.html`);
+      const response = await fetch(new URL(`../components/${name}.html`, import.meta.url));
       if (!response.ok) {
         throw new Error(`Unable to load "${name}" component: ${response.status} ${response.statusText}`);
       }
