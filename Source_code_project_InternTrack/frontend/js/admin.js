@@ -1,8 +1,8 @@
 import { ApiError, apiRequest, getAuthSessionPersistence } from "./api.js";
 import { logout, requireAuth } from "./auth.js";
 import { confirmAction, initializeSharedUi, showToast } from "./ui.js";
+import { createUser, listUsers, setUserActive, updateUser } from "./users.js";
 
-const USER_PAGE_SIZE = 100;
 const ROLE_LABELS = Object.freeze({
   ADMIN: "Quản trị viên",
   SUPERVISOR: "Giảng viên",
@@ -184,22 +184,7 @@ function getSearchTerm() {
 }
 
 async function fetchAllUsers() {
-  const users = [];
-  let skip = 0;
-
-  while (true) {
-    const page = await apiRequest(`users?skip=${skip}&limit=${USER_PAGE_SIZE}`);
-    if (!Array.isArray(page) || page.some((user) => !isRecord(user))) {
-      throw new Error("API người dùng trả về dữ liệu không hợp lệ.");
-    }
-    users.push(...page);
-    if (page.length < USER_PAGE_SIZE) {
-      break;
-    }
-    skip += page.length;
-  }
-
-  return users;
+  return listUsers();
 }
 
 async function getUsers(force = false) {
@@ -1017,10 +1002,11 @@ async function submitUserForm(event) {
   }
   setFormMessage(message, "");
   try {
-    await apiRequest(editing ? `users/${userId}` : "users", {
-      method: editing ? "PUT" : "POST",
-      body,
-    });
+    if (editing) {
+      await updateUser(userId, body);
+    } else {
+      await createUser(body);
+    }
     userDialog.close();
     usersCache = null;
     showAlert(editing ? "Đã cập nhật thông tin người dùng." : "Đã tạo người dùng mới.", "success");
@@ -1062,10 +1048,7 @@ async function handleUserAction(action, id) {
     })) {
       return;
     }
-    await apiRequest(`users/${id}/status`, {
-      method: "PATCH",
-      body: { is_active: isActive },
-    });
+    await setUserActive(id, isActive);
     usersCache = null;
     showAlert(`Đã ${isActive ? "kích hoạt" : "khóa"} tài khoản.`, "success");
     await renderView(currentView, true);
