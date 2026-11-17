@@ -1,6 +1,7 @@
 import { loadComponents } from "./component-loader.js";
 import { logout, requireAuth } from "./auth.js";
 import { initializeStudentDashboard } from "./student-dashboard.js";
+import { initializeSharedUi } from "./ui.js";
 
 function getUserInitials(fullName) {
   const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -102,6 +103,7 @@ try {
   const user = await requireAuth();
   if (user) {
     await loadComponents();
+    await initializeSharedUi();
     setupSidebar();
     setupAccountMenu(user);
     if (document.body.dataset.dashboard === "student") {

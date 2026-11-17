@@ -1,5 +1,6 @@
 import { ApiError, apiRequest, getAuthSessionPersistence } from "./api.js";
 import { logout, requireAuth } from "./auth.js";
+import { confirmAction, initializeSharedUi, showToast } from "./ui.js";
 
 const USER_PAGE_SIZE = 100;
 const ROLE_LABELS = Object.freeze({
@@ -84,6 +85,10 @@ function getErrorMessage(error) {
 }
 
 function showAlert(message, kind = "error") {
+  if (kind === "success") {
+    showToast(message);
+    return;
+  }
   if (!(alertBox instanceof HTMLElement)) {
     return;
   }
@@ -678,6 +683,9 @@ function setView(view) {
     return;
   }
   currentView = view;
+  if (window.location.hash !== `#${view}`) {
+    window.location.hash = view;
+  }
   for (const panel of document.querySelectorAll("[data-view-panel]")) {
     panel.hidden = panel.dataset.viewPanel !== view;
   }
@@ -706,6 +714,13 @@ function setView(view) {
 }
 
 function setupNavigation() {
+  window.addEventListener("hashchange", () => {
+    const view = window.location.hash.slice(1);
+    if (Object.hasOwn(VIEW_LABELS, view) && view !== currentView) {
+      setView(view);
+    }
+  });
+
   document.querySelectorAll("[data-view-target]").forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
@@ -1039,7 +1054,12 @@ async function handleUserAction(action, id) {
   }
   if (action === "status") {
     const isActive = !user.is_active;
-    if (!window.confirm(`Xác nhận ${isActive ? "kích hoạt" : "khóa"} tài khoản ${user.email}?`)) {
+    if (!await confirmAction({
+      title: isActive ? "Kích hoạt tài khoản" : "Khóa tài khoản",
+      message: `Xác nhận ${isActive ? "kích hoạt" : "khóa"} tài khoản ${user.email}?`,
+      confirmLabel: isActive ? "Kích hoạt" : "Khóa tài khoản",
+      destructive: !isActive,
+    })) {
       return;
     }
     await apiRequest(`users/${id}/status`, {
@@ -1052,7 +1072,12 @@ async function handleUserAction(action, id) {
     return;
   }
   if (action === "delete") {
-    if (!window.confirm(`Xóa tài khoản ${user.email}? Thao tác này không thể hoàn tác.`)) {
+    if (!await confirmAction({
+      title: "Xóa tài khoản",
+      message: `Xóa tài khoản ${user.email}? Thao tác này không thể hoàn tác.`,
+      confirmLabel: "Xóa người dùng",
+      destructive: true,
+    })) {
       return;
     }
     await apiRequest(`users/${id}`, { method: "DELETE" });
@@ -1228,10 +1253,12 @@ async function handlePeriodAction(action, id) {
     showPeriodDetails(period);
   } else if (action === "edit") {
     openPeriodDialog(period);
-  } else if (
-    action === "delete" &&
-    window.confirm(`Xóa kỳ thực tập “${period.name}”? Backend có thể từ chối nếu kỳ đã gắn với nhóm.`)
-  ) {
+  } else if (action === "delete" && await confirmAction({
+    title: "Xóa kỳ thực tập",
+    message: `Xóa kỳ thực tập “${period.name}”? Backend có thể từ chối nếu kỳ đã gắn với nhóm.`,
+    confirmLabel: "Xóa kỳ thực tập",
+    destructive: true,
+  })) {
     await apiRequest(`internship-periods/${id}`, { method: "DELETE" });
     periodsCache = null;
     showAlert("Đã xóa kỳ thực tập.", "success");
@@ -1371,6 +1398,7 @@ async function initializeAdmin() {
     if (!adminUser) {
       return;
     }
+    await initializeSharedUi();
     setupAccount(adminUser);
     setupNavigation();
     setupUserActions();
@@ -1378,7 +1406,8 @@ async function initializeAdmin() {
     setupDialogs();
     setupPasswordChange();
     setupLogout();
-    setView("overview");
+    const requestedView = window.location.hash.slice(1);
+    setView(Object.hasOwn(VIEW_LABELS, requestedView) ? requestedView : "overview");
   } catch (error) {
     showAlert(getErrorMessage(error));
     if (main instanceof HTMLElement) {

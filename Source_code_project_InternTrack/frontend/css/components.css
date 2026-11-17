@@ -315,6 +315,97 @@ textarea.form-control {
   margin-top: 24px;
 }
 
+.confirm-dialog {
+  width: min(100%, 440px);
+  padding: 24px;
+}
+
+.confirm-dialog-message {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.toast-region {
+  position: fixed;
+  z-index: 120;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: min(390px, calc(100vw - 36px));
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 15px;
+  border: 1px solid #c4e6d3;
+  border-radius: 11px;
+  background: #effaf3;
+  box-shadow: 0 12px 32px rgb(22 44 72 / 16%);
+  color: #32734f;
+  pointer-events: auto;
+  animation: toast-enter 160ms ease-out;
+}
+
+.toast[data-kind="error"] {
+  border-color: #f1c3c1;
+  background: #fff2f1;
+  color: #9c3d39;
+}
+
+.toast[data-kind="warning"] {
+  border-color: #f1d9a8;
+  background: #fff8e9;
+  color: #8d5b14;
+}
+
+.toast[data-kind="info"] {
+  border-color: #c9dcf4;
+  background: #f0f6ff;
+  color: #315d91;
+}
+
+.toast-message {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.toast-close {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: currentColor;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.toast-close:hover {
+  background: rgb(0 0 0 / 6%);
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes modal-enter {
   from {
     opacity: 0;
@@ -345,6 +436,16 @@ textarea.form-control {
 
   .modal-footer .button {
     width: 100%;
+  }
+
+  .toast-region {
+    top: 12px;
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+
+  .confirm-dialog {
+    padding: 20px;
   }
 }
 
