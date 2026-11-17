@@ -21,6 +21,9 @@ class Attachment(Base):
     report_id = Column(Integer, ForeignKey("reports.id"), nullable=True)
     file_name = Column(String(255), nullable=False)
     file_url = Column(String(500), nullable=False)
+    stored_filename = Column(String(255), nullable=True)
+    mime_type = Column(String(127), nullable=True)
+    file_size = Column(Integer, nullable=True)
     uploaded_at = Column(DateTime, nullable=False, server_default=func.now())
 
     uploader = relationship("User", foreign_keys=[uploaded_by])
