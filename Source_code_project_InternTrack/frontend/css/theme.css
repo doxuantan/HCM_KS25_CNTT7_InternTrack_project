@@ -1,0 +1,529 @@
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #e6edf5;
+  background: #0e1725;
+  --ink: #e6edf5;
+  --muted: #a0adbf;
+  --line: #2d3b50;
+  --accent: #60b7a4;
+  --component-accent: var(--accent);
+  --component-border: #35445a;
+  --component-ink: #e6edf5;
+  --component-muted: #a0adbf;
+  --login-ink: #e6edf5;
+  --login-muted: #a0adbf;
+  --login-accent: #65c2ad;
+  --theme-surface: #172437;
+  --theme-input: #101a2a;
+  --theme-hover: #25364c;
+  --theme-text: #e6edf5;
+  --theme-muted-text: #a0adbf;
+  --theme-line: #34445a;
+}
+
+.theme-toggle {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #68758a;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.theme-toggle:hover {
+  border-color: #e3e9f0;
+  background: #f1f4f8;
+}
+
+.theme-toggle svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.theme-icon-sun {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-toggle {
+  border-color: #35445a;
+  background: #1c2b40;
+  color: #f1d38b;
+}
+
+:root[data-theme="dark"] .theme-toggle:hover {
+  border-color: #53647b;
+  background: #25364c;
+}
+
+:root[data-theme="dark"] .theme-icon-sun {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-icon-moon {
+  display: none;
+}
+
+.login-theme-toggle {
+  position: fixed;
+  z-index: 20;
+  top: 18px;
+  right: 20px;
+}
+
+:root[data-theme="dark"] body:not(.home-page):not(.login-page) {
+  background:
+    radial-gradient(ellipse at 82% 0%, rgb(52 94 103 / 18%), transparent 34rem),
+    #0e1725;
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .sidebar {
+  border-color: #26364a;
+  background: #101a2a;
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .brand {
+  color: #edf2f8;
+}
+
+:root[data-theme="dark"] .workspace-switcher,
+:root[data-theme="dark"] .sidebar-help {
+  border-color: rgb(255 255 255 / 11%);
+  background: rgb(255 255 255 / 4%);
+}
+
+:root[data-theme="dark"] .navigation-label {
+  color: #8998ad;
+}
+
+:root[data-theme="dark"] .nav-link {
+  color: #b2bfd0;
+}
+
+:root[data-theme="dark"] .nav-link:hover {
+  background: rgb(255 255 255 / 8%);
+  color: #fff;
+}
+
+:root[data-theme="dark"] .nav-link.is-active {
+  border-color: rgb(96 189 169 / 24%);
+  background: rgb(55 142 127 / 24%);
+  color: #a9e3d6;
+}
+
+:root[data-theme="dark"] .navigation .nav-count {
+  background: rgb(255 255 255 / 9%);
+  color: #d1d9e3;
+}
+
+:root[data-theme="dark"] .topbar {
+  border-color: #2b394d;
+  background: rgb(16 26 42 / 92%);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .topbar-context,
+:root[data-theme="dark"] .topbar-context span,
+:root[data-theme="dark"] .profile-chevron,
+:root[data-theme="dark"] .profile-details span {
+  color: var(--theme-muted-text);
+}
+
+:root[data-theme="dark"] .topbar-context strong,
+:root[data-theme="dark"] .profile-details strong {
+  color: #e6edf5;
+}
+
+:root[data-theme="dark"] .profile-button {
+  border-color: #35445a;
+}
+
+:root[data-theme="dark"] .account-menu,
+:root[data-theme="dark"] .summary-card,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .modal,
+:root[data-theme="dark"] .admin-dialog {
+  border-color: #2e3e53;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .account-menu-heading strong,
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] .summary-value,
+:root[data-theme="dark"] .panel-heading h2,
+:root[data-theme="dark"] .admin-dashboard .panel-heading h2,
+:root[data-theme="dark"] .project-name,
+:root[data-theme="dark"] .admin-dashboard h1,
+:root[data-theme="dark"] .admin-user-cell strong,
+:root[data-theme="dark"] .admin-unavailable h2,
+:root[data-theme="dark"] .admin-detail-list dd,
+:root[data-theme="dark"] .admin-account-list dd,
+:root[data-theme="dark"] .admin-profile-fields legend,
+:root[data-theme="dark"] .student-dashboard .student-panel-heading h2,
+:root[data-theme="dark"] .student-dashboard .student-info-list dd {
+  color: #e6edf5;
+}
+
+:root[data-theme="dark"] .account-menu-heading span,
+:root[data-theme="dark"] .account-menu-item,
+:root[data-theme="dark"] .summary-label,
+:root[data-theme="dark"] .summary-note,
+:root[data-theme="dark"] .page-description,
+:root[data-theme="dark"] .muted,
+:root[data-theme="dark"] .table-subtitle,
+:root[data-theme="dark"] .footer,
+:root[data-theme="dark"] .admin-user-cell span,
+:root[data-theme="dark"] .admin-table-footnote,
+:root[data-theme="dark"] .admin-account-list dt,
+:root[data-theme="dark"] .admin-detail-list dt,
+:root[data-theme="dark"] .admin-unavailable p,
+:root[data-theme="dark"] .student-dashboard .student-progress-note,
+:root[data-theme="dark"] .student-dashboard .student-source-note,
+:root[data-theme="dark"] .student-dashboard .student-state,
+:root[data-theme="dark"] .student-dashboard .student-activity-empty {
+  color: var(--theme-muted-text);
+}
+
+:root[data-theme="dark"] .account-menu-item {
+  border-color: #34445a;
+}
+
+:root[data-theme="dark"] .account-menu-item:hover,
+:root[data-theme="dark"] .modal-close:hover {
+  background: var(--theme-hover);
+}
+
+:root[data-theme="dark"] .icon-button,
+:root[data-theme="dark"] .admin-text-button,
+:root[data-theme="dark"] .text-link,
+:root[data-theme="dark"] .admin-row-action {
+  color: #9fd9cd;
+}
+
+:root[data-theme="dark"] .icon-button:hover {
+  border-color: #35445a;
+  background: var(--theme-hover);
+}
+
+:root[data-theme="dark"] .button-secondary,
+:root[data-theme="dark"] .form-control,
+:root[data-theme="dark"] .admin-search,
+:root[data-theme="dark"] .admin-inline-select,
+:root[data-theme="dark"] .admin-row-action {
+  border-color: var(--theme-line);
+  background: var(--theme-input);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .admin-search input {
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .admin-search input::placeholder,
+:root[data-theme="dark"] .form-control::placeholder {
+  color: #94a3b7;
+}
+
+:root[data-theme="dark"] .button-secondary:hover:not(:disabled),
+:root[data-theme="dark"] .admin-row-action:hover:not(:disabled) {
+  border-color: #53647b;
+  background: var(--theme-hover);
+}
+
+:root[data-theme="dark"] .data-table th,
+:root[data-theme="dark"] th,
+:root[data-theme="dark"] thead {
+  background: #1b2a3e;
+  color: #aebbd0;
+}
+
+:root[data-theme="dark"] .data-table td,
+:root[data-theme="dark"] td {
+  border-color: #2c3b50;
+  color: #c3cedc;
+}
+
+:root[data-theme="dark"] .data-table tbody tr:hover,
+:root[data-theme="dark"] tbody tr:hover {
+  background: #1b2a3e;
+}
+
+:root[data-theme="dark"] .summary-icon-blue,
+:root[data-theme="dark"] .admin-stat-icon-blue,
+:root[data-theme="dark"] .status-in-progress,
+:root[data-theme="dark"] .status-badge-progress,
+:root[data-theme="dark"] .student-status-in-progress,
+:root[data-theme="dark"] .admin-role-badge {
+  background: #203854;
+  color: #a9cef3;
+}
+
+:root[data-theme="dark"] .summary-icon-violet,
+:root[data-theme="dark"] .admin-stat-icon-violet,
+:root[data-theme="dark"] .admin-role-badge[data-role="ADMIN"] {
+  background: #302846;
+  color: #d0baff;
+}
+
+:root[data-theme="dark"] .summary-icon-green,
+:root[data-theme="dark"] .admin-stat-icon-green,
+:root[data-theme="dark"] .status-completed,
+:root[data-theme="dark"] .status-badge-success,
+:root[data-theme="dark"] .student-status-done,
+:root[data-theme="dark"] .admin-status-active,
+:root[data-theme="dark"] .admin-role-badge[data-role="STUDENT"] {
+  background: #1d3b34;
+  color: #9cdec2;
+}
+
+:root[data-theme="dark"] .summary-icon-orange,
+:root[data-theme="dark"] .admin-stat-icon-orange,
+:root[data-theme="dark"] .status-review,
+:root[data-theme="dark"] .status-badge-pending,
+:root[data-theme="dark"] .student-status-todo {
+  background: #453522;
+  color: #f0c482;
+}
+
+:root[data-theme="dark"] .status-badge-danger,
+:root[data-theme="dark"] .admin-status-inactive {
+  background: #482b31;
+  color: #f0a2a2;
+}
+
+:root[data-theme="dark"] .status-badge-neutral,
+:root[data-theme="dark"] .admin-stat-icon-slate {
+  background: #303b4b;
+  color: #c1ccda;
+}
+
+:root[data-theme="dark"] .admin-alert,
+:root[data-theme="dark"] .load-error {
+  border-color: #754247;
+  background: #3a252c;
+  color: #f0aaaa;
+}
+
+:root[data-theme="dark"] .admin-alert[data-kind="success"] {
+  border-color: #386652;
+  background: #1c382f;
+  color: #a4dfbd;
+}
+
+:root[data-theme="dark"] .admin-form-message,
+:root[data-theme="dark"] .admin-row-action-danger,
+:root[data-theme="dark"] .admin-dashboard .sidebar-logout {
+  color: #f0a2a2;
+}
+
+:root[data-theme="dark"] .admin-dashboard .sidebar-logout:hover {
+  background: #3a252c;
+}
+
+:root[data-theme="dark"] .admin-profile-fields {
+  border-color: #34445a;
+}
+
+:root[data-theme="dark"] .admin-toolbar,
+:root[data-theme="dark"] .admin-account-list > div,
+:root[data-theme="dark"] .admin-detail-list > div,
+:root[data-theme="dark"] .student-dashboard .student-table-scroll {
+  border-color: #2c3b50;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-task-title,
+:root[data-theme="dark"] .student-dashboard .student-task-progress,
+:root[data-theme="dark"] .student-dashboard .student-priority-low,
+:root[data-theme="dark"] .progress-cell > span {
+  color: #c3cedc;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-progress-value,
+:root[data-theme="dark"] .positive,
+:root[data-theme="dark"] .home-kicker,
+:root[data-theme="dark"] .home-register-link {
+  color: #8bd4c3;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-priority-medium {
+  color: #f0c482;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-priority-high {
+  color: #f0a2a2;
+}
+
+:root[data-theme="dark"] .admin-dialog::backdrop,
+:root[data-theme="dark"] .modal::backdrop {
+  background: rgb(0 0 0 / 68%);
+}
+
+:root[data-theme="dark"] .form-error,
+:root[data-theme="dark"] .login-field-error,
+:root[data-theme="dark"] .admin-table-state[data-state="error"] {
+  color: #f0a2a2;
+}
+
+:root[data-theme="dark"] .progress-track,
+:root[data-theme="dark"] .student-dashboard .student-progress-track,
+:root[data-theme="dark"] .student-dashboard .student-task-progress-track {
+  background: #2b3b50;
+}
+
+:root[data-theme="dark"] .footer {
+  border-color: #2b394d;
+}
+
+:root[data-theme="dark"] .toast {
+  border-color: #386652;
+  background: #1c382f;
+  color: #a4dfbd;
+}
+
+:root[data-theme="dark"] .toast[data-kind="error"] {
+  border-color: #754247;
+  background: #3a252c;
+  color: #f0aaaa;
+}
+
+:root[data-theme="dark"] .toast[data-kind="warning"] {
+  border-color: #705c37;
+  background: #382f20;
+  color: #f0d39a;
+}
+
+:root[data-theme="dark"] .toast[data-kind="info"] {
+  border-color: #365576;
+  background: #1d3046;
+  color: #a9cef3;
+}
+
+:root[data-theme="dark"] body.home-page {
+  background:
+    radial-gradient(ellipse at 82% 28%, rgb(69 133 122 / 12%), transparent 32%),
+    #0e1725;
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .home-header {
+  border-color: #2d3b50;
+}
+
+:root[data-theme="dark"] .home-brand,
+:root[data-theme="dark"] .home-intro h1,
+:root[data-theme="dark"] .home-intro h1 span,
+:root[data-theme="dark"] .home-feature h2 {
+  color: #e6edf5;
+}
+
+:root[data-theme="dark"] .home-description,
+:root[data-theme="dark"] .home-feature p,
+:root[data-theme="dark"] .home-access-note,
+:root[data-theme="dark"] .home-footer {
+  color: #a0adbf;
+}
+
+:root[data-theme="dark"] .home-features {
+  border-color: #2d3b50;
+  background: rgb(23 36 55 / 92%);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 24%);
+}
+
+:root[data-theme="dark"] .home-access-note {
+  border-color: #34445a;
+}
+
+:root[data-theme="dark"] .home-role-notice {
+  border-color: #705c37;
+  background: #382f20;
+  color: #f0d39a;
+}
+
+:root[data-theme="dark"] body.login-page {
+  background: #0e1725;
+  color: var(--login-ink);
+}
+
+:root[data-theme="dark"] .login-form-side {
+  background:
+    radial-gradient(ellipse at 85% 12%, rgb(69 133 122 / 10%), transparent 24rem),
+    #0e1725;
+}
+
+:root[data-theme="dark"] .login-heading,
+:root[data-theme="dark"] .login-mobile-brand {
+  color: #e6edf5;
+}
+
+:root[data-theme="dark"] .login-subheading,
+:root[data-theme="dark"] .remember-option,
+:root[data-theme="dark"] .login-help-text,
+:root[data-theme="dark"] .login-register,
+:root[data-theme="dark"] .login-back-link {
+  color: #a0adbf;
+}
+
+:root[data-theme="dark"] .login-link:hover,
+:root[data-theme="dark"] .login-back-link:hover {
+  color: #8bd4c3;
+}
+
+:root[data-theme="dark"] .login-input-wrap .form-control {
+  border-color: #35445a;
+  background: #101a2a;
+  color: #e6edf5;
+}
+
+:root[data-theme="dark"] .password-toggle {
+  color: #a0adbf;
+}
+
+:root[data-theme="dark"] .password-toggle:hover {
+  background: #25364c;
+  color: #e6edf5;
+}
+
+:root[data-theme="dark"] .login-message {
+  border-color: #315a50;
+  background: #1b382f;
+  color: #a8dec8;
+}
+
+:root[data-theme="dark"] .login-divider::before,
+:root[data-theme="dark"] .login-divider::after {
+  background: #34445a;
+}
+
+:root[data-theme="dark"] .login-theme-toggle {
+  border-color: #35445a;
+  background: #1c2b40;
+  color: #f1d38b;
+}
+
+@media (max-width: 700px) {
+  :root[data-theme="dark"] .login-mobile-brand {
+    color: #e6edf5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle {
+    transition-duration: 0.01ms;
+  }
+}

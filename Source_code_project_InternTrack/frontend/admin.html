@@ -7,10 +7,12 @@
     <meta name="description" content="Bảng điều khiển quản trị hệ thống InterTrack.">
     <meta name="api-base-url" content="http://localhost:8000/api/v1">
     <title>Quản trị hệ thống | InterTrack</title>
+    <script src="js/theme.js"></script>
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/theme.css">
     <script type="module" src="js/admin.js"></script>
   </head>
   <body
@@ -110,6 +112,22 @@
             >
           </label>
           <span class="topbar-spacer"></span>
+          <button
+            class="icon-button theme-toggle"
+            type="button"
+            data-theme-toggle
+            aria-label="Chuyển sang giao diện tối"
+            aria-pressed="false"
+            title="Chuyển sang giao diện tối"
+          >
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+            </svg>
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"></path>
+            </svg>
+          </button>
           <div class="account-menu-container" data-account-menu>
             <button
               class="profile-button"
