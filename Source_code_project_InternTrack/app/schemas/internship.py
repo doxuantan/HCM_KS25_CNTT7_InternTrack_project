@@ -7,7 +7,7 @@ from app.models.internship_period import PeriodStatus
 
 
 class InternshipCreate(BaseModel):
-    name: str = Field(min_length=1, max_length=150)
+    name: str = Field(min_length=1, max_length=150, pattern=r".*\S.*")
     description: str | None = None
     start_date: date
     end_date: date
@@ -16,7 +16,7 @@ class InternshipCreate(BaseModel):
 
 
 class InternshipUpdate(BaseModel):
-    name: str = Field(min_length=1, max_length=150)
+    name: str = Field(min_length=1, max_length=150, pattern=r".*\S.*")
     description: str | None = None
     start_date: date
     end_date: date
