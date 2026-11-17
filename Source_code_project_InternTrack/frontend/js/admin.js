@@ -56,9 +56,21 @@ function getErrorMessage(error) {
   if (error.status === 404) {
     return "Không tìm thấy dữ liệu hoặc API tương ứng.";
   }
-  if (error.status === 422 && Array.isArray(error.payload?.detail)) {
-    const messages = error.payload.detail
-      .map((item) => (isRecord(item) && typeof item.msg === "string" ? item.msg : ""))
+  if (
+    error.status === 422 &&
+    (Array.isArray(error.payload?.errors) || Array.isArray(error.payload?.detail))
+  ) {
+    const validationErrors = error.payload.errors || error.payload.detail;
+    const messages = validationErrors
+      .map((item) =>
+        isRecord(item)
+          ? typeof item.message === "string"
+            ? item.message
+            : typeof item.msg === "string"
+              ? item.msg
+              : ""
+          : "",
+      )
       .filter(Boolean);
     return messages.length ? messages.join(" ") : "Dữ liệu gửi lên chưa hợp lệ.";
   }

@@ -1,13 +1,20 @@
-from fastapi import FastAPI, Depends
+import logging
+
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.router import router as api_router
-from app.db.database import Base, engine, get_db
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+from app.api.v1.router import router as api_router
+from app.core.api_responses import install_api_response_handling
+from app.db.database import Base, engine, get_db
 import app.models
 
 
+logger = logging.getLogger(__name__)
 app = FastAPI()
+install_api_response_handling(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -35,6 +42,11 @@ def health_check():
 def test_connection(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
-        return {"message":"kết nối thành công database"}
-    except Exception as e:
-        return {"message":f"Kết nối thất bại Lỗi {e}"}
+        return {"message": "Database connection successful."}
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Database connectivity probe failed.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection failed.",
+        ) from None

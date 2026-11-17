@@ -1,0 +1,1141 @@
+{
+  "info": {
+    "_postman_id": "6f96e970-1f30-4ead-9a7d-2f73f2343e8b",
+    "name": "InternTrack_API_Collection",
+    "description": "InternTrack APIs. Import and select InternTrack_Environment before running. Register creates a disposable STUDENT account; ADMIN and SUPERVISOR credentials and IDs must be configured for their requests. Logout is an acknowledgement only: access tokens remain valid until expiry.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const expected = {",
+          "  'Register': 201, 'Register invalid email': 422, 'Register duplicate email': 409,",
+          "  'Register missing fields': 422, 'Register invalid password': 422, 'Register password over bcrypt limit': 422,",
+          "  'Register wrong type': 422, 'Register forged role': 422, 'Login': 200,",
+          "  'Login wrong email': 401, 'Login wrong password': 401, 'Login invalid email': 422,",
+          "  'Login missing password': 422, 'Login inactive account': 403, 'Login as Admin': 200,",
+          "  'Login as Supervisor': 200, 'Get Current User': 200, 'Get Current User no token': 401,",
+          "  'Get Current User malformed token': 401, 'Get Current User expired token': 401,",
+          "  'Get Current User deleted account': 401, 'Get Current User inactive account': 403,",
+          "  'Change Password wrong current': 400, 'Change Password invalid new password': 422,",
+          "  'Change Password confirmation field': 422, 'Change Password no token': 401,",
+          "  'Change Password invalid token': 401, 'Change Password inactive account': 403,",
+          "  'Change Password': 200, 'Login with old password': 401, 'Login with new password': 200,",
+          "  'Logout': 200, 'List Users as Student': 403, 'Get unknown User': 404,",
+          "  'Create Student': 201, 'Create Supervisor': 201, 'Delete User': 204,",
+          "  'List Internship Periods': 200, 'Get unknown Internship Period': 404,",
+          "  'Create Internship Period': 201, 'Delete Internship Period': 204,",
+          "  'Upload Attachment': 201, 'Download Attachment': 200, 'Delete Attachment': 204",
+          "};",
+          "pm.variables.set('expected_status', expected[pm.info.requestName] || 200);",
+          "if (pm.info.requestName === 'Register') {",
+          "  pm.environment.set('register_email', `student-${Date.now()}@example.test`);",
+          "  if (!pm.environment.get('register_password')) pm.environment.set('register_password', `Auto_Test_${Date.now()}`);",
+          "  if (!pm.environment.get('register_full_name')) pm.environment.set('register_full_name', 'Postman Test Student');",
+          "}",
+          "if (pm.info.requestName === 'Register password over bcrypt limit') pm.environment.set('long_password', 'L'.repeat(73));",
+          "if (pm.info.requestName === 'Change Password' && !pm.environment.get('new_password')) {",
+          "  pm.environment.set('new_password', `Changed_Test_${Date.now()}`);",
+          "}",
+          "if (pm.info.requestName === 'Change Password') pm.environment.set('old_password', pm.environment.get('login_password'));"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const expected = Number(pm.variables.get('expected_status') || 200);",
+          "const name = pm.info.requestName;",
+          "pm.test(`HTTP ${expected}`, () => pm.response.to.have.status(expected));",
+          "const contentType = pm.response.headers.get('Content-Type') || '';",
+          "if (expected === 204) {",
+          "  pm.test('204 has no response body', () => pm.expect(pm.response.text()).to.eql(''));",
+          "} else if (contentType.includes('application/json')) {",
+          "  const body = pm.response.json();",
+          "  pm.test('Standard response envelope', () => {",
+          "    pm.expect(body).to.have.keys('success', 'message', 'data', 'errors');",
+          "    pm.expect(body.message).to.be.a('string');",
+          "    if (expected < 400) {",
+          "      pm.expect(body.success).to.eql(true);",
+          "      pm.expect(body.errors).to.eql(null);",
+          "    } else {",
+          "      pm.expect(body.success).to.eql(false);",
+          "      pm.expect(body.data).to.eql(null);",
+          "      pm.expect(body.errors).to.be.an('array');",
+          "    }",
+          "  });",
+          "  if (expected < 400 && body.data && body.data.access_token) {",
+          "    pm.environment.set('access_token', body.data.access_token);",
+          "    const roleKey = `${body.data.user.role.toLowerCase()}_token`;",
+          "    pm.environment.set(roleKey, body.data.access_token);",
+          "  }",
+          "  if (name === 'Register' && expected === 201) {",
+          "    pm.environment.set('login_email', body.data.email);",
+          "    pm.environment.set('login_password', pm.environment.get('register_password'));",
+          "  }",
+          "  if (name === 'Change Password' && expected === 200) {",
+          "    pm.environment.set('login_password', pm.environment.get('new_password'));",
+          "  }",
+          "  if (name === 'Create Student' || name === 'Create Supervisor') pm.environment.set('user_id', body.data.id);",
+          "  if (name === 'Create Internship Period') pm.environment.set('internship_period_id', body.data.id);",
+          "  if (name === 'Upload Attachment') pm.environment.set('attachment_id', body.data.id);",
+          "} else if (expected < 400) {",
+          "  pm.test('Binary response has a download filename', () => pm.expect(pm.response.headers.get('Content-Disposition') || '').to.include('filename='));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{student_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{register_email}}\",\n  \"password\": \"{{register_password}}\",\n  \"full_name\": \"{{register_full_name}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Register invalid email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"not-an-email\",\"password\":\"Valid_Test_123\",\"full_name\":\"Invalid Email\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Register duplicate email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{register_email}}\",\"password\":\"{{register_password}}\",\"full_name\":\"Duplicate\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Register missing fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"missing@example.test\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Register invalid password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"short-password@example.test\",\"password\":\"short\",\"full_name\":\"Short Password\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Register password over bcrypt limit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"long-password@example.test\",\"password\":\"{{long_password}}\",\"full_name\":\"Long Password\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Register wrong type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":17,\"password\":\"Valid_Test_123\",\"full_name\":\"Wrong Type\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Register forged role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"role-spoof@example.test\",\"password\":\"Valid_Test_123\",\"full_name\":\"Role Spoof\",\"role\":\"ADMIN\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{login_email}}\",\"password\":\"{{login_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Login wrong email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"unknown@example.test\",\"password\":\"{{login_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Login wrong password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{login_email}}\",\"password\":\"Wrong_Test_Password\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Login invalid email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"invalid\",\"password\":\"{{login_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Login missing password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{login_email}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Login inactive account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{inactive_email}}\",\"password\":\"{{inactive_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Login as Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{admin_email}}\",\"password\":\"{{admin_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Login as Supervisor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{supervisor_email}}\",\"password\":\"{{supervisor_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          },
+          "auth": {
+            "type": "noauth"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me"
+          }
+        },
+        {
+          "name": "Get Current User no token",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get Current User malformed token",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "not.a.jwt",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Current User expired token",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{expired_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Current User deleted account",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{deleted_user_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Current User inactive account",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{inactive_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Password wrong current",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\":\"Wrong_Current_123\",\"new_password\":\"{{new_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/change-password"
+          }
+        },
+        {
+          "name": "Change Password invalid new password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\":\"{{login_password}}\",\"new_password\":\"short\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/change-password"
+          }
+        },
+        {
+          "name": "Change Password confirmation field",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\":\"{{login_password}}\",\"new_password\":\"{{new_password}}\",\"confirm_password\":\"different\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/change-password"
+          }
+        },
+        {
+          "name": "Change Password no token",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\":\"{{login_password}}\",\"new_password\":\"{{new_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/change-password",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Change Password invalid token",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\":\"{{login_password}}\",\"new_password\":\"{{new_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/change-password",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "not.a.jwt",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Password inactive account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\":\"{{inactive_password}}\",\"new_password\":\"{{new_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/change-password",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{inactive_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\":\"{{login_password}}\",\"new_password\":\"{{new_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/change-password"
+          }
+        },
+        {
+          "name": "Login with old password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{login_email}}\",\"password\":\"{{old_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Login with new password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{login_email}}\",\"password\":\"{{login_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{admin_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users?skip=0&limit=100"
+          }
+        },
+        {
+          "name": "List Users as Student",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users/{{user_id}}"
+          }
+        },
+        {
+          "name": "Get unknown User",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users/999999999"
+          }
+        },
+        {
+          "name": "Create Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{create_user_email}}\",\"password\":\"{{create_user_password}}\",\"full_name\":\"{{create_user_name}}\",\"role\":\"STUDENT\",\"student_profile\":{\"student_code\":\"{{student_code}}\"}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "Create Supervisor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{create_user_email}}\",\"password\":\"{{create_user_password}}\",\"full_name\":\"{{create_user_name}}\",\"role\":\"SUPERVISOR\",\"lecturer_profile\":{\"lecturer_code\":\"{{lecturer_code}}\"}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"full_name\":\"{{updated_user_name}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/users/{{user_id}}"
+          }
+        },
+        {
+          "name": "Update User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"is_active\":false}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/users/{{user_id}}/status"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/users/{{user_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Internship Periods",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "List Internship Periods",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/internship-periods"
+          }
+        },
+        {
+          "name": "Get Internship Period",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/internship-periods/{{internship_period_id}}"
+          }
+        },
+        {
+          "name": "Get unknown Internship Period",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/internship-periods/999999999"
+          }
+        },
+        {
+          "name": "Create Internship Period",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"{{period_name}}\",\"description\":\"Postman test period\",\"start_date\":\"{{period_start_date}}\",\"end_date\":\"{{period_end_date}}\",\"status\":\"UPCOMING\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/internship-periods"
+          }
+        },
+        {
+          "name": "Update Internship Period",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"{{period_name}}\",\"description\":\"Updated by Postman\",\"start_date\":\"{{period_start_date}}\",\"end_date\":\"{{period_end_date}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/internship-periods/{{internship_period_id}}"
+          }
+        },
+        {
+          "name": "Update Internship Period Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"ACTIVE\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/internship-periods/{{internship_period_id}}/status"
+          }
+        },
+        {
+          "name": "Delete Internship Period",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/internship-periods/{{internship_period_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attachments",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{student_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Upload Attachment",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{upload_file_path}}"
+                },
+                {
+                  "key": "task_id",
+                  "value": "{{task_id}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{base_url}}/attachments/upload"
+          }
+        },
+        {
+          "name": "Download Attachment",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/attachments/{{attachment_id}}"
+          }
+        },
+        {
+          "name": "Delete Attachment",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/attachments/{{attachment_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}
