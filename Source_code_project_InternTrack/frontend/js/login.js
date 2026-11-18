@@ -143,7 +143,8 @@ loginForm.addEventListener("submit", async (event) => {
 
   try {
     const remember = new FormData(loginForm).get("remember") === "on";
-    const user = await login(emailInput.value.trim(), passwordInput.value, remember);
+    await login(emailInput.value.trim(), passwordInput.value, remember);
+    const user = await getCurrentUser();
     navigateByRole(user.role);
   } catch (error) {
     showLoginError(error);
