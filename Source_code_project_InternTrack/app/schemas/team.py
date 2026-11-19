@@ -49,3 +49,45 @@ class TeamResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TeamMemberAdd(BaseModel):
+    student_id: int = Field(gt=0)
+
+
+class TeamMemberResponse(BaseModel):
+    id: int
+    team_id: int
+    student_id: int
+    is_leader: bool
+    joined_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TeamLeaderUpdate(BaseModel):
+    student_id: int | None = Field(default=None, gt=0)
+    leader_id: int | None = Field(default=None, gt=0)
+
+    @model_validator(mode="after")
+    def validate_student(self):
+        if self.student_id is None and self.leader_id is None:
+            raise ValueError("student_id or leader_id is required.")
+        if self.student_id is not None and self.leader_id is not None:
+            if self.student_id != self.leader_id:
+                raise ValueError("student_id and leader_id must match.")
+        return self
+
+
+class TeamSupervisorUpdate(BaseModel):
+    supervisor_id: int | None = Field(default=None, gt=0)
+    lecturer_id: int | None = Field(default=None, gt=0)
+
+    @model_validator(mode="after")
+    def validate_supervisor(self):
+        if self.supervisor_id is None and self.lecturer_id is None:
+            raise ValueError("supervisor_id or lecturer_id is required.")
+        if self.supervisor_id is not None and self.lecturer_id is not None:
+            if self.supervisor_id != self.lecturer_id:
+                raise ValueError("supervisor_id and lecturer_id must match.")
+        return self
