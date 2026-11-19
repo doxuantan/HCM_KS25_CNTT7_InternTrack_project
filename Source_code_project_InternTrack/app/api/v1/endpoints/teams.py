@@ -5,7 +5,15 @@ from app.db.database import get_db
 from app.dependencies.auth import get_current_user
 from app.dependencies.permissions import require_role
 from app.models.user import User, UserRole
-from app.schemas.team import TeamCreate, TeamResponse, TeamUpdate
+from app.schemas.team import (
+    TeamCreate,
+    TeamLeaderUpdate,
+    TeamMemberAdd,
+    TeamMemberResponse,
+    TeamResponse,
+    TeamSupervisorUpdate,
+    TeamUpdate,
+)
 from app.services import team_service
 
 
@@ -59,3 +67,67 @@ def update_team(
     current_user: User = Depends(get_current_user),
 ) -> TeamResponse:
     return team_service.update_team(db, team_id, data, current_user)
+
+
+@router.post(
+    "/{team_id}/members",
+    response_model=TeamMemberResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def add_team_member(
+    team_id: int,
+    data: TeamMemberAdd,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TeamMemberResponse:
+    return team_service.add_team_member(db, team_id, data, current_user)
+
+
+@router.delete("/{team_id}/members/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_team_member(
+    team_id: int,
+    student_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    team_service.remove_team_member(db, team_id, student_id, current_user)
+
+
+@router.patch("/{team_id}/leader", response_model=TeamMemberResponse)
+def change_team_leader(
+    team_id: int,
+    data: TeamLeaderUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TeamMemberResponse:
+    return team_service.change_team_leader(db, team_id, data, current_user)
+
+
+@router.put("/{team_id}/leader", response_model=TeamMemberResponse)
+def replace_team_leader(
+    team_id: int,
+    data: TeamLeaderUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TeamMemberResponse:
+    return team_service.change_team_leader(db, team_id, data, current_user)
+
+
+@router.patch("/{team_id}/supervisor", response_model=TeamResponse)
+def change_team_supervisor(
+    team_id: int,
+    data: TeamSupervisorUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TeamResponse:
+    return team_service.change_team_supervisor(db, team_id, data, current_user)
+
+
+@router.put("/{team_id}/supervisor", response_model=TeamResponse)
+def replace_team_supervisor(
+    team_id: int,
+    data: TeamSupervisorUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TeamResponse:
+    return team_service.change_team_supervisor(db, team_id, data, current_user)

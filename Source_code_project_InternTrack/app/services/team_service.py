@@ -9,7 +9,13 @@ from app.models.student import Student
 from app.models.team import Team
 from app.models.team_member import TeamMember
 from app.models.user import User, UserRole
-from app.schemas.team import TeamCreate, TeamUpdate
+from app.schemas.team import (
+    TeamCreate,
+    TeamLeaderUpdate,
+    TeamMemberAdd,
+    TeamSupervisorUpdate,
+    TeamUpdate,
+)
 
 
 def _lecturer_id(db: Session, user: User) -> int | None:
@@ -163,6 +169,212 @@ def update_team(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Mã nhóm đã tồn tại hoặc dữ liệu liên kết không hợp lệ.",
+        ) from None
+    db.refresh(team)
+    return team
+
+
+def _require_team_member_manager(db: Session, team: Team, user: User) -> None:
+    if user.role == UserRole.ADMIN:
+        return
+    if user.role != UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Chỉ quản trị viên hoặc nhóm trưởng được quản lý thành viên.",
+        )
+    student_id = _student_id(db, user)
+    membership = db.scalar(
+        select(TeamMember).where(
+            TeamMember.team_id == team.id,
+            TeamMember.student_id == student_id,
+            TeamMember.is_leader.is_(True),
+        )
+    )
+    if membership is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Chỉ quản trị viên hoặc nhóm trưởng được quản lý thành viên.",
+        )
+
+
+def _ensure_student_not_in_period(
+    db: Session,
+    student_id: int,
+    period_id: int,
+    *,
+    exclude_team_id: int | None = None,
+) -> None:
+    statement = (
+        select(TeamMember.id)
+        .join(Team, TeamMember.team_id == Team.id)
+        .where(
+            TeamMember.student_id == student_id,
+            Team.period_id == period_id,
+        )
+    )
+    if exclude_team_id is not None:
+        statement = statement.where(Team.id != exclude_team_id)
+    if db.scalar(statement) is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Sinh viên đã tham gia một nhóm khác trong cùng kỳ thực tập (BR05).",
+        )
+
+
+def add_team_member(
+    db: Session,
+    team_id: int,
+    data: TeamMemberAdd,
+    user: User,
+) -> TeamMember:
+    team = get_team(db, team_id, user)
+    _require_team_member_manager(db, team, user)
+    if db.get(Student, data.student_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Không tìm thấy sinh viên.",
+        )
+    existing = db.scalar(
+        select(TeamMember).where(
+            TeamMember.team_id == team_id,
+            TeamMember.student_id == data.student_id,
+        )
+    )
+    if existing is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Sinh viên đã là thành viên của nhóm này.",
+        )
+    _ensure_student_not_in_period(db, data.student_id, team.period_id)
+
+    member = TeamMember(team_id=team_id, student_id=data.student_id, is_leader=False)
+    db.add(member)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể thêm sinh viên; dữ liệu thành viên không hợp lệ.",
+        ) from None
+    db.refresh(member)
+    return member
+
+
+def remove_team_member(
+    db: Session,
+    team_id: int,
+    student_id: int,
+    user: User,
+) -> None:
+    team = get_team(db, team_id, user)
+    _require_team_member_manager(db, team, user)
+    member = db.scalar(
+        select(TeamMember).where(
+            TeamMember.team_id == team_id,
+            TeamMember.student_id == student_id,
+        )
+    )
+    if member is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Không tìm thấy thành viên trong nhóm.",
+        )
+    if member.is_leader:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể xóa nhóm trưởng; hãy thay đổi nhóm trưởng trước.",
+        )
+    db.delete(member)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể xóa thành viên khỏi nhóm.",
+        ) from None
+
+
+def change_team_leader(
+    db: Session,
+    team_id: int,
+    data: TeamLeaderUpdate,
+    user: User,
+) -> TeamMember:
+    if user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Chỉ quản trị viên được thay đổi nhóm trưởng.",
+        )
+    team = get_team(db, team_id, user)
+    student_id = data.student_id if data.student_id is not None else data.leader_id
+    if student_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="student_id là bắt buộc.",
+        )
+    member = db.scalar(
+        select(TeamMember).where(
+            TeamMember.team_id == team_id,
+            TeamMember.student_id == student_id,
+        )
+    )
+    if member is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Sinh viên không phải thành viên của nhóm.",
+        )
+
+    for current in db.scalars(select(TeamMember).where(TeamMember.team_id == team_id)):
+        current.is_leader = current.id == member.id
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể cập nhật nhóm trưởng.",
+        ) from None
+    db.refresh(member)
+    return member
+
+
+def change_team_supervisor(
+    db: Session,
+    team_id: int,
+    data: TeamSupervisorUpdate,
+    user: User,
+) -> Team:
+    if user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Chỉ quản trị viên được thay đổi giảng viên hướng dẫn.",
+        )
+    team = get_team(db, team_id, user)
+    supervisor_id = (
+        data.supervisor_id
+        if data.supervisor_id is not None
+        else data.lecturer_id
+    )
+    if supervisor_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="supervisor_id là bắt buộc.",
+        )
+    if db.get(Lecturer, supervisor_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Không tìm thấy giảng viên hướng dẫn.",
+        )
+    team.supervisor_id = supervisor_id
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể cập nhật giảng viên hướng dẫn.",
         ) from None
     db.refresh(team)
     return team

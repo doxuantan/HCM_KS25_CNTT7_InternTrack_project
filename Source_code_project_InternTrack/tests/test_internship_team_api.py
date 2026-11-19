@@ -99,6 +99,9 @@ class InternshipAndTeamApiTests(unittest.TestCase):
             self.team_id = self.team.id
             self.other_team_id = self.other_team.id
             self.lecturer_id = self.lecturer.id
+            self.other_lecturer_id = self.other_lecturer.id
+            self.student_profile_id = self.student_profile.id
+            self.outsider_profile_id = self.outsider_profile.id
 
         self.tokens = {
             "admin": self._token(self.admin_id),
@@ -317,6 +320,63 @@ class InternshipAndTeamApiTests(unittest.TestCase):
             admin_updated.json()["data"]["team_name"],
             "Admin updated team",
         )
+
+    def test_team_member_leader_and_supervisor_management(self) -> None:
+        change_leader = self.client.patch(
+            f"/api/v1/teams/{self.team_id}/leader",
+            json={"student_id": self.student_profile_id},
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(change_leader.status_code, 200, change_leader.text)
+        self.assertTrue(change_leader.json()["data"]["is_leader"])
+
+        denied_leader_change = self.client.patch(
+            f"/api/v1/teams/{self.team_id}/leader",
+            json={"student_id": self.outsider_profile_id},
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(denied_leader_change.status_code, 403, denied_leader_change.text)
+
+        add_member = self.client.post(
+            f"/api/v1/teams/{self.team_id}/members",
+            json={"student_id": self.outsider_profile_id},
+            headers=self._auth("student"),
+        )
+        self.assertEqual(add_member.status_code, 201, add_member.text)
+
+        br05 = self.client.post(
+            f"/api/v1/teams/{self.other_team_id}/members",
+            json={"student_id": self.outsider_profile_id},
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(br05.status_code, 409, br05.text)
+        self.assertIn("BR05", br05.json()["message"])
+
+        remove_member = self.client.delete(
+            f"/api/v1/teams/{self.team_id}/members/{self.outsider_profile_id}",
+            headers=self._auth("student"),
+        )
+        self.assertEqual(remove_member.status_code, 204, remove_member.text)
+
+        remove_leader = self.client.delete(
+            f"/api/v1/teams/{self.team_id}/members/{self.student_profile_id}",
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(remove_leader.status_code, 409, remove_leader.text)
+
+        change_supervisor = self.client.patch(
+            f"/api/v1/teams/{self.team_id}/supervisor",
+            json={"supervisor_id": self.other_lecturer_id},
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(change_supervisor.status_code, 200, change_supervisor.text)
+
+        invalid_supervisor = self.client.patch(
+            f"/api/v1/teams/{self.team_id}/supervisor",
+            json={"supervisor_id": 9999},
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(invalid_supervisor.status_code, 404, invalid_supervisor.text)
 
     def test_team_validation_and_not_found(self) -> None:
         missing_reference = self.client.post(
