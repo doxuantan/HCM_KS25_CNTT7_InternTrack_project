@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101a2b">
+    <meta name="description" content="Thông tin nhóm thực tập của sinh viên InterTrack.">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Nhóm thực tập | InterTrack</title>
+    <link rel="icon" type="image/svg+xml" href="../logo.svg">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/student-team.css">
+    <script type="module" src="../js/app.js"></script>
+  </head>
+  <body
+    class="student-dashboard student-team-page"
+    data-allowed-roles="STUDENT"
+    data-dashboard="student-team"
+    data-app-root="../"
+  >
+    <div class="app-shell" id="overview">
+      <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+      <aside class="sidebar" id="app-sidebar" data-component="sidebar" aria-label="Điều hướng chính"></aside>
+
+      <div class="app-main">
+        <header class="topbar" data-component="header"></header>
+
+        <main class="content" id="main-content" tabindex="-1" aria-busy="true">
+          <div class="page-heading student-page-heading">
+            <div>
+              <p class="eyebrow">Không gian sinh viên</p>
+              <h1>Nhóm thực tập của <span data-student-name>sinh viên</span></h1>
+              <p class="page-description">Thông tin nhóm, thành viên và giảng viên hướng dẫn.</p>
+            </div>
+          </div>
+
+          <section class="student-team-list" data-team-list aria-live="polite" aria-busy="true">
+            <p class="student-team-state" data-team-state role="status">Đang tải thông tin nhóm...</p>
+          </section>
+        </main>
+
+        <footer class="footer" data-component="footer"></footer>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,107 @@
+.student-team-page .student-team-list {
+  display: grid;
+  gap: 20px;
+}
+
+.student-team-page .student-team-card {
+  padding: 22px;
+}
+
+.student-team-page .student-team-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.student-team-page .student-team-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 19px;
+}
+
+.student-team-page .student-team-heading .muted {
+  margin: 6px 0 0;
+}
+
+.student-team-page .student-team-badge {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f5f1;
+  color: #267c67;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.student-team-page .student-team-description {
+  margin: 18px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.student-team-page .student-team-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 24px;
+  margin: 22px 0;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.student-team-page .student-team-details > div {
+  min-width: 0;
+}
+
+.student-team-page .student-team-details dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.student-team-page .student-team-details dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-team-page .student-team-members-heading {
+  margin: 0 0 12px;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.student-team-page .student-team-table {
+  min-width: 600px;
+}
+
+.student-team-page .student-team-state {
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--muted);
+}
+
+.student-team-page .student-team-state[data-state="error"] {
+  border-color: #efcaca;
+  background: #fff7f7;
+  color: #a93232;
+}
+
+@media (max-width: 640px) {
+  .student-team-page .student-team-card {
+    padding: 17px;
+  }
+
+  .student-team-page .student-team-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .student-team-page .student-team-heading {
+    flex-direction: column;
+  }
+}
