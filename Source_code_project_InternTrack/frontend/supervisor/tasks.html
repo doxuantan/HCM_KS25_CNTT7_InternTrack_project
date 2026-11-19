@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Quản lý công việc | InterTrack</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <script type="module" src="../js/tasks.js"></script>
+  </head>
+  <body class="admin-dashboard" data-allowed-roles="SUPERVISOR,ADMIN" data-supervisor-tasks-page>
+    <main class="standalone-admin-main" id="main-content" aria-busy="true">
+      <div class="standalone-admin-heading">
+        <div><p class="eyebrow">Quản lý thực tập</p><h1>Công việc nhóm</h1></div>
+        <a class="button button-secondary" href="../admin.html">Quay về quản trị</a>
+      </div>
+      <section class="panel admin-panel">
+        <div class="admin-toolbar">
+          <div class="admin-filter"><label for="supervisor-task-status">Trạng thái</label><select class="form-control" id="supervisor-task-status" data-supervisor-task-status><option value="">Tất cả</option><option value="TODO">Chưa bắt đầu</option><option value="IN_PROGRESS">Đang thực hiện</option><option value="REVIEW">Chờ duyệt</option><option value="DONE">Hoàn thành</option><option value="CANCELLED">Đã hủy</option></select></div>
+          <div class="admin-filter"><label for="supervisor-task-priority">Ưu tiên</label><select class="form-control" id="supervisor-task-priority" data-supervisor-task-priority><option value="">Tất cả</option><option value="LOW">Thấp</option><option value="MEDIUM">Trung bình</option><option value="HIGH">Cao</option></select></div>
+          <button class="button button-primary" type="button" data-create-task>Tạo công việc</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table admin-table">
+            <thead><tr><th>Tên công việc</th><th>Người được giao</th><th>Trạng thái</th><th>Ưu tiên</th><th>Deadline</th><th>Thao tác</th></tr></thead>
+            <tbody data-supervisor-task-rows><tr><td class="admin-table-state" colspan="6">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <dialog class="modal admin-dialog" data-task-dialog>
+      <form class="admin-dialog-form" data-task-form>
+        <div class="modal-header"><div><h2 class="modal-title" data-task-dialog-title>Tạo công việc</h2></div><button class="modal-close" type="button" data-close-task-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body admin-form-grid">
+          <label class="form-field" for="task-team"><span class="form-label">Nhóm</span><select class="form-control" id="task-team" name="team_id" required></select></label>
+          <label class="form-field" for="task-title"><span class="form-label">Tên công việc</span><input class="form-control" id="task-title" name="title" maxlength="200" required></label>
+          <label class="form-field" for="task-type"><span class="form-label">Loại công việc</span><select class="form-control" id="task-type" name="task_type" required><option value="TEAM">Nhóm</option><option value="PERSONAL">Cá nhân</option></select></label>
+          <label class="form-field" for="task-priority"><span class="form-label">Ưu tiên</span><select class="form-control" id="task-priority" name="priority" required><option value="LOW">Thấp</option><option value="MEDIUM" selected>Trung bình</option><option value="HIGH">Cao</option></select></label>
+          <label class="form-field" for="task-assignee"><span class="form-label">Người được giao (tùy chọn)</span><select class="form-control" id="task-assignee" name="student_id"><option value="">Chưa giao</option></select></label>
+          <label class="form-field" for="task-start-date"><span class="form-label">Ngày bắt đầu</span><input class="form-control" id="task-start-date" name="start_date" type="date" required></label>
+          <label class="form-field" for="task-deadline"><span class="form-label">Deadline</span><input class="form-control" id="task-deadline" name="deadline" type="datetime-local" required></label>
+          <label class="form-field admin-form-wide" for="task-description"><span class="form-label">Mô tả</span><textarea class="form-control" id="task-description" name="description"></textarea></label>
+          <p class="admin-form-message admin-form-wide" data-task-form-message role="alert" hidden></p>
+        </div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-task-dialog>Hủy</button><button class="button button-primary" type="submit">Tạo công việc</button></div>
+      </form>
+    </dialog>
+    <dialog class="modal admin-dialog" data-task-status-dialog>
+      <form class="admin-dialog-form" data-task-status-form>
+        <div class="modal-header"><div><h2 class="modal-title">Cập nhật trạng thái</h2></div><button class="modal-close" type="button" data-close-task-status-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body"><label class="form-field" for="task-status"><span class="form-label">Trạng thái</span><select class="form-control" id="task-status" name="status" required><option value="TODO">Chưa bắt đầu</option><option value="IN_PROGRESS">Đang thực hiện</option><option value="REVIEW">Chờ duyệt</option><option value="DONE">Hoàn thành</option><option value="CANCELLED">Đã hủy</option></select></label></div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-task-status-dialog>Hủy</button><button class="button button-primary" type="submit">Cập nhật</button></div>
+      </form>
+    </dialog>
+  </body>
+</html>

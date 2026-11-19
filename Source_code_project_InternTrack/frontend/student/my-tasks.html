@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Công việc của tôi | InterTrack</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/student-dashboard.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <script type="module" src="../js/tasks.js"></script>
+  </head>
+  <body class="student-dashboard" data-allowed-roles="STUDENT" data-my-tasks-page>
+    <main class="content" id="main-content" aria-busy="true">
+      <div class="page-heading student-page-heading">
+        <div><p class="eyebrow">Không gian sinh viên</p><h1>Công việc của tôi</h1></div>
+        <a class="button button-secondary" href="../index.html">Về bảng điều khiển</a>
+      </div>
+      <section class="panel student-tasks-panel">
+        <div class="panel-heading student-panel-heading">
+          <div><h2>Danh sách công việc được giao</h2></div>
+          <div class="admin-toolbar" style="margin:0">
+            <div class="admin-filter"><label for="student-task-status">Trạng thái</label><select class="form-control" id="student-task-status" data-student-task-status><option value="">Tất cả</option><option value="TODO">Chưa bắt đầu</option><option value="IN_PROGRESS">Đang thực hiện</option><option value="REVIEW">Chờ duyệt</option><option value="DONE">Hoàn thành</option><option value="CANCELLED">Đã hủy</option></select></div>
+            <div class="admin-filter"><label for="student-task-priority">Ưu tiên</label><select class="form-control" id="student-task-priority" data-student-task-priority><option value="">Tất cả</option><option value="LOW">Thấp</option><option value="MEDIUM">Trung bình</option><option value="HIGH">Cao</option></select></div>
+          </div>
+        </div>
+        <div class="table-scroll student-table-scroll">
+          <table class="data-table student-task-table">
+            <thead><tr><th>STT</th><th>Tên công việc</th><th>Hạn hoàn thành</th><th>Ưu tiên</th><th>Trạng thái</th><th>Tiến độ</th></tr></thead>
+            <tbody data-task-rows aria-busy="true"><tr><td class="student-state-cell" colspan="6"><div class="student-state" data-task-state role="status">Đang tải công việc...</div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

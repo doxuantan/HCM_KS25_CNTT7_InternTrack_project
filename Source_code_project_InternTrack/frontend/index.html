@@ -105,6 +105,10 @@
                     <h2 id="tasks-heading">Công việc của tôi</h2>
                     <p class="muted">Các trạng thái khác TODO, IN_PROGRESS và DONE không tính vào thống kê.</p>
                   </div>
+                  <div class="admin-toolbar" style="margin:0">
+                    <div class="admin-filter"><label for="student-task-status">Trạng thái</label><select class="form-control" id="student-task-status" data-student-task-status><option value="">Tất cả</option><option value="TODO">Chưa bắt đầu</option><option value="IN_PROGRESS">Đang thực hiện</option><option value="REVIEW">Chờ duyệt</option><option value="DONE">Hoàn thành</option><option value="CANCELLED">Đã hủy</option></select></div>
+                    <div class="admin-filter"><label for="student-task-priority">Ưu tiên</label><select class="form-control" id="student-task-priority" data-student-task-priority><option value="">Tất cả</option><option value="LOW">Thấp</option><option value="MEDIUM">Trung bình</option><option value="HIGH">Cao</option></select></div>
+                  </div>
                 </div>
                 <div class="table-scroll student-table-scroll">
                   <table class="data-table student-task-table">
