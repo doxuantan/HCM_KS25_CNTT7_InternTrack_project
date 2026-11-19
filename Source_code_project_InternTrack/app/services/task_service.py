@@ -5,10 +5,13 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.models.task_comment import TaskComment
+from app.models.task_history import TaskHistory
+
 from app.models.lecturer import Lecturer
 from app.models.student import Student
 from app.models.task import Task, TaskStatus
-from app.models.task_assignment import TaskAssignment
+from app.models.task_assignment import TaskAssignment, AssignmentStatus
 from app.models.team import Team
 from app.models.team_member import TeamMember
 from app.models.user import User, UserRole
@@ -17,6 +20,8 @@ from app.schemas.task import (
     TaskCreate,
     TaskProgressUpdate,
     TaskStatusUpdate,
+    TaskCommentCreate,
+    TaskCommentResponse,
 )
 
 
@@ -173,33 +178,83 @@ def update_task_status(
     user: User,
 ) -> Task:
     task = _get_task(db, task_id)
+
+    old_status = task.status
+    new_status = data.status
+
+    # Sinh viên chỉ được cập nhật nhiệm vụ được giao
     if user.role == UserRole.STUDENT:
         student_id = db.scalar(
             select(Student.id).where(Student.user_id == user.id)
         )
-        is_assigned = student_id is not None and db.scalar(
-            select(TaskAssignment.id).where(
-                TaskAssignment.task_id == task.id,
-                TaskAssignment.student_id == student_id,
+
+        assignment = None
+
+        if student_id is not None:
+            assignment = db.scalar(
+                select(TaskAssignment).where(
+                    TaskAssignment.task_id == task.id,
+                    TaskAssignment.student_id == student_id,
+                )
             )
-        )
-        if not is_assigned:
+
+        if assignment is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Bạn không được giao nhiệm vụ này.",
             )
+
+        # Sinh viên chỉ được bắt đầu hoặc gửi duyệt
+        allowed_transitions = {
+            TaskStatus.TODO: TaskStatus.IN_PROGRESS,
+            TaskStatus.IN_PROGRESS: TaskStatus.REVIEW,
+        }
+
+        if allowed_transitions.get(old_status) != new_status:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Sinh viên chỉ được chuyển TODO sang IN_PROGRESS "
+                       "hoặc IN_PROGRESS sang REVIEW.",
+            )
+
     else:
+        # Chỉ người quản lý nhóm hoặc ADMIN được duyệt hoàn thành
         _assert_task_manager(db, task, user)
 
-    if task.status != TaskStatus.TODO or data.status != TaskStatus.DONE:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Chỉ cho phép chuyển trạng thái từ TODO sang DONE.",
-        )
+        if old_status != TaskStatus.REVIEW or new_status != TaskStatus.DONE:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Người quản lý chỉ được chuyển trạng thái "
+                       "từ REVIEW sang DONE.",
+            )
 
-    task.status = TaskStatus.DONE
+    # Cập nhật trạng thái nhiệm vụ
+    task.status = new_status
+
+    # Đồng bộ trạng thái các bản ghi phân công
+    for assignment in task.assignments:
+        assignment.status = AssignmentStatus(new_status.value)
+
+        if new_status == TaskStatus.DONE:
+            assignment.progress = 100
+
+    # Ghi lịch sử thay đổi trạng thái
+    history = TaskHistory(
+        task_id=task.id,
+        user_id=user.id,
+        old_status=old_status.value,
+        new_status=new_status.value,
+        description=(
+            f"Trạng thái thay đổi từ {old_status.value} "
+            f"sang {new_status.value}"
+        ),
+    )
+
+    db.add(history)
+
     db.commit()
     db.refresh(task)
+
     return task
 
 
@@ -241,3 +296,71 @@ def update_task_progress(
     db.commit()
     db.refresh(assignment)
     return assignment
+
+
+# Task Comment
+def _assert_can_comment(db: Session, task: Task, user: User) -> None:
+    if user.role == UserRole.ADMIN:
+        return
+
+    if user.role == UserRole.STUDENT:
+        student_id = db.scalar(
+            select(Student.id).where(Student.user_id == user.id)
+        )
+
+        is_member = student_id is not None and db.scalar(
+            select(TeamMember.id).where(
+                TeamMember.team_id == task.team_id,
+                TeamMember.student_id == student_id,
+            )
+        )
+
+        if is_member:
+            return
+    else:
+        _assert_task_manager(db, task, user)
+        return
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Bạn không có quyền bình luận nhiệm vụ này.",
+    )
+
+
+def create_task_comment(
+    db: Session,
+    task_id: int,
+    data: TaskCommentCreate,
+    user: User,
+) -> TaskComment:
+    task = _get_task(db, task_id)
+    _assert_can_comment(db, task, user)
+
+    comment = TaskComment(
+        task_id=task.id,
+        user_id=user.id,
+        content=data.content,
+    )
+
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+
+    return comment
+
+
+def get_task_comments(
+    db: Session,
+    task_id: int,
+    user: User,
+) -> list[TaskComment]:
+    task = _get_task(db, task_id)
+    _assert_can_comment(db, task, user)
+
+    return list(
+        db.scalars(
+            select(TaskComment)
+            .where(TaskComment.task_id == task.id)
+            .order_by(TaskComment.created_at.asc(), TaskComment.id.asc())
+        ).all()
+    )

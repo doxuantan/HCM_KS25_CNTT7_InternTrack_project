@@ -11,6 +11,8 @@ from app.schemas.task import (
     TaskProgressUpdate,
     TaskResponse,
     TaskStatusUpdate,
+    TaskCommentCreate,
+    TaskCommentResponse
 )
 from app.services import task_service
 
@@ -35,7 +37,7 @@ def create_task(
     return task_service.create_task(db, data, current_user)
 
 
-@router.put("/{task_id}/assign", response_model=TaskResponse)
+@router.post("/{task_id}/assign", response_model=TaskResponse)
 def assign_task(
     task_id: int,
     data: TaskAssign,
@@ -45,7 +47,7 @@ def assign_task(
     return task_service.assign_task(db, task_id, data, current_user)
 
 
-@router.patch("/{task_id}/status", response_model=TaskResponse)
+@router.put("/{task_id}/status", response_model=TaskResponse)
 def update_task_status(
     task_id: int,
     data: TaskStatusUpdate,
@@ -63,3 +65,34 @@ def update_task_progress(
     current_user: User = Depends(get_current_user),
 ) -> TaskAssignmentResponse:
     return task_service.update_task_progress(db, task_id, data, current_user)
+
+
+#Task Comment
+@router.post(
+    "/{task_id}/comments",
+    response_model=TaskCommentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_task_comment(
+    task_id: int,
+    data: TaskCommentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TaskCommentResponse:
+    return task_service.create_task_comment(
+        db, task_id, data, current_user
+    )
+
+
+@router.get(
+    "/{task_id}/comments",
+    response_model=list[TaskCommentResponse],
+)
+def get_task_comments(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[TaskCommentResponse]:
+    return task_service.get_task_comments(
+        db, task_id, current_user
+    )

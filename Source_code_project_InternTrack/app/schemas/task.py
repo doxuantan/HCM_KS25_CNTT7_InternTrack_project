@@ -72,3 +72,17 @@ class TaskResponse(BaseModel):
     assignments: list[TaskAssignmentResponse]
 
     model_config = ConfigDict(from_attributes=True)
+
+# Task Comment
+class TaskCommentCreate(BaseModel):
+    content: str = Field(min_length=1, max_length=5000)
+
+
+class TaskCommentResponse(BaseModel):
+    id: int
+    task_id: int
+    user_id: int
+    content: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
