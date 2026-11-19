@@ -344,6 +344,13 @@ class InternshipAndTeamApiTests(unittest.TestCase):
         )
         self.assertEqual(add_member.status_code, 201, add_member.text)
 
+        member_list = self.client.get(
+            f"/api/v1/teams/{self.team_id}/members",
+            headers=self._auth("student"),
+        )
+        self.assertEqual(member_list.status_code, 200, member_list.text)
+        self.assertEqual(len(member_list.json()["data"]), 2)
+
         br05 = self.client.post(
             f"/api/v1/teams/{self.other_team_id}/members",
             json={"student_id": self.outsider_profile_id},

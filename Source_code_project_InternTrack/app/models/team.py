@@ -32,3 +32,11 @@ class Team(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+
+    @property
+    def supervisor_name(self) -> str | None:
+        return self.supervisor.user.full_name if self.supervisor and self.supervisor.user else None
+
+    @property
+    def supervisor_code(self) -> str | None:
+        return self.supervisor.lecturer_code if self.supervisor else None

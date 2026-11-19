@@ -296,6 +296,33 @@ def remove_team_member(
         ) from None
 
 
+def list_team_members(db: Session, team_id: int, user: User) -> list[dict]:
+    team = get_team(db, team_id, user)
+    rows = db.execute(
+        select(
+            TeamMember,
+            Student.student_code,
+            User.full_name,
+        )
+        .join(Student, TeamMember.student_id == Student.id)
+        .join(User, Student.user_id == User.id)
+        .where(TeamMember.team_id == team.id)
+        .order_by(TeamMember.is_leader.desc(), User.full_name.asc())
+    ).all()
+    return [
+        {
+            "id": member.id,
+            "team_id": member.team_id,
+            "student_id": member.student_id,
+            "is_leader": member.is_leader,
+            "joined_at": member.joined_at,
+            "student_name": student_name,
+            "student_code": student_code,
+        }
+        for member, student_code, student_name in rows
+    ]
+
+
 def change_team_leader(
     db: Session,
     team_id: int,

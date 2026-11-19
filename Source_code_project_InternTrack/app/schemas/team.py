@@ -42,6 +42,8 @@ class TeamResponse(BaseModel):
     id: int
     period_id: int
     supervisor_id: int
+    supervisor_name: str | None = None
+    supervisor_code: str | None = None
     team_name: str
     team_code: str
     description: str | None
@@ -91,3 +93,15 @@ class TeamSupervisorUpdate(BaseModel):
             if self.supervisor_id != self.lecturer_id:
                 raise ValueError("supervisor_id and lecturer_id must match.")
         return self
+
+
+class TeamMemberDetail(BaseModel):
+    id: int
+    team_id: int
+    student_id: int
+    is_leader: bool
+    joined_at: datetime
+    student_name: str | None = None
+    student_code: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
