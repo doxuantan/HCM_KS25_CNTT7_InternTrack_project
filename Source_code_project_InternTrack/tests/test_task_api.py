@@ -497,6 +497,20 @@ class TaskApiTests(unittest.TestCase):
         )
         self.assertEqual(denied.status_code, 403, denied.text)
 
+    def test_task_is_overdue_cases(self) -> None:
+        past = datetime.now() - timedelta(hours=1)
+        future = datetime.now() + timedelta(hours=1)
+
+        todo_task = Task(deadline=past, status=TaskStatus.TODO)
+        done_task = Task(deadline=past, status=TaskStatus.DONE)
+        cancelled_task = Task(deadline=past, status=TaskStatus.CANCELLED)
+        future_task = Task(deadline=future, status=TaskStatus.TODO)
+
+        self.assertTrue(todo_task.is_overdue)
+        self.assertFalse(done_task.is_overdue)
+        self.assertFalse(cancelled_task.is_overdue)
+        self.assertFalse(future_task.is_overdue)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -64,6 +64,14 @@ class Task(Base):
     @property
     def is_overdue(self) -> bool:
         # Quá hạn: deadline đã qua và chưa DONE/CANCELLED (không có trạng thái OVERDUE riêng)
-        return (self.deadline is not None
-                and self.deadline < datetime.now()
-                and self.status not in (TaskStatus.DONE, TaskStatus.CANCELLED))
+        if self.deadline is None:
+            return False
+
+        deadline = self.deadline
+        if deadline.tzinfo is not None:
+            deadline = deadline.astimezone().replace(tzinfo=None)
+
+        return (
+            deadline < datetime.now()
+            and self.status not in (TaskStatus.DONE, TaskStatus.CANCELLED)
+        )
