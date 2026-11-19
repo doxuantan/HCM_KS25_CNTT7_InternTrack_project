@@ -1,3 +1,4 @@
+import enum
 from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -40,7 +41,17 @@ class TaskStatusUpdate(BaseModel):
 
 
 class TaskProgressUpdate(BaseModel):
-    progress: int = Field(ge=0, le=100)
+    progress: int = Field(strict=True, ge=0, le=100)
+
+
+class TaskReviewStatus(str, enum.Enum):
+    APPROVED = "APPROVED"
+    REVISION_REQUIRED = "REVISION_REQUIRED"
+
+
+class TaskReviewUpdate(BaseModel):
+    status: TaskReviewStatus
+    comment: str | None = Field(default=None, max_length=5000)
 
 
 class TaskAssignmentResponse(BaseModel):
@@ -72,6 +83,21 @@ class TaskResponse(BaseModel):
     assignments: list[TaskAssignmentResponse]
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TaskListResponse(BaseModel):
+    items: list[TaskResponse]
+    total: int
+    page: int
+    limit: int
+    total_pages: int
+
+
+class TaskReviewResponse(BaseModel):
+    message: str
+    status: TaskReviewStatus
+    task: TaskResponse
+
 
 # Task Comment
 class TaskCommentCreate(BaseModel):

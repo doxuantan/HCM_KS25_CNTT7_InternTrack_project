@@ -300,6 +300,11 @@ class TaskApiTests(unittest.TestCase):
         )
         self.assertEqual(invalid.status_code, 409, invalid.text)
 
+        with self.session_factory() as db:
+            task = db.get(Task, task_id)
+            task.status = TaskStatus.REVIEW
+            db.commit()
+
         completed = self.client.patch(
             f"/api/v1/tasks/{task_id}/status",
             json={"status": "DONE"},
@@ -383,6 +388,114 @@ class TaskApiTests(unittest.TestCase):
             self.assertEqual(assignment.progress, 100)
             task = db.get(Task, task_id)
             self.assertEqual(task.status, TaskStatus.TODO)
+
+
+    def test_review_permissions_and_results(self) -> None:
+        task_id = self._create_task()
+        with self.session_factory() as db:
+            task = db.get(Task, task_id)
+            task.status = TaskStatus.REVIEW
+            db.commit()
+
+        denied = self.client.post(
+            f"/api/v1/tasks/{task_id}/review",
+            json={"status": "APPROVED"},
+            headers=self._auth("student"),
+        )
+        self.assertEqual(denied.status_code, 403, denied.text)
+
+        approved = self.client.post(
+            f"/api/v1/tasks/{task_id}/review",
+            json={"status": "APPROVED", "comment": "Dat yeu cau"},
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(approved.status_code, 200, approved.text)
+        approved_data = approved.json()["data"]
+        self.assertEqual(approved_data["status"], "APPROVED")
+        self.assertEqual(approved_data["task"]["status"], "DONE")
+
+        revision_task_id = self._create_task(title="Revision work")
+        with self.session_factory() as db:
+            task = db.get(Task, revision_task_id)
+            task.status = TaskStatus.REVIEW
+            db.commit()
+        revision = self.client.post(
+            f"/api/v1/tasks/{revision_task_id}/review",
+            json={"status": "REVISION_REQUIRED"},
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(revision.status_code, 200, revision.text)
+        self.assertEqual(revision.json()["data"]["task"]["status"], "IN_PROGRESS")
+
+    def test_task_filters_pagination_and_permissions(self) -> None:
+        first_id = self._create_task(title="First")
+        second_id = self._create_task(title="Second")
+        self._assign_student(first_id)
+        self._assign_student(second_id)
+
+        response = self.client.get(
+            "/api/v1/tasks",
+            params={
+                "team": self.team_id,
+                "status": "TODO",
+                "assignee": self.student_profile_id,
+                "page": 1,
+                "limit": 1,
+            },
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        data = response.json()["data"]
+        self.assertEqual(data["total"], 2)
+        self.assertEqual(data["page"], 1)
+        self.assertEqual(data["limit"], 1)
+        self.assertEqual(data["total_pages"], 2)
+        self.assertEqual(len(data["items"]), 1)
+
+        student_response = self.client.get(
+            "/api/v1/tasks",
+            headers=self._auth("student"),
+        )
+        self.assertEqual(student_response.status_code, 200, student_response.text)
+        student_ids = {task["id"] for task in student_response.json()["data"]["items"]}
+        self.assertIn(first_id, student_ids)
+        self.assertIn(second_id, student_ids)
+
+    def test_put_progress_integer_bounds_and_not_found(self) -> None:
+        task_id = self._create_task()
+        self._assign_student(task_id)
+
+        for progress in (0, 100):
+            response = self.client.put(
+                f"/api/v1/tasks/{task_id}/progress",
+                json={"progress": progress},
+                headers=self._auth("student"),
+            )
+            self.assertEqual(response.status_code, 200, response.text)
+            self.assertEqual(response.json()["data"]["progress"], progress)
+
+        for payload in (-1, 101, 12.5, "50"):
+            response = self.client.put(
+                f"/api/v1/tasks/{task_id}/progress",
+                json={"progress": payload},
+                headers=self._auth("student"),
+            )
+            self.assertIn(response.status_code, (422,), response.text)
+
+        missing = self.client.put(
+            "/api/v1/tasks/9999/progress",
+            json={"progress": 50},
+            headers=self._auth("student"),
+        )
+        self.assertEqual(missing.status_code, 404, missing.text)
+
+        outsider = self._create_task(title="Outsider task")
+        denied = self.client.put(
+            f"/api/v1/tasks/{outsider}/progress",
+            json={"progress": 50},
+            headers=self._auth("outsider"),
+        )
+        self.assertEqual(denied.status_code, 403, denied.text)
 
 
 if __name__ == "__main__":
