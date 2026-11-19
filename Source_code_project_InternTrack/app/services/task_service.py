@@ -26,6 +26,7 @@ from app.schemas.task import (
     TaskReviewStatus,
     TaskResponse,
 )
+from app.services.notification_service import notify_task_assigned
 
 
 def _get_task(db: Session, task_id: int) -> Task:
@@ -242,6 +243,12 @@ def assign_task(
         ) from None
 
     db.refresh(task)
+    notify_task_assigned(
+        db,
+        student=student,
+        task_title=task.title,
+        assigned_by=user,
+    )
     return task
 
 
