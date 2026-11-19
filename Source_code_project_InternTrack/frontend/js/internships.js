@@ -9,6 +9,7 @@ const STATUS_LABELS = {
 };
 
 let periods = [];
+let currentUser = null;
 const dialog = document.querySelector("[data-period-dialog]");
 const form = document.querySelector("[data-period-form]");
 
@@ -48,21 +49,28 @@ function render() {
       row.append(cell);
     }
     const statusCell = document.createElement("td");
-    const select = document.createElement("select");
-    select.className = "admin-inline-select";
-    select.dataset.periodStatus = "";
-    select.dataset.periodId = String(period.id);
-    for (const [value, label] of Object.entries(STATUS_LABELS)) {
-      const option = document.createElement("option");
-      option.value = value;
-      option.textContent = label;
-      option.selected = value === period.status;
-      select.append(option);
+    if (currentUser?.role === "ADMIN") {
+      const select = document.createElement("select");
+      select.className = "admin-inline-select";
+      select.dataset.periodStatus = "";
+      select.dataset.periodId = String(period.id);
+      for (const [value, label] of Object.entries(STATUS_LABELS)) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        option.selected = value === period.status;
+        select.append(option);
+      }
+      statusCell.append(select);
+    } else {
+      statusCell.textContent = STATUS_LABELS[period.status] || period.status;
     }
-    statusCell.append(select);
     const actions = document.createElement("td");
     actions.className = "admin-row-actions";
-    for (const [label, action] of [["Sửa", "edit"]]) {
+    for (const [label, action] of [
+      ["Xem", "view"],
+      ...(currentUser?.role === "ADMIN" ? [["Sửa", "edit"]] : []),
+    ]) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "admin-row-action";
@@ -80,6 +88,32 @@ function escapeHtml(value) {
   const node = document.createElement("div");
   node.textContent = String(value);
   return node.innerHTML;
+}
+
+function openPeriodDetail(period) {
+  const detailDialog = document.querySelector("[data-period-detail-dialog]");
+  if (!(detailDialog instanceof HTMLDialogElement)) return;
+  document.querySelector("[data-period-detail-title]").textContent = period.name || "Chi tiết đợt thực tập";
+  const list = document.querySelector("[data-period-detail-list]");
+  const items = [
+    ["ID", period.id],
+    ["Tên đợt", period.name],
+    ["Mô tả", period.description],
+    ["Ngày bắt đầu", formatDate(period.start_date)],
+    ["Ngày kết thúc", formatDate(period.end_date)],
+    ["Hạn nộp báo cáo", period.report_deadline ? formatDate(period.report_deadline) : "—"],
+    ["Trạng thái", STATUS_LABELS[period.status] || period.status],
+  ];
+  list.replaceChildren(...items.map(([label, value]) => {
+    const item = document.createElement("div");
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const detail = document.createElement("dd");
+    detail.textContent = value == null || value === "" ? "—" : String(value);
+    item.append(term, detail);
+    return item;
+  }));
+  detailDialog.showModal();
 }
 
 function openDialog(period = null) {
@@ -144,7 +178,8 @@ document.querySelector("[data-periods-rows]")?.addEventListener("click", (event)
   const button = event.target instanceof Element ? event.target.closest("[data-period-action]") : null;
   if (!(button instanceof HTMLButtonElement)) return;
   const period = periods.find((item) => String(item.id) === button.dataset.periodId);
-  if (period) openDialog(period);
+  if (period && button.dataset.periodAction === "view") openPeriodDetail(period);
+  if (period && button.dataset.periodAction === "edit") openDialog(period);
 });
 document.querySelector("[data-periods-rows]")?.addEventListener("change", async (event) => {
   const select = event.target;
@@ -164,7 +199,13 @@ document.querySelector("[data-periods-rows]")?.addEventListener("change", async 
 document.querySelectorAll("[data-close-dialog]").forEach((button) => {
   button.addEventListener("click", () => dialog?.close());
 });
+document.querySelectorAll("[data-close-period-detail]").forEach((button) => {
+  button.addEventListener("click", () => document.querySelector("[data-period-detail-dialog]")?.close());
+});
 
-await requireAuth();
+currentUser = await requireAuth();
+if (currentUser?.role !== "ADMIN") {
+  document.querySelector("[data-create-period]")?.setAttribute("hidden", "");
+}
 await initializeSharedUi();
 await load();

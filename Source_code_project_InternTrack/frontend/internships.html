@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/theme.css">
     <script type="module" src="js/internships.js"></script>
   </head>
-  <body class="admin-dashboard" data-allowed-roles="ADMIN">
+  <body class="admin-dashboard" data-allowed-roles="ADMIN,SUPERVISOR,STUDENT">
     <main class="standalone-admin-main" id="main-content" tabindex="-1" aria-busy="true">
       <div class="standalone-admin-heading">
         <div>
@@ -60,6 +60,15 @@
         </div>
         <div class="modal-footer"><button class="button button-secondary" type="button" data-close-dialog>Hủy</button><button class="button button-primary" type="submit">Lưu kỳ thực tập</button></div>
       </form>
+    </dialog>
+
+    <dialog class="modal admin-dialog" data-period-detail-dialog>
+      <div class="modal-header">
+        <div><h2 class="modal-title" data-period-detail-title>Chi tiết đợt thực tập</h2></div>
+        <button class="modal-close" type="button" data-close-period-detail aria-label="Đóng">×</button>
+      </div>
+      <div class="modal-body"><dl class="admin-detail-list" data-period-detail-list></dl></div>
+      <div class="modal-footer"><button class="button button-secondary" type="button" data-close-period-detail>Đóng</button></div>
     </dialog>
   </body>
 </html>
