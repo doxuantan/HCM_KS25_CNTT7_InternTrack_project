@@ -6,7 +6,7 @@ from app.db.database import get_db
 from app.dependencies.auth import get_current_user
 from app.dependencies.permissions import require_role
 from app.models.internship_period import PeriodStatus
-from app.models.user import UserRole
+from app.models.user import User, UserRole
 from app.schemas.internship import (
     InternshipCreate,
     InternshipUpdate,
@@ -27,8 +27,11 @@ router = APIRouter(
     "",
     response_model=list[InternshipResponse]
 )
-def get_all_internships(db: Session = Depends(get_db)):
-    return service.get_all_internships(db)
+def get_all_internships(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return service.get_all_internships(db, current_user)
 
 
 @router.get(
@@ -37,9 +40,10 @@ def get_all_internships(db: Session = Depends(get_db)):
 )
 def get_internship(
     internship_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    return service.get_internship_by_id(db, internship_id)
+    return service.get_internship_by_id(db, internship_id, current_user)
 
 
 @router.post(
