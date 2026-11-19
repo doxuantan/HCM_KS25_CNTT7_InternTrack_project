@@ -62,6 +62,12 @@ class InternshipAndTeamApiTests(unittest.TestCase):
                 end_date=date(2026, 12, 31),
                 status=PeriodStatus.UPCOMING,
             )
+            self.other_period = InternshipPeriod(
+                name="Other period",
+                start_date=date(2027, 1, 1),
+                end_date=date(2027, 12, 31),
+                status=PeriodStatus.UPCOMING,
+            )
             db.add_all(
                 [
                     self.lecturer,
@@ -69,6 +75,7 @@ class InternshipAndTeamApiTests(unittest.TestCase):
                     self.student_profile,
                     self.outsider_profile,
                     self.period,
+                    self.other_period,
                 ]
             )
             db.flush()
@@ -80,7 +87,7 @@ class InternshipAndTeamApiTests(unittest.TestCase):
                 status=TeamStatus.ACTIVE,
             )
             self.other_team = Team(
-                period_id=self.period.id,
+                period_id=self.other_period.id,
                 supervisor_id=self.other_lecturer.id,
                 team_name="Other team",
                 team_code="SUP-02",
@@ -96,6 +103,7 @@ class InternshipAndTeamApiTests(unittest.TestCase):
             self.student_id = self.student.id
             self.outsider_id = self.outsider.id
             self.period_id = self.period.id
+            self.other_period_id = self.other_period.id
             self.team_id = self.team.id
             self.other_team_id = self.other_team.id
             self.lecturer_id = self.lecturer.id
@@ -231,7 +239,7 @@ class InternshipAndTeamApiTests(unittest.TestCase):
             f"/api/v1/teams/{self.other_team_id}",
             headers=self._auth("student"),
         )
-        self.assertEqual(hidden_team.status_code, 404, hidden_team.text)
+        self.assertEqual(hidden_team.status_code, 403, hidden_team.text)
 
         supervisor_teams = self.client.get(
             "/api/v1/teams",
@@ -247,7 +255,7 @@ class InternshipAndTeamApiTests(unittest.TestCase):
             json={"team_name": "Unauthorized"},
             headers=self._auth("supervisor"),
         )
-        self.assertEqual(denied_update.status_code, 404, denied_update.text)
+        self.assertEqual(denied_update.status_code, 403, denied_update.text)
 
         create_payload = {
             "period_id": self.period_id,
@@ -321,6 +329,42 @@ class InternshipAndTeamApiTests(unittest.TestCase):
             "Admin updated team",
         )
 
+    def test_scope_permissions_and_cross_scope_requests(self) -> None:
+        outside_team = self.client.get(
+            f"/api/v1/teams/{self.other_team_id}",
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(outside_team.status_code, 403, outside_team.text)
+
+        student_outside_team = self.client.get(
+            f"/api/v1/teams/{self.other_team_id}",
+            headers=self._auth("student"),
+        )
+        self.assertEqual(student_outside_team.status_code, 403, student_outside_team.text)
+
+        outside_period = self.client.get(
+            f"/api/v1/internship-periods/{self.other_period_id}",
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(outside_period.status_code, 403, outside_period.text)
+
+        student_outside_period = self.client.get(
+            f"/api/v1/internship-periods/{self.other_period_id}",
+            headers=self._auth("student"),
+        )
+        self.assertEqual(student_outside_period.status_code, 403, student_outside_period.text)
+
+        unknown_team = self.client.get(
+            "/api/v1/teams/9999",
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(unknown_team.status_code, 404, unknown_team.text)
+
+        unauthenticated = self.client.get(
+            f"/api/v1/teams/{self.team_id}",
+        )
+        self.assertEqual(unauthenticated.status_code, 401, unauthenticated.text)
+
     def test_team_member_leader_and_supervisor_management(self) -> None:
         change_leader = self.client.patch(
             f"/api/v1/teams/{self.team_id}/leader",
@@ -333,7 +377,7 @@ class InternshipAndTeamApiTests(unittest.TestCase):
         denied_leader_change = self.client.patch(
             f"/api/v1/teams/{self.team_id}/leader",
             json={"student_id": self.outsider_profile_id},
-            headers=self._auth("supervisor"),
+            headers=self._auth("other_supervisor"),
         )
         self.assertEqual(denied_leader_change.status_code, 403, denied_leader_change.text)
 
@@ -351,8 +395,21 @@ class InternshipAndTeamApiTests(unittest.TestCase):
         self.assertEqual(member_list.status_code, 200, member_list.text)
         self.assertEqual(len(member_list.json()["data"]), 2)
 
+        same_period_team = self.client.post(
+            "/api/v1/teams",
+            json={
+                "period_id": self.period_id,
+                "supervisor_id": self.lecturer_id,
+                "team_name": "Same period team",
+                "team_code": "SAME-PERIOD-01",
+            },
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(same_period_team.status_code, 201, same_period_team.text)
+        same_period_team_id = same_period_team.json()["data"]["id"]
+
         br05 = self.client.post(
-            f"/api/v1/teams/{self.other_team_id}/members",
+            f"/api/v1/teams/{same_period_team_id}/members",
             json={"student_id": self.outsider_profile_id},
             headers=self._auth("admin"),
         )

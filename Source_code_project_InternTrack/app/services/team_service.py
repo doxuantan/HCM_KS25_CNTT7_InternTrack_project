@@ -51,15 +51,20 @@ def get_teams(db: Session, user: User) -> list[Team]:
 
 
 def get_team(db: Session, team_id: int, user: User) -> Team:
-    statement = _team_query_for_user(db, user)
-    if statement is None:
-        team = None
-    else:
-        team = db.scalar(statement.where(Team.id == team_id))
+    team = db.get(Team, team_id)
     if team is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Không tìm thấy nhóm.",
+        )
+    statement = _team_query_for_user(db, user)
+    allowed = user.role == UserRole.ADMIN
+    if statement is not None:
+        allowed = db.scalar(statement.where(Team.id == team_id)) is not None
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn không có quyền truy cập nhóm ngoài phạm vi.",
         )
     return team
 
@@ -104,6 +109,11 @@ def create_team(db: Session, data: TeamCreate, user: User) -> Team:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Tài khoản chưa được liên kết với hồ sơ giảng viên.",
+            )
+        if data.supervisor_id is not None and data.supervisor_id != supervisor_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Giảng viên chỉ được tạo nhóm thuộc phạm vi của mình.",
             )
     else:
         supervisor_id = data.supervisor_id
@@ -177,6 +187,14 @@ def update_team(
 def _require_team_member_manager(db: Session, team: Team, user: User) -> None:
     if user.role == UserRole.ADMIN:
         return
+    if user.role == UserRole.SUPERVISOR:
+        lecturer_id = _lecturer_id(db, user)
+        if lecturer_id == team.supervisor_id:
+            return
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Giảng viên không có quyền quản lý thành viên nhóm ngoài phạm vi.",
+        )
     if user.role != UserRole.STUDENT:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -329,12 +347,25 @@ def change_team_leader(
     data: TeamLeaderUpdate,
     user: User,
 ) -> TeamMember:
-    if user.role != UserRole.ADMIN:
+    team = get_team(db, team_id, user)
+    can_manage = user.role == UserRole.ADMIN
+    if user.role == UserRole.SUPERVISOR:
+        lecturer_id = _lecturer_id(db, user)
+        can_manage = lecturer_id == team.supervisor_id
+    elif user.role == UserRole.STUDENT:
+        student_id = _student_id(db, user)
+        can_manage = student_id is not None and db.scalar(
+            select(TeamMember.id).where(
+                TeamMember.team_id == team.id,
+                TeamMember.student_id == student_id,
+                TeamMember.is_leader.is_(True),
+            )
+        ) is not None
+    if not can_manage:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Chỉ quản trị viên được thay đổi nhóm trưởng.",
+            detail="Chỉ quản trị viên, giảng viên phụ trách hoặc nhóm trưởng được thay đổi nhóm trưởng.",
         )
-    team = get_team(db, team_id, user)
     student_id = data.student_id if data.student_id is not None else data.leader_id
     if student_id is None:
         raise HTTPException(
