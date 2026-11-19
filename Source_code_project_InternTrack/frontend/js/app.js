@@ -99,8 +99,12 @@ function setupAccountMenu(user) {
   });
 }
 
+let isLoadingCurrentUser = false;
+
 try {
+  isLoadingCurrentUser = true;
   const user = await requireAuth();
+  isLoadingCurrentUser = false;
   if (user) {
     await loadComponents();
     await initializeSharedUi();
@@ -112,6 +116,15 @@ try {
   }
 } catch (error) {
   console.error("The application layout could not be initialized.", error);
+  const profile = document.querySelector("[data-student-profile]");
+  if (
+    isLoadingCurrentUser &&
+    document.body.dataset.dashboard === "student" &&
+    profile instanceof HTMLElement
+  ) {
+    profile.textContent = "Không thể tải thông tin cá nhân từ API. Vui lòng thử lại sau.";
+    profile.setAttribute("role", "alert");
+  }
   const main = document.querySelector("#main-content");
   if (main) {
     main.setAttribute("aria-busy", "false");

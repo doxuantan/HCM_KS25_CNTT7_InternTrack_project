@@ -9,6 +9,11 @@ const TASK_PRIORITIES = Object.freeze({
   MEDIUM: { label: "Trung bình", className: "student-priority-medium" },
   HIGH: { label: "Cao", className: "student-priority-high" },
 });
+const USER_ROLE_LABELS = Object.freeze({
+  ADMIN: "Quản trị viên",
+  SUPERVISOR: "Giảng viên hướng dẫn",
+  STUDENT: "Sinh viên",
+});
 
 function isValidTask(task) {
   return (
@@ -153,6 +158,34 @@ export function showTaskDashboardError() {
   renderTaskState("error", "Không thể tải dữ liệu công việc. Vui lòng thử lại sau.");
 }
 
+function renderStudentProfile(user) {
+  const profile = document.querySelector("[data-student-profile]");
+  if (!(profile instanceof HTMLElement)) {
+    return;
+  }
+
+  const details = [];
+  if (typeof user.full_name === "string" && user.full_name.trim()) {
+    details.push(`Họ tên: ${user.full_name.trim()}`);
+  }
+  if (typeof user.email === "string" && user.email.trim()) {
+    details.push(`Email: ${user.email.trim()}`);
+  }
+  if (Number.isInteger(user.id)) {
+    details.push(`Mã tài khoản: ${user.id}`);
+  }
+  if (typeof user.role === "string" && user.role) {
+    details.push(`Vai trò: ${USER_ROLE_LABELS[user.role] || user.role}`);
+  }
+  if (typeof user.is_active === "boolean") {
+    details.push(`Trạng thái: ${user.is_active ? "Đang hoạt động" : "Đã khóa"}`);
+  }
+
+  profile.textContent = details.length
+    ? details.join(" · ")
+    : "API không trả về thông tin hồ sơ.";
+}
+
 export function renderTaskDashboard(tasks) {
   const metrics = calculateTaskMetrics(tasks);
   const taskRows = document.querySelector("[data-task-rows]");
@@ -217,6 +250,7 @@ export function initializeStudentDashboard(user) {
   const studentName = document.querySelector("[data-student-name]");
   const mainContent = document.querySelector("#main-content");
 
+  renderStudentProfile(user);
   if (studentName) {
     studentName.textContent =
       typeof user.full_name === "string" && user.full_name.trim()
