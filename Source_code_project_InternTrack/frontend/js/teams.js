@@ -6,6 +6,8 @@ let teams = [];
 let periods = [];
 let users = [];
 let activeTeamId = null;
+let currentUser = null;
+const teamMembersCache = new Map();
 
 function isStudentView() {
   return document.body.dataset.teamView === "student";
@@ -19,10 +21,10 @@ function escapeHtml(value) {
 
 async function loadUsersAndReferences() {
   if (isStudentView()) return;
-  [periods, users] = await Promise.all([
-    apiRequest("internship-periods"),
-    apiRequest("users?skip=0&limit=100"),
-  ]);
+  periods = await apiRequest("internship-periods");
+  users = currentUser?.role === "ADMIN"
+    ? await apiRequest("users?skip=0&limit=100")
+    : [];
   fillTeamFormOptions();
 }
 
@@ -38,6 +40,13 @@ function fillTeamFormOptions() {
     }));
   }
   if (supervisorSelect) {
+    if (currentUser?.role === "SUPERVISOR") {
+      supervisorSelect.closest("label")?.setAttribute("hidden", "");
+      supervisorSelect.required = false;
+      return;
+    }
+    supervisorSelect.closest("label")?.removeAttribute("hidden");
+    supervisorSelect.required = true;
     const supervisors = users.filter((user) => user.role === "SUPERVISOR" && user.lecturer_profile);
     supervisorSelect.replaceChildren(...supervisors.map((user) => {
       const option = document.createElement("option");
@@ -81,11 +90,17 @@ function renderTeams() {
     statusCell.textContent = { ACTIVE: "Đang hoạt động", INACTIVE: "Không hoạt động", COMPLETED: "Đã hoàn thành" }[team.status] || team.status;
     const actions = document.createElement("td");
     actions.className = "admin-row-actions";
-    for (const [label, action] of [
-      ["Sửa", "edit"],
-      ["Thành viên", "member"],
-      ["Nhóm trưởng", "leader"],
-    ]) {
+    const actionItems = [["Chi tiết", "detail"]];
+    if (currentUser?.role === "ADMIN" || currentUser?.role === "SUPERVISOR") {
+      actionItems.push(["Sửa", "edit"], ["Thành viên", "member"]);
+    }
+    if (currentUser?.role === "ADMIN" || currentUser?.role === "SUPERVISOR") {
+      actionItems.push(["Nhóm trưởng", "leader"]);
+    }
+    if (currentUser?.role === "ADMIN") {
+      actionItems.push(["Giảng viên", "supervisor"]);
+    }
+    for (const [label, action] of actionItems) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "admin-row-action";
@@ -121,11 +136,8 @@ function openTeamDialog(team = null) {
 async function loadAdminTeams() {
   const body = document.querySelector("[data-teams-rows]");
   if (body) body.replaceChildren(stateRow("Đang tải nhóm thực tập..."));
-  [teams, periods, users] = await Promise.all([
-    apiRequest("teams"),
-    apiRequest("internship-periods"),
-    apiRequest("users?skip=0&limit=100"),
-  ]);
+  teams = await apiRequest("teams");
+  await loadUsersAndReferences();
   fillTeamFormOptions();
   renderTeams();
 }
@@ -191,6 +203,19 @@ async function openMemberDialog(teamId) {
       option.textContent = `${user.full_name} (${user.student_profile.student_code})`;
       return option;
     }));
+  const idField = document.querySelector("[data-member-id-field]");
+  const fallbackInput = document.querySelector("#member-student-id");
+  if (currentUser?.role === "SUPERVISOR") {
+    studentSelect.closest("label")?.setAttribute("hidden", "");
+    studentSelect.required = false;
+    idField?.removeAttribute("hidden");
+    fallbackInput.required = true;
+  } else {
+    studentSelect.closest("label")?.removeAttribute("hidden");
+    studentSelect.required = true;
+    idField?.setAttribute("hidden", "");
+    fallbackInput.required = false;
+  }
   const memberList = document.querySelector("[data-member-list]");
   if (memberList) {
     memberList.replaceChildren(...members.map((member) => {
@@ -211,6 +236,40 @@ async function openMemberDialog(teamId) {
   document.querySelector("[data-member-dialog]").showModal();
 }
 
+async function openTeamDetail(teamId) {
+  const team = teams.find((item) => item.id === teamId);
+  if (!team) return;
+  const dialog = document.querySelector("[data-team-detail-dialog]");
+  const members = await apiRequest(`teams/${teamId}/members`);
+  const period = periods.find((item) => item.id === team.period_id);
+  document.querySelector("[data-team-detail-title]").textContent = team.team_name;
+  const supervisor = users.find((item) => item.role === "SUPERVISOR" && item.lecturer_profile?.id === team.supervisor_id);
+  const detailItems = [
+    ["Mã nhóm", team.team_code],
+    ["Kỳ thực tập", period?.name || `ID ${team.period_id}`],
+    ["Giảng viên hướng dẫn", team.supervisor_name || supervisor?.full_name || `ID ${team.supervisor_id}`],
+    ["Trạng thái", { ACTIVE: "Đang hoạt động", INACTIVE: "Không hoạt động", COMPLETED: "Đã hoàn thành" }[team.status] || team.status],
+    ["Mô tả", team.description],
+  ];
+  document.querySelector("[data-team-detail-list]").replaceChildren(...detailItems.map(([label, value]) => {
+    const item = document.createElement("div");
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const detail = document.createElement("dd");
+    detail.textContent = value == null || value === "" ? "—" : String(value);
+    item.append(term, detail);
+    return item;
+  }));
+  const memberList = document.querySelector("[data-team-detail-members]");
+  memberList.replaceChildren(...members.map((member) => {
+    const item = document.createElement("div");
+    item.className = "team-member-item";
+    item.textContent = `${member.student_name || `Sinh viên ID ${member.student_id}`} — ${member.is_leader ? "Nhóm trưởng" : "Thành viên"}`;
+    return item;
+  }));
+  dialog?.showModal();
+}
+
 async function openLeaderDialog(teamId) {
   activeTeamId = teamId;
   const members = await apiRequest(`teams/${teamId}/members`);
@@ -225,6 +284,21 @@ async function openLeaderDialog(teamId) {
   document.querySelector("[data-leader-dialog]").showModal();
 }
 
+async function openSupervisorDialog(teamId) {
+  activeTeamId = teamId;
+  const team = teams.find((item) => item.id === teamId);
+  const select = document.querySelector("#team-supervisor-change");
+  const supervisors = users.filter((user) => user.role === "SUPERVISOR" && user.lecturer_profile);
+  select.replaceChildren(...supervisors.map((user) => {
+    const option = document.createElement("option");
+    option.value = String(user.lecturer_profile.id);
+    option.textContent = `${user.full_name} (${user.lecturer_profile.lecturer_code})`;
+    option.selected = user.lecturer_profile.id === team?.supervisor_id;
+    return option;
+  }));
+  document.querySelector("[data-supervisor-dialog]").showModal();
+}
+
 document.querySelector("[data-team-search]")?.addEventListener("input", renderTeams);
 document.querySelector("[data-create-team]")?.addEventListener("click", () => openTeamDialog());
 
@@ -234,11 +308,13 @@ document.querySelector("[data-team-form]")?.addEventListener("submit", async (ev
   const teamId = form.dataset.teamId;
   const body = {
     period_id: Number(form.elements.period_id.value),
-    supervisor_id: Number(form.elements.supervisor_id.value),
     team_name: form.elements.team_name.value.trim(),
     team_code: form.elements.team_code.value.trim(),
     description: form.elements.description.value.trim() || null,
   };
+  if (currentUser?.role === "ADMIN") {
+    body.supervisor_id = Number(form.elements.supervisor_id.value);
+  }
   if (!teamId) body.status = form.elements.status.value;
   else body.status = form.elements.status.value;
   try {
@@ -257,31 +333,42 @@ document.querySelector("[data-team-form]")?.addEventListener("submit", async (ev
 document.querySelector("[data-member-form]")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
+  const fallbackInput = form.elements.student_id_fallback;
+  const studentId =
+    currentUser?.role === "SUPERVISOR"
+      ? Number(fallbackInput?.value)
+      : Number(form.elements.student_id.value);
   try {
     await apiRequest(`teams/${activeTeamId}/members`, {
       method: "POST",
-      body: { student_id: Number(form.elements.student_id.value) },
-    });
-
-    document.querySelector("[data-member-list]")?.addEventListener("click", async (event) => {
-      const button = event.target instanceof Element ? event.target.closest("[data-remove-member-id]") : null;
-      if (!(button instanceof HTMLButtonElement) || !(await confirmAction({
-        title: "Xóa thành viên",
-        message: "Xóa sinh viên khỏi nhóm thực tập?",
-        confirmLabel: "Xóa thành viên",
-        destructive: true,
-      }))) return;
-      try {
-        await apiRequest(`teams/${activeTeamId}/members/${button.dataset.removeMemberId}`, { method: "DELETE" });
-        showToast("Đã xóa thành viên khỏi nhóm.");
-        document.querySelector("[data-member-dialog]")?.close();
-        await openMemberDialog(activeTeamId);
-      } catch (error) {
-        showToast(error.message, { kind: "error" });
-      }
+      body: { student_id: studentId },
     });
     document.querySelector("[data-member-dialog]").close();
     showToast("Đã thêm thành viên.");
+  } catch (error) {
+    showToast(error.message, { kind: "error" });
+  }
+});
+
+document.querySelector("[data-member-list]")?.addEventListener("click", async (event) => {
+  const button = event.target instanceof Element
+    ? event.target.closest("[data-remove-member-id]")
+    : null;
+  if (!(button instanceof HTMLButtonElement)) return;
+  const confirmed = await confirmAction({
+    title: "Xóa thành viên",
+    message: "Xóa sinh viên khỏi nhóm thực tập?",
+    confirmLabel: "Xóa thành viên",
+    destructive: true,
+  });
+  if (!confirmed) return;
+  try {
+    await apiRequest(
+      `teams/${activeTeamId}/members/${button.dataset.removeMemberId}`,
+      { method: "DELETE" },
+    );
+    showToast("Đã xóa thành viên khỏi nhóm.");
+    await openMemberDialog(activeTeamId);
   } catch (error) {
     showToast(error.message, { kind: "error" });
   }
@@ -302,11 +389,30 @@ document.querySelector("[data-leader-form]")?.addEventListener("submit", async (
   }
 });
 
+document.querySelector("[data-supervisor-form]")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  try {
+    await apiRequest(`teams/${activeTeamId}/supervisor`, {
+      method: "PATCH",
+      body: { supervisor_id: Number(form.elements.supervisor_id.value) },
+    });
+    document.querySelector("[data-supervisor-dialog]").close();
+    showToast("Đã cập nhật giảng viên hướng dẫn.");
+    await loadAdminTeams();
+  } catch (error) {
+    showToast(error.message, { kind: "error" });
+  }
+});
+
 document.querySelector("[data-teams-rows]")?.addEventListener("click", (event) => {
   const button = event.target instanceof Element ? event.target.closest("[data-team-action]") : null;
   if (!(button instanceof HTMLButtonElement)) return;
   const teamId = Number(button.dataset.teamId);
   const team = teams.find((item) => item.id === teamId);
+  if (button.dataset.teamAction === "detail") {
+    void openTeamDetail(teamId).catch((error) => showToast(error.message, { kind: "error" }));
+  }
   if (button.dataset.teamAction === "edit" && team) openTeamDialog(team);
   if (button.dataset.teamAction === "member") {
     void openMemberDialog(teamId).catch((error) => showToast(error.message, { kind: "error" }));
@@ -314,18 +420,26 @@ document.querySelector("[data-teams-rows]")?.addEventListener("click", (event) =
   if (button.dataset.teamAction === "leader") {
     void openLeaderDialog(teamId).catch((error) => showToast(error.message, { kind: "error" }));
   }
+  if (button.dataset.teamAction === "supervisor") {
+    void openSupervisorDialog(teamId).catch((error) => showToast(error.message, { kind: "error" }));
+  }
 });
 
 for (const [dialogSelector, closeSelector] of [
   ["[data-team-dialog]", "[data-close-team-dialog]"],
   ["[data-member-dialog]", "[data-close-member-dialog]"],
   ["[data-leader-dialog]", "[data-close-leader-dialog]"],
+  ["[data-team-detail-dialog]", "[data-close-team-detail]"],
+  ["[data-supervisor-dialog]", "[data-close-supervisor-dialog]"],
 ]) {
   const dialog = document.querySelector(dialogSelector);
   document.querySelectorAll(closeSelector).forEach((button) => button.addEventListener("click", () => dialog?.close()));
 }
 
-await requireAuth();
+currentUser = await requireAuth();
+if (currentUser?.role !== "ADMIN") {
+  document.querySelector("[data-create-team]")?.setAttribute("hidden", "");
+}
 await initializeSharedUi();
 if (isStudentView()) {
   await loadStudentTeam();

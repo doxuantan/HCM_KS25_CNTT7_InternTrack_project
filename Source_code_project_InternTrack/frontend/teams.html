@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/theme.css">
     <script type="module" src="js/teams.js"></script>
   </head>
-  <body class="admin-dashboard" data-allowed-roles="ADMIN">
+  <body class="admin-dashboard" data-allowed-roles="ADMIN,SUPERVISOR,STUDENT">
     <main class="standalone-admin-main" id="main-content" tabindex="-1" aria-busy="true">
       <div class="standalone-admin-heading">
         <div><p class="eyebrow">Quản lý thực tập</p><h1>Nhóm thực tập</h1></div>
@@ -53,6 +53,7 @@
         <div class="modal-header"><div><h2 class="modal-title">Thêm thành viên</h2></div><button class="modal-close" type="button" data-close-member-dialog aria-label="Đóng">×</button></div>
         <div class="modal-body">
           <label class="form-field" for="member-student"><span class="form-label">Sinh viên</span><select class="form-control" id="member-student" name="student_id" required></select></label>
+          <label class="form-field" for="member-student-id" data-member-id-field hidden><span class="form-label">ID hồ sơ sinh viên</span><input class="form-control" id="member-student-id" name="student_id_fallback" type="number" min="1"></label>
           <div class="team-member-list" data-member-list aria-label="Thành viên hiện tại"></div>
           <p class="admin-form-message" data-member-form-message role="alert" hidden></p>
         </div>
@@ -65,6 +66,27 @@
         <div class="modal-header"><div><h2 class="modal-title">Chọn nhóm trưởng</h2></div><button class="modal-close" type="button" data-close-leader-dialog aria-label="Đóng">×</button></div>
         <div class="modal-body"><label class="form-field" for="leader-student"><span class="form-label">Thành viên</span><select class="form-control" id="leader-student" name="student_id" required></select></label><p class="admin-form-message" data-leader-form-message role="alert" hidden></p></div>
         <div class="modal-footer"><button class="button button-secondary" type="button" data-close-leader-dialog>Hủy</button><button class="button button-primary" type="submit">Cập nhật</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="modal admin-dialog" data-team-detail-dialog>
+      <div class="modal-header">
+        <div><h2 class="modal-title" data-team-detail-title>Chi tiết nhóm</h2></div>
+        <button class="modal-close" type="button" data-close-team-detail aria-label="Đóng">×</button>
+      </div>
+      <div class="modal-body">
+        <dl class="admin-detail-list" data-team-detail-list></dl>
+        <h3 class="team-detail-section-title">Thành viên</h3>
+        <div class="team-member-list" data-team-detail-members></div>
+      </div>
+      <div class="modal-footer"><button class="button button-secondary" type="button" data-close-team-detail>Đóng</button></div>
+    </dialog>
+
+    <dialog class="modal admin-dialog" data-supervisor-dialog>
+      <form class="admin-dialog-form" data-supervisor-form>
+        <div class="modal-header"><div><h2 class="modal-title">Đổi giảng viên hướng dẫn</h2></div><button class="modal-close" type="button" data-close-supervisor-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body"><label class="form-field" for="team-supervisor-change"><span class="form-label">Giảng viên hướng dẫn</span><select class="form-control" id="team-supervisor-change" name="supervisor_id" required></select></label></div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-supervisor-dialog>Hủy</button><button class="button button-primary" type="submit">Cập nhật</button></div>
       </form>
     </dialog>
   </body>
