@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Nhóm thực tập | InterTrack</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/student-dashboard.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <script type="module" src="../js/teams.js"></script>
+  </head>
+  <body class="student-dashboard" data-allowed-roles="STUDENT" data-team-view="student">
+    <main class="content" id="main-content" aria-busy="true">
+      <div class="page-heading student-page-heading">
+        <div><p class="eyebrow">Không gian sinh viên</p><h1>Nhóm thực tập của tôi</h1><p class="page-description">Thông tin chỉ đọc.</p></div>
+        <a class="button button-secondary" href="../index.html">Về bảng điều khiển</a>
+      </div>
+      <section class="panel student-info-panel" data-student-team-panel>
+        <dl class="student-info-list">
+          <div><dt>Tên nhóm</dt><dd data-student-team-name>Đang tải...</dd></div>
+          <div><dt>Mã nhóm</dt><dd data-student-team-code>—</dd></div>
+          <div><dt>Nhóm trưởng</dt><dd data-student-team-leader>—</dd></div>
+          <div><dt>Giảng viên hướng dẫn</dt><dd data-student-team-supervisor>—</dd></div>
+        </dl>
+      </section>
+      <section class="panel student-tasks-panel">
+        <div class="panel-heading student-panel-heading"><div><h2>Thành viên nhóm</h2><p class="muted">Danh sách lấy trực tiếp từ backend</p></div></div>
+        <div class="table-scroll"><table class="data-table"><thead><tr><th>Thành viên</th><th>Mã sinh viên</th><th>Vai trò</th></tr></thead><tbody data-student-team-members><tr><td colspan="3" role="status">Đang tải...</td></tr></tbody></table></div>
+      </section>
+    </main>
+  </body>
+</html>

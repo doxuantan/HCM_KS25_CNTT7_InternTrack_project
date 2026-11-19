@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Quản lý kỳ thực tập | InterTrack</title>
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <script type="module" src="js/internships.js"></script>
+  </head>
+  <body class="admin-dashboard" data-allowed-roles="ADMIN">
+    <main class="standalone-admin-main" id="main-content" tabindex="-1" aria-busy="true">
+      <div class="standalone-admin-heading">
+        <div>
+          <p class="eyebrow">Quản lý chương trình</p>
+          <h1>Kỳ thực tập</h1>
+        </div>
+        <a class="button button-secondary" href="admin.html">Quay về quản trị</a>
+      </div>
+      <section class="panel admin-panel">
+        <div class="admin-toolbar">
+          <div class="admin-filter">
+            <label for="period-status-filter">Trạng thái</label>
+            <select class="form-control" id="period-status-filter" data-period-status-filter>
+              <option value="">Tất cả trạng thái</option>
+              <option value="UPCOMING">Sắp diễn ra</option>
+              <option value="ACTIVE">Đang diễn ra</option>
+              <option value="COMPLETED">Đã hoàn thành</option>
+            </select>
+          </div>
+          <button class="button button-primary" type="button" data-create-period>+ Thêm kỳ thực tập</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table admin-table">
+            <thead><tr><th>Kỳ thực tập</th><th>Ngày bắt đầu</th><th>Ngày kết thúc</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <tbody data-periods-rows><tr><td class="admin-table-state" colspan="5">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="modal admin-dialog" data-period-dialog>
+      <form class="admin-dialog-form" data-period-form>
+        <div class="modal-header">
+          <div><h2 class="modal-title" data-period-dialog-title>Thêm kỳ thực tập</h2><p class="form-hint">Ngày kết thúc không được trước ngày bắt đầu.</p></div>
+          <button class="modal-close" type="button" data-close-dialog aria-label="Đóng">×</button>
+        </div>
+        <div class="modal-body admin-form-grid">
+          <label class="form-field admin-form-wide" for="period-name"><span class="form-label">Tên kỳ thực tập</span><input class="form-control" id="period-name" name="name" maxlength="150" required></label>
+          <label class="form-field admin-form-wide" for="period-description"><span class="form-label">Mô tả</span><textarea class="form-control" id="period-description" name="description"></textarea></label>
+          <label class="form-field" for="period-start-date"><span class="form-label">Ngày bắt đầu</span><input class="form-control" id="period-start-date" name="start_date" type="date" required></label>
+          <label class="form-field" for="period-end-date"><span class="form-label">Ngày kết thúc</span><input class="form-control" id="period-end-date" name="end_date" type="date" required></label>
+          <label class="form-field" for="period-report-deadline"><span class="form-label">Hạn nộp báo cáo</span><input class="form-control" id="period-report-deadline" name="report_deadline" type="datetime-local"></label>
+          <label class="form-field" for="period-status"><span class="form-label">Trạng thái</span><select class="form-control" id="period-status" name="status"><option value="UPCOMING">Sắp diễn ra</option><option value="ACTIVE">Đang diễn ra</option><option value="COMPLETED">Đã hoàn thành</option></select></label>
+          <p class="admin-form-message admin-form-wide" data-period-form-message role="alert" hidden></p>
+        </div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-dialog>Hủy</button><button class="button button-primary" type="submit">Lưu kỳ thực tập</button></div>
+      </form>
+    </dialog>
+  </body>
+</html>

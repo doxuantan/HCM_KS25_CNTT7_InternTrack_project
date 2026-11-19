@@ -109,6 +109,8 @@ class UserStatusUpdate(BaseModel):
 class StudentProfileResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id: int
+    user_id: int
     student_code: str
     class_name: str | None
     major: str | None
@@ -118,6 +120,8 @@ class StudentProfileResponse(BaseModel):
 class LecturerProfileResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id: int
+    user_id: int
     lecturer_code: str
     department: str | None
     phone: str | None

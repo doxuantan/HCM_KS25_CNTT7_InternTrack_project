@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Quản lý nhóm thực tập | InterTrack</title>
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <script type="module" src="js/teams.js"></script>
+  </head>
+  <body class="admin-dashboard" data-allowed-roles="ADMIN">
+    <main class="standalone-admin-main" id="main-content" tabindex="-1" aria-busy="true">
+      <div class="standalone-admin-heading">
+        <div><p class="eyebrow">Quản lý thực tập</p><h1>Nhóm thực tập</h1></div>
+        <a class="button button-secondary" href="admin.html">Quay về quản trị</a>
+      </div>
+      <section class="panel admin-panel">
+        <div class="admin-toolbar">
+          <div class="admin-filter"><label for="team-search">Tìm kiếm</label><input class="form-control" id="team-search" data-team-search type="search" placeholder="Tên hoặc mã nhóm"></div>
+          <button class="button button-primary" type="button" data-create-team>+ Tạo nhóm</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table admin-table">
+            <thead><tr><th>Nhóm</th><th>Kỳ thực tập</th><th>Giảng viên hướng dẫn</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <tbody data-teams-rows><tr><td class="admin-table-state" colspan="5">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="modal admin-dialog" data-team-dialog>
+      <form class="admin-dialog-form" data-team-form>
+        <div class="modal-header"><div><h2 class="modal-title" data-team-dialog-title>Tạo nhóm</h2></div><button class="modal-close" type="button" data-close-team-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body admin-form-grid">
+          <label class="form-field" for="team-period"><span class="form-label">Kỳ thực tập</span><select class="form-control" id="team-period" name="period_id" required></select></label>
+          <label class="form-field" for="team-supervisor"><span class="form-label">Giảng viên hướng dẫn</span><select class="form-control" id="team-supervisor" name="supervisor_id" required></select></label>
+          <label class="form-field" for="team-name"><span class="form-label">Tên nhóm</span><input class="form-control" id="team-name" name="team_name" maxlength="100" required></label>
+          <label class="form-field" for="team-code"><span class="form-label">Mã nhóm</span><input class="form-control" id="team-code" name="team_code" maxlength="30" required></label>
+          <label class="form-field admin-form-wide" for="team-description"><span class="form-label">Mô tả</span><textarea class="form-control" id="team-description" name="description"></textarea></label>
+          <label class="form-field" for="team-status"><span class="form-label">Trạng thái</span><select class="form-control" id="team-status" name="status"><option value="ACTIVE">Đang hoạt động</option><option value="INACTIVE">Không hoạt động</option><option value="COMPLETED">Đã hoàn thành</option></select></label>
+          <p class="admin-form-message admin-form-wide" data-team-form-message role="alert" hidden></p>
+        </div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-team-dialog>Hủy</button><button class="button button-primary" type="submit">Lưu nhóm</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="modal admin-dialog" data-member-dialog>
+      <form class="admin-dialog-form" data-member-form>
+        <div class="modal-header"><div><h2 class="modal-title">Thêm thành viên</h2></div><button class="modal-close" type="button" data-close-member-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body">
+          <label class="form-field" for="member-student"><span class="form-label">Sinh viên</span><select class="form-control" id="member-student" name="student_id" required></select></label>
+          <div class="team-member-list" data-member-list aria-label="Thành viên hiện tại"></div>
+          <p class="admin-form-message" data-member-form-message role="alert" hidden></p>
+        </div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-member-dialog>Hủy</button><button class="button button-primary" type="submit">Thêm thành viên</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="modal admin-dialog" data-leader-dialog>
+      <form class="admin-dialog-form" data-leader-form>
+        <div class="modal-header"><div><h2 class="modal-title">Chọn nhóm trưởng</h2></div><button class="modal-close" type="button" data-close-leader-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body"><label class="form-field" for="leader-student"><span class="form-label">Thành viên</span><select class="form-control" id="leader-student" name="student_id" required></select></label><p class="admin-form-message" data-leader-form-message role="alert" hidden></p></div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-leader-dialog>Hủy</button><button class="button button-primary" type="submit">Cập nhật</button></div>
+      </form>
+    </dialog>
+  </body>
+</html>

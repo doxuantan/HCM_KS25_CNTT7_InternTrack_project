@@ -10,6 +10,7 @@ from app.schemas.team import (
     TeamLeaderUpdate,
     TeamMemberAdd,
     TeamMemberResponse,
+    TeamMemberDetail,
     TeamResponse,
     TeamSupervisorUpdate,
     TeamUpdate,
@@ -39,6 +40,15 @@ def get_team(
     current_user: User = Depends(get_current_user),
 ) -> TeamResponse:
     return team_service.get_team(db, team_id, current_user)
+
+
+@router.get("/{team_id}/members", response_model=list[TeamMemberDetail])
+def list_team_members(
+    team_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[dict]:
+    return team_service.list_team_members(db, team_id, current_user)
 
 
 @router.post(
