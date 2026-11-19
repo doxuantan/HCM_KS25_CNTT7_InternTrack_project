@@ -1,8 +1,10 @@
-const VALID_TASK_STATUSES = new Set(["TODO", "IN_PROGRESS", "DONE"]);
+const VALID_TASK_STATUSES = new Set(["TODO", "IN_PROGRESS", "REVIEW", "DONE", "CANCELLED"]);
 const TASK_STATUS_LABELS = Object.freeze({
   TODO: "Chưa bắt đầu",
   IN_PROGRESS: "Đang thực hiện",
+  REVIEW: "Chờ duyệt",
   DONE: "Hoàn thành",
+  CANCELLED: "Đã hủy",
 });
 const TASK_PRIORITIES = Object.freeze({
   LOW: { label: "Thấp", className: "student-priority-low" },
@@ -77,6 +79,12 @@ function createTaskRow(task, index) {
   row.append(createCell(String(index + 1)));
 
   const title = createCell(task.title.trim(), "student-task-title");
+  if (typeof task.description === "string" && task.description.trim()) {
+    const description = document.createElement("div");
+    description.className = "student-task-description muted";
+    description.textContent = task.description.trim();
+    title.append(description);
+  }
   row.append(title, createCell(formatDeadline(task.deadline)));
 
   const priorityCell = document.createElement("td");

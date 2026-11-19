@@ -1,6 +1,7 @@
 import { loadComponents } from "./component-loader.js";
 import { logout, requireAuth } from "./auth.js";
 import { initializeStudentDashboard } from "./student-dashboard.js";
+import { loadStudentTasks } from "./tasks.js";
 import { initializeSharedUi } from "./ui.js";
 
 function getUserInitials(fullName) {
@@ -112,6 +113,7 @@ try {
     setupAccountMenu(user);
     if (document.body.dataset.dashboard === "student") {
       initializeStudentDashboard(user);
+      await loadStudentTasks();
     }
   }
 } catch (error) {
