@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
+from app.models.task import TaskStatus
 from app.schemas.task import (
     TaskAssign,
     TaskAssignmentResponse,
@@ -12,7 +13,11 @@ from app.schemas.task import (
     TaskResponse,
     TaskStatusUpdate,
     TaskCommentCreate,
-    TaskCommentResponse
+    TaskCommentResponse,
+    TaskReviewUpdate,
+    TaskListResponse,
+    TaskResponse,
+    TaskReviewResponse,
 )
 from app.services import task_service
 
@@ -22,6 +27,27 @@ router = APIRouter(
     tags=["Tasks"],
     dependencies=[Depends(get_current_user)],
 )
+
+
+@router.get("", response_model=TaskListResponse)
+def list_tasks(
+    team: int | None = Query(default=None, gt=0),
+    status_filter: TaskStatus | None = Query(default=None, alias="status"),
+    assignee: int | None = Query(default=None, gt=0),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    return task_service.list_tasks(
+        db,
+        current_user,
+        team=team,
+        status=status_filter,
+        assignee=assignee,
+        page=page,
+        limit=limit,
+    )
 
 
 @router.post(
@@ -37,7 +63,8 @@ def create_task(
     return task_service.create_task(db, data, current_user)
 
 
-@router.post("/{task_id}/assign", response_model=TaskResponse)
+@router.put("/{task_id}/assign", response_model=TaskResponse)
+@router.post("/{task_id}/assign", response_model=TaskResponse, include_in_schema=False)
 def assign_task(
     task_id: int,
     data: TaskAssign,
@@ -48,6 +75,7 @@ def assign_task(
 
 
 @router.put("/{task_id}/status", response_model=TaskResponse)
+@router.patch("/{task_id}/status", response_model=TaskResponse, include_in_schema=False)
 def update_task_status(
     task_id: int,
     data: TaskStatusUpdate,
@@ -58,6 +86,7 @@ def update_task_status(
 
 
 @router.patch("/{task_id}/progress", response_model=TaskAssignmentResponse)
+@router.put("/{task_id}/progress", response_model=TaskAssignmentResponse)
 def update_task_progress(
     task_id: int,
     data: TaskProgressUpdate,
@@ -65,6 +94,16 @@ def update_task_progress(
     current_user: User = Depends(get_current_user),
 ) -> TaskAssignmentResponse:
     return task_service.update_task_progress(db, task_id, data, current_user)
+
+
+@router.post("/{task_id}/review", response_model=TaskReviewResponse)
+def review_task(
+    task_id: int,
+    data: TaskReviewUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    return task_service.review_task(db, task_id, data, current_user)
 
 
 #Task Comment

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -22,6 +22,9 @@ from app.schemas.task import (
     TaskStatusUpdate,
     TaskCommentCreate,
     TaskCommentResponse,
+    TaskReviewUpdate,
+    TaskReviewStatus,
+    TaskResponse,
 )
 
 
@@ -104,6 +107,77 @@ def create_task(db: Session, data: TaskCreate, user: User) -> Task:
     return task
 
 
+def list_tasks(
+    db: Session,
+    user: User,
+    *,
+    team: int | None = None,
+    status: TaskStatus | None = None,
+    assignee: int | None = None,
+    page: int = 1,
+    limit: int = 20,
+) -> dict:
+    statement = select(Task)
+
+    if user.role == UserRole.ADMIN:
+        pass
+    elif user.role == UserRole.SUPERVISOR:
+        lecturer_id = db.scalar(
+            select(Lecturer.id).where(Lecturer.user_id == user.id)
+        )
+        if lecturer_id is None:
+            return {"items": [], "total": 0, "page": page, "limit": limit, "total_pages": 0}
+        statement = statement.join(Team, Team.id == Task.team_id).where(
+            Team.supervisor_id == lecturer_id
+        )
+    elif user.role == UserRole.STUDENT:
+        student_id = db.scalar(
+            select(Student.id).where(Student.user_id == user.id)
+        )
+        if student_id is None:
+            return {"items": [], "total": 0, "page": page, "limit": limit, "total_pages": 0}
+        statement = statement.where(
+            select(TaskAssignment.id)
+            .where(
+                TaskAssignment.task_id == Task.id,
+                TaskAssignment.student_id == student_id,
+            )
+            .exists()
+        )
+    else:
+        return {"items": [], "total": 0, "page": page, "limit": limit, "total_pages": 0}
+
+    if team is not None:
+        statement = statement.where(Task.team_id == team)
+    if status is not None:
+        statement = statement.where(Task.status == status)
+    if assignee is not None:
+        statement = statement.where(
+            select(TaskAssignment.id)
+            .where(
+                TaskAssignment.task_id == Task.id,
+                TaskAssignment.student_id == assignee,
+            )
+            .exists()
+        )
+
+    count_statement = select(func.count()).select_from(
+        statement.with_only_columns(Task.id).order_by(None).subquery()
+    )
+    total = db.scalar(count_statement) or 0
+    tasks = db.scalars(
+        statement.order_by(Task.id.desc()).offset((page - 1) * limit).limit(limit)
+    ).unique().all()
+    total_pages = (total + limit - 1) // limit if total else 0
+    return {
+        "items": list(tasks),
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages,
+    }
+
+
 def assign_task(
     db: Session,
     task_id: int,
@@ -169,6 +243,68 @@ def assign_task(
 
     db.refresh(task)
     return task
+
+
+def review_task(
+    db: Session,
+    task_id: int,
+    data: TaskReviewUpdate,
+    user: User,
+) -> dict:
+    task = _get_task(db, task_id)
+
+    if user.role == UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sinh viên không được tự duyệt nhiệm vụ của mình.",
+        )
+
+    _assert_task_manager(db, task, user)
+
+    if task.status != TaskStatus.REVIEW:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Chỉ có thể review nhiệm vụ ở trạng thái REVIEW.",
+        )
+
+    old_status = task.status
+    if data.status == TaskReviewStatus.APPROVED:
+        new_status = TaskStatus.DONE
+        for assignment in task.assignments:
+            assignment.status = AssignmentStatus.DONE
+            assignment.progress = 100
+        description = "Task review approved."
+    else:
+        new_status = TaskStatus.IN_PROGRESS
+        for assignment in task.assignments:
+            assignment.status = AssignmentStatus.IN_PROGRESS
+        description = "Task review requires revision."
+
+    if data.comment:
+        description = f"{description} {data.comment.strip()}".strip()
+
+    task.status = new_status
+    db.add(
+        TaskHistory(
+            task_id=task.id,
+            user_id=user.id,
+            old_status=old_status.value,
+            new_status=new_status.value,
+            description=description,
+        )
+    )
+    db.commit()
+    db.refresh(task)
+
+    return {
+        "message": (
+            "Đã duyệt nhiệm vụ."
+            if data.status == TaskReviewStatus.APPROVED
+            else "Đã yêu cầu sinh viên sửa lại nhiệm vụ."
+        ),
+        "status": data.status,
+        "task": TaskResponse.model_validate(task),
+    }
 
 
 def update_task_status(
@@ -293,6 +429,11 @@ def update_task_progress(
         )
 
     assignment.progress = data.progress
+    if task.status != TaskStatus.CANCELLED:
+        try:
+            assignment.status = AssignmentStatus(task.status.value)
+        except ValueError:
+            pass
     db.commit()
     db.refresh(assignment)
     return assignment
