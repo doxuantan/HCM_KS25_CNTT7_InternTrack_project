@@ -406,6 +406,22 @@ def get_attachment_file(
     return attachment, file_path
 
 
+def list_task_attachments(
+    *,
+    db: Session,
+    task_id: int,
+    current_user: User,
+) -> list[Attachment]:
+    _assert_target_access(db, current_user, task_id=task_id)
+    return list(
+        db.scalars(
+            select(Attachment)
+            .where(Attachment.task_id == task_id)
+            .order_by(Attachment.uploaded_at.asc(), Attachment.id.asc())
+        ).all()
+    )
+
+
 def delete_attachment(
     *,
     db: Session,

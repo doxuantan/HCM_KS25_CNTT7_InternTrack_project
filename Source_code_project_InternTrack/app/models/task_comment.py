@@ -15,3 +15,7 @@ class TaskComment(Base):
 
     task = relationship("Task", back_populates="comments")
     user = relationship("User")
+
+    @property
+    def user_name(self) -> str | None:
+        return self.user.full_name if self.user else None

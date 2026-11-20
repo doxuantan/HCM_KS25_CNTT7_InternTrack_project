@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, File, Form, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.dependencies.auth import get_current_user
+from app.models.attachment import Attachment
 from app.models.user import User
 from app.schemas.attachment import AttachmentResponse
 from app.services import attachment_service
@@ -55,6 +56,23 @@ async def upload_attachment(
         task_id=task_id,
         diary_id=diary_id,
         report_id=report_id,
+    )
+
+
+@router.get(
+    "",
+    response_model=list[AttachmentResponse],
+    summary="List task attachments",
+)
+def list_task_attachments(
+    task_id: int = Query(gt=0),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[Attachment]:
+    return attachment_service.list_task_attachments(
+        db=db,
+        task_id=task_id,
+        current_user=current_user,
     )
 
 

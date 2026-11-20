@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/student-dashboard.css">
+    <link rel="stylesheet" href="../css/admin.css">
     <link rel="stylesheet" href="../css/theme.css">
     <script type="module" src="../js/tasks.js"></script>
   </head>
@@ -34,5 +35,44 @@
         </div>
       </section>
     </main>
+    <dialog class="modal admin-dialog task-detail-dialog" data-task-detail-dialog>
+      <div class="admin-dialog-form">
+        <div class="modal-header"><div><h2 class="modal-title" data-task-detail-title>Chi tiết công việc</h2></div><button class="modal-close" type="button" data-close-task-detail-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body task-detail-body">
+          <dl class="admin-detail-list">
+            <div><dt>Trạng thái</dt><dd data-task-detail-status>—</dd></div>
+            <div><dt>Deadline</dt><dd data-task-detail-deadline>—</dd></div>
+            <div><dt>Tiến độ</dt><dd data-task-detail-progress>—</dd></div>
+            <div><dt>Ưu tiên</dt><dd data-task-detail-priority>—</dd></div>
+            <div class="task-detail-wide"><dt>Người được giao</dt><dd data-task-detail-assignees>—</dd></div>
+            <div class="task-detail-wide"><dt>Mô tả</dt><dd data-task-detail-description>—</dd></div>
+          </dl>
+          <section class="task-detail-section" data-student-task-update-section hidden>
+            <h3>Cập nhật tiến độ</h3>
+            <form class="task-detail-update-form" data-student-task-update-form>
+              <label class="form-field" for="detail-task-progress"><span class="form-label">Tiến độ (%)</span><input class="form-control" id="detail-task-progress" name="progress" type="number" min="0" max="100" step="1" required></label>
+              <label class="form-field" for="detail-task-status"><span class="form-label">Trạng thái</span><select class="form-control" id="detail-task-status" name="status"><option value="">Không đổi trạng thái</option></select></label>
+              <button class="button button-primary" type="submit">Lưu cập nhật</button>
+            </form>
+          </section>
+          <section class="task-detail-section">
+            <h3>Minh chứng</h3>
+            <ul class="task-detail-list" data-task-detail-attachments><li>Đang tải...</li></ul>
+            <form class="task-detail-upload-form" data-task-evidence-form>
+              <label class="form-field" for="task-evidence-file"><span class="form-label">Đính kèm tệp</span><input class="form-control" id="task-evidence-file" name="file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg" required></label>
+              <button class="button button-secondary" type="submit">Tải minh chứng</button>
+            </form>
+          </section>
+          <section class="task-detail-section">
+            <h3>Bình luận</h3>
+            <ul class="task-detail-list" data-task-detail-comments><li>Đang tải...</li></ul>
+            <form class="task-detail-comment-form" data-task-comment-form>
+              <label class="form-field" for="task-comment-content"><span class="form-label">Thêm bình luận</span><textarea class="form-control" id="task-comment-content" name="content" maxlength="5000" required></textarea></label>
+              <button class="button button-secondary" type="submit">Gửi bình luận</button>
+            </form>
+          </section>
+        </div>
+      </div>
+    </dialog>
   </body>
 </html>

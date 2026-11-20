@@ -12,6 +12,7 @@ from app.api.v1.router import router
 from app.core.api_responses import install_api_response_handling
 from app.core.security import create_access_token
 from app.db.database import Base, get_db
+from app.models.attachment import Attachment
 from app.models.internship_period import InternshipPeriod, PeriodStatus
 from app.models.lecturer import Lecturer
 from app.models.student import Student
@@ -291,6 +292,45 @@ class TaskApiTests(unittest.TestCase):
         )
         self.assertEqual(denied.status_code, 403, denied.text)
 
+    def test_assign_task_to_multiple_students_atomically(self) -> None:
+        with self.session_factory() as db:
+            db.add(TeamMember(team_id=self.team_id, student_id=self.outsider_profile_id))
+            db.commit()
+
+        task_id = self._create_task()
+        assigned = self.client.put(
+            f"/api/v1/tasks/{task_id}/assign",
+            json={"student_ids": [self.student_profile_id, self.outsider_profile_id]},
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(assigned.status_code, 200, assigned.text)
+        assignments = assigned.json()["data"]["assignments"]
+        self.assertEqual(
+            {assignment["student_id"] for assignment in assignments},
+            {self.student_profile_id, self.outsider_profile_id},
+        )
+        self.assertTrue(all(assignment["student_name"] for assignment in assignments))
+
+        second_task_id = self._create_task(title="Atomic assignment")
+        invalid = self.client.put(
+            f"/api/v1/tasks/{second_task_id}/assign",
+            json={"student_ids": [self.student_profile_id, self.inactive_profile_id]},
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(invalid.status_code, 422, invalid.text)
+        with self.session_factory() as db:
+            self.assertEqual(
+                db.query(TaskAssignment).filter_by(task_id=second_task_id).count(),
+                0,
+            )
+
+        duplicate = self.client.put(
+            f"/api/v1/tasks/{second_task_id}/assign",
+            json={"student_ids": [self.student_profile_id, self.student_profile_id]},
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(duplicate.status_code, 422, duplicate.text)
+
     def test_status_only_allows_todo_to_done(self) -> None:
         task_id = self._create_task()
         invalid = self.client.patch(
@@ -350,7 +390,20 @@ class TaskApiTests(unittest.TestCase):
         )
         self.assertEqual(unassigned.status_code, 403, unassigned.text)
 
+        unassigned_progress = self.client.get(
+            f"/api/v1/tasks/{task_id}/progress",
+            headers=self._auth("outsider"),
+        )
+        self.assertEqual(unassigned_progress.status_code, 403, unassigned_progress.text)
+
         self._assign_student(task_id)
+
+        own_progress = self.client.get(
+            f"/api/v1/tasks/{task_id}/progress",
+            headers=self._auth("student"),
+        )
+        self.assertEqual(own_progress.status_code, 200, own_progress.text)
+        self.assertEqual(own_progress.json()["data"]["progress"], 0)
 
         for value in (0, 100):
             updated = self.client.patch(
@@ -460,6 +513,38 @@ class TaskApiTests(unittest.TestCase):
         student_ids = {task["id"] for task in student_response.json()["data"]["items"]}
         self.assertIn(first_id, student_ids)
         self.assertIn(second_id, student_ids)
+
+    def test_task_comments_and_attachment_listing(self) -> None:
+        task_id = self._create_task()
+        comment = self.client.post(
+            f"/api/v1/tasks/{task_id}/comments",
+            json={"content": "Đã hoàn thành phần đầu."},
+            headers=self._auth("student"),
+        )
+        self.assertEqual(comment.status_code, 201, comment.text)
+        self.assertEqual(comment.json()["data"]["user_name"], "student")
+
+        with self.session_factory() as db:
+            db.add(
+                Attachment(
+                    uploaded_by=self.student_id,
+                    task_id=task_id,
+                    file_name="evidence.pdf",
+                    file_url="stored.pdf",
+                    stored_filename="stored.pdf",
+                    mime_type="application/pdf",
+                    file_size=12,
+                )
+            )
+            db.commit()
+
+        attachments = self.client.get(
+            "/api/v1/attachments",
+            params={"task_id": task_id},
+            headers=self._auth("student"),
+        )
+        self.assertEqual(attachments.status_code, 200, attachments.text)
+        self.assertEqual(attachments.json()["data"][0]["file_name"], "evidence.pdf")
 
     def test_put_progress_integer_bounds_and_not_found(self) -> None:
         task_id = self._create_task()

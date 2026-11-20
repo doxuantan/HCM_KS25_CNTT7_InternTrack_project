@@ -96,6 +96,15 @@ def update_task_progress(
     return task_service.update_task_progress(db, task_id, data, current_user)
 
 
+@router.get("/{task_id}/progress", response_model=TaskAssignmentResponse)
+def get_task_progress(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TaskAssignmentResponse:
+    return task_service.get_task_progress(db, task_id, current_user)
+
+
 @router.post("/{task_id}/review", response_model=TaskReviewResponse)
 def review_task(
     task_id: int,

@@ -40,7 +40,7 @@
           <label class="form-field" for="task-title"><span class="form-label">Tên công việc</span><input class="form-control" id="task-title" name="title" maxlength="200" required></label>
           <label class="form-field" for="task-type"><span class="form-label">Loại công việc</span><select class="form-control" id="task-type" name="task_type" required><option value="TEAM">Nhóm</option><option value="PERSONAL">Cá nhân</option></select></label>
           <label class="form-field" for="task-priority"><span class="form-label">Ưu tiên</span><select class="form-control" id="task-priority" name="priority" required><option value="LOW">Thấp</option><option value="MEDIUM" selected>Trung bình</option><option value="HIGH">Cao</option></select></label>
-          <label class="form-field" for="task-assignee"><span class="form-label">Người được giao (tùy chọn)</span><select class="form-control" id="task-assignee" name="student_id"><option value="">Chưa giao</option></select></label>
+          <label class="form-field" for="task-assignee"><span class="form-label">Người được giao (có thể chọn nhiều)</span><select class="form-control" id="task-assignee" name="student_ids" multiple size="4"></select><span class="muted">Giữ Ctrl hoặc Command để chọn nhiều thành viên.</span></label>
           <label class="form-field" for="task-start-date"><span class="form-label">Ngày bắt đầu</span><input class="form-control" id="task-start-date" name="start_date" type="date" required></label>
           <label class="form-field" for="task-deadline"><span class="form-label">Deadline</span><input class="form-control" id="task-deadline" name="deadline" type="datetime-local" required></label>
           <label class="form-field admin-form-wide" for="task-description"><span class="form-label">Mô tả</span><textarea class="form-control" id="task-description" name="description"></textarea></label>
@@ -52,9 +52,48 @@
     <dialog class="modal admin-dialog" data-task-status-dialog>
       <form class="admin-dialog-form" data-task-status-form>
         <div class="modal-header"><div><h2 class="modal-title">Cập nhật trạng thái</h2></div><button class="modal-close" type="button" data-close-task-status-dialog aria-label="Đóng">×</button></div>
-        <div class="modal-body"><label class="form-field" for="task-status"><span class="form-label">Trạng thái</span><select class="form-control" id="task-status" name="status" required><option value="TODO">Chưa bắt đầu</option><option value="IN_PROGRESS">Đang thực hiện</option><option value="REVIEW">Chờ duyệt</option><option value="DONE">Hoàn thành</option><option value="CANCELLED">Đã hủy</option></select></label></div>
+        <div class="modal-body"><label class="form-field" for="task-status"><span class="form-label">Trạng thái</span><select class="form-control" id="task-status" name="status" required><option value="DONE">Hoàn thành</option></select></label></div>
         <div class="modal-footer"><button class="button button-secondary" type="button" data-close-task-status-dialog>Hủy</button><button class="button button-primary" type="submit">Cập nhật</button></div>
       </form>
+    </dialog>
+    <dialog class="modal admin-dialog task-detail-dialog" data-task-detail-dialog>
+      <div class="admin-dialog-form">
+        <div class="modal-header"><div><h2 class="modal-title" data-task-detail-title>Chi tiết công việc</h2></div><button class="modal-close" type="button" data-close-task-detail-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body task-detail-body">
+          <dl class="admin-detail-list">
+            <div><dt>Trạng thái</dt><dd data-task-detail-status>—</dd></div>
+            <div><dt>Deadline</dt><dd data-task-detail-deadline>—</dd></div>
+            <div><dt>Tiến độ</dt><dd data-task-detail-progress>—</dd></div>
+            <div><dt>Ưu tiên</dt><dd data-task-detail-priority>—</dd></div>
+            <div class="task-detail-wide"><dt>Người được giao</dt><dd data-task-detail-assignees>—</dd></div>
+            <div class="task-detail-wide"><dt>Mô tả</dt><dd data-task-detail-description>—</dd></div>
+          </dl>
+          <section class="task-detail-section" data-student-task-update-section hidden>
+            <h3>Cập nhật tiến độ</h3>
+            <form class="task-detail-update-form" data-student-task-update-form>
+              <label class="form-field" for="detail-task-progress"><span class="form-label">Tiến độ (%)</span><input class="form-control" id="detail-task-progress" name="progress" type="number" min="0" max="100" step="1" required></label>
+              <label class="form-field" for="detail-task-status"><span class="form-label">Trạng thái</span><select class="form-control" id="detail-task-status" name="status"><option value="">Không đổi trạng thái</option></select></label>
+              <button class="button button-primary" type="submit">Lưu cập nhật</button>
+            </form>
+          </section>
+          <section class="task-detail-section">
+            <h3>Minh chứng</h3>
+            <ul class="task-detail-list" data-task-detail-attachments><li>Đang tải...</li></ul>
+            <form class="task-detail-upload-form" data-task-evidence-form>
+              <label class="form-field" for="task-evidence-file"><span class="form-label">Đính kèm tệp</span><input class="form-control" id="task-evidence-file" name="file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg" required></label>
+              <button class="button button-secondary" type="submit">Tải minh chứng</button>
+            </form>
+          </section>
+          <section class="task-detail-section">
+            <h3>Bình luận</h3>
+            <ul class="task-detail-list" data-task-detail-comments><li>Đang tải...</li></ul>
+            <form class="task-detail-comment-form" data-task-comment-form>
+              <label class="form-field" for="task-comment-content"><span class="form-label">Thêm bình luận</span><textarea class="form-control" id="task-comment-content" name="content" maxlength="5000" required></textarea></label>
+              <button class="button button-secondary" type="submit">Gửi bình luận</button>
+            </form>
+          </section>
+        </div>
+      </div>
     </dialog>
   </body>
 </html>
