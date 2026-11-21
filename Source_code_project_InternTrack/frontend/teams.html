@@ -10,27 +10,81 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/team-management.css">
     <script type="module" src="js/teams.js"></script>
   </head>
-  <body class="admin-dashboard" data-allowed-roles="ADMIN,SUPERVISOR,STUDENT">
-    <main class="standalone-admin-main" id="main-content" tabindex="-1" aria-busy="true">
-      <div class="standalone-admin-heading">
-        <div><p class="eyebrow">Quản lý thực tập</p><h1>Nhóm thực tập</h1></div>
-        <a class="button button-secondary" href="admin.html">Quay về quản trị</a>
+  <body class="admin-dashboard team-management-page" data-allowed-roles="ADMIN,SUPERVISOR,STUDENT">
+    <div class="app-shell">
+      <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+      <aside class="sidebar admin-sidebar" id="app-sidebar" aria-label="Điều hướng quản lý nhóm">
+        <a class="brand" href="admin.html" aria-label="InterTrack - Trang quản trị">
+          <img class="brand-mark" src="logo.svg" alt="">
+          <span class="brand-copy"><span>InterTrack</span><span class="brand-tagline">QUẢN TRỊ THỰC TẬP</span></span>
+        </a>
+        <div class="workspace-switcher">
+          <span class="workspace-mark" aria-hidden="true">IT</span>
+          <span class="workspace-details"><strong>Nhóm thực tập</strong><span>Dữ liệu trực tiếp từ hệ thống</span></span>
+        </div>
+        <nav class="navigation admin-navigation" aria-label="Menu quản lý">
+          <p class="navigation-label">QUẢN LÝ THỰC TẬP</p>
+          <a class="nav-link" href="admin.html"><span class="nav-icon" aria-hidden="true">▦</span><span>Tổng quan</span></a>
+          <a class="nav-link" href="internships.html"><span class="nav-icon" aria-hidden="true">▣</span><span>Kỳ thực tập</span></a>
+          <a class="nav-link is-active" href="teams.html" aria-current="page"><span class="nav-icon" aria-hidden="true">⌘</span><span>Nhóm thực tập</span></a>
+        </nav>
+        <div class="sidebar-bottom">
+          <button class="sidebar-logout" type="button" data-logout><span aria-hidden="true">↪</span>Đăng xuất</button>
+        </div>
+      </aside>
+
+      <div class="app-main">
+        <header class="topbar admin-topbar">
+          <button class="icon-button menu-toggle" type="button" data-sidebar-toggle aria-controls="app-sidebar" aria-expanded="false" aria-label="Mở menu">☰</button>
+          <span class="topbar-context">Quản trị hệ thống <span aria-hidden="true">/</span> <strong>Nhóm thực tập</strong></span>
+          <span class="topbar-spacer"></span>
+          <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Chuyển giao diện">◐</button>
+          <div class="account-menu-container" data-account-menu-container>
+            <button class="profile-button" type="button" data-account-toggle aria-haspopup="menu" aria-expanded="false">
+              <span class="avatar avatar-blue" data-team-user-initials>AD</span>
+              <span class="profile-details"><strong data-team-user-name>Quản trị viên</strong><span data-team-user-role>ADMIN</span></span>
+              <span class="profile-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="account-menu" data-account-menu role="menu" hidden>
+              <div class="account-menu-heading"><strong data-team-user-name>Quản trị viên</strong><span data-team-user-role>ADMIN</span></div>
+              <button class="account-menu-item" type="button" role="menuitem" data-logout><span aria-hidden="true">↪</span>Đăng xuất</button>
+            </div>
+          </div>
+        </header>
+
+        <main class="content admin-content" id="main-content" tabindex="-1" aria-busy="true">
+          <div class="page-heading admin-page-heading team-page-heading">
+            <div><p class="eyebrow">Quản lý thực tập</p><h1>Nhóm thực tập</h1><p class="page-description">Quản lý kỳ, giảng viên hướng dẫn và thành viên theo dữ liệu thực tế.</p></div>
+            <button class="button button-primary" type="button" data-create-team>+ Tạo nhóm</button>
+          </div>
+
+          <section class="admin-stat-grid team-stat-grid" aria-label="Thống kê nhóm">
+            <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Tổng nhóm</span><span class="admin-stat-icon admin-stat-icon-blue">⌘</span></div><p class="summary-value" data-team-stat-total>—</p><p class="summary-note">Tất cả nhóm trong hệ thống</p></article>
+            <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Đang hoạt động</span><span class="admin-stat-icon admin-stat-icon-green">●</span></div><p class="summary-value" data-team-stat-active>—</p><p class="summary-note">Nhóm đang thực tập</p></article>
+            <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Thành viên</span><span class="admin-stat-icon admin-stat-icon-violet">♧</span></div><p class="summary-value" data-team-stat-members>—</p><p class="summary-note">Tổng lượt thành viên</p></article>
+            <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Chưa có giảng viên</span><span class="admin-stat-icon admin-stat-icon-orange">!</span></div><p class="summary-value" data-team-stat-supervisor>—</p><p class="summary-note">Nhóm cần kiểm tra phân công</p></article>
+          </section>
+
+          <section class="panel admin-panel team-table-panel">
+            <div class="admin-toolbar team-toolbar">
+              <div class="admin-filter team-search-filter"><label for="team-search">Tìm kiếm</label><input class="form-control" id="team-search" data-team-search type="search" placeholder="Tên hoặc mã nhóm"></div>
+              <div class="admin-filter"><label for="team-period-filter">Kỳ thực tập</label><select class="form-control" id="team-period-filter" data-team-period-filter><option value="">Tất cả</option></select></div>
+              <div class="admin-filter"><label for="team-status-filter">Trạng thái</label><select class="form-control" id="team-status-filter" data-team-status-filter><option value="">Tất cả</option><option value="ACTIVE">Đang hoạt động</option><option value="INACTIVE">Không hoạt động</option><option value="COMPLETED">Đã hoàn thành</option></select></div>
+              <button class="button button-secondary team-refresh" type="button" data-team-refresh>↻ Làm mới</button>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table admin-table team-data-table">
+                <thead><tr><th>Nhóm</th><th>Kỳ thực tập</th><th>Giảng viên hướng dẫn</th><th>Thành viên</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                <tbody data-teams-rows><tr><td class="admin-table-state" colspan="6">Đang tải...</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+        </main>
       </div>
-      <section class="panel admin-panel">
-        <div class="admin-toolbar">
-          <div class="admin-filter"><label for="team-search">Tìm kiếm</label><input class="form-control" id="team-search" data-team-search type="search" placeholder="Tên hoặc mã nhóm"></div>
-          <button class="button button-primary" type="button" data-create-team>+ Tạo nhóm</button>
-        </div>
-        <div class="table-scroll">
-          <table class="data-table admin-table">
-            <thead><tr><th>Nhóm</th><th>Kỳ thực tập</th><th>Giảng viên hướng dẫn</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-            <tbody data-teams-rows><tr><td class="admin-table-state" colspan="5">Đang tải...</td></tr></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+    </div>
 
     <dialog class="modal admin-dialog" data-team-dialog>
       <form class="admin-dialog-form" data-team-form>
