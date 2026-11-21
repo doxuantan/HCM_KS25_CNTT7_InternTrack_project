@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#153a72">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Bảng điều khiển giảng viên | InterTrack</title>
+    <script src="../js/theme.js"></script>
+    <link rel="icon" type="image/svg+xml" href="../logo.svg">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/supervisor-dashboard.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <script type="module" src="../js/supervisor-dashboard.js"></script>
+  </head>
+  <body class="admin-dashboard supervisor-dashboard" data-allowed-roles="SUPERVISOR" data-supervisor-dashboard>
+    <div class="app-shell">
+      <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+      <aside class="sidebar admin-sidebar" id="app-sidebar" aria-label="Điều hướng giảng viên">
+        <a class="brand" href="dashboard.html" aria-label="InterTrack - Giảng viên">
+          <img class="brand-mark" src="../logo.svg" alt="">
+          <span class="brand-copy"><span>InterTrack</span><span class="brand-tagline">GIẢNG VIÊN HƯỚNG DẪN</span></span>
+        </a>
+        <nav class="navigation admin-navigation" aria-label="Menu giảng viên">
+          <p class="navigation-label">THEO DÕI THỰC TẬP</p>
+          <a class="nav-link is-active" href="#overview" data-supervisor-view="overview"><span class="nav-icon">▦</span><span>Tổng quan</span></a>
+          <a class="nav-link" href="#periods" data-supervisor-view="periods"><span class="nav-icon">▣</span><span>Kỳ thực tập</span></a>
+          <a class="nav-link" href="#teams" data-supervisor-view="teams"><span class="nav-icon">⌘</span><span>Nhóm phụ trách</span></a>
+          <a class="nav-link" href="#progress" data-supervisor-view="progress"><span class="nav-icon">◷</span><span>Tiến độ</span></a>
+          <a class="nav-link" href="tasks.html"><span class="nav-icon">✓</span><span>Quản lý task</span></a>
+          <a class="nav-link" href="#diaries" data-supervisor-view="diaries"><span class="nav-icon">✎</span><span>Nhật ký</span></a>
+          <a class="nav-link" href="#reports" data-supervisor-view="reports"><span class="nav-icon">▤</span><span>Báo cáo</span></a>
+          <a class="nav-link" href="#evaluations" data-supervisor-view="evaluations"><span class="nav-icon">☆</span><span>Đánh giá</span></a>
+          <a class="nav-link" href="#notifications" data-supervisor-view="notifications"><span class="nav-icon">●</span><span>Thông báo</span></a>
+        </nav>
+        <div class="sidebar-bottom"><button class="sidebar-logout" type="button" data-logout><span>↪</span>Đăng xuất</button></div>
+      </aside>
+
+      <div class="app-main">
+        <header class="topbar admin-topbar">
+          <button class="icon-button menu-toggle" type="button" data-sidebar-toggle aria-controls="app-sidebar" aria-expanded="false" aria-label="Mở menu">☰</button>
+          <span class="topbar-context">Giảng viên hướng dẫn <span>/</span> <strong data-supervisor-page-title>Tổng quan</strong></span>
+          <span class="topbar-spacer"></span>
+          <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Chuyển giao diện">◐</button>
+          <div class="account-menu-container">
+            <button class="profile-button" type="button" data-account-toggle aria-haspopup="menu" aria-expanded="false">
+              <span class="avatar avatar-blue" data-user-initials>GV</span>
+              <span class="profile-details"><strong data-user-name>Giảng viên</strong><span data-user-role>SUPERVISOR</span></span>
+              <span class="profile-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="account-menu" data-account-menu role="menu" hidden>
+              <div class="account-menu-heading"><strong data-user-name>Giảng viên</strong><span>Giảng viên hướng dẫn</span></div>
+              <button class="account-menu-item" type="button" role="menuitem" data-logout><span aria-hidden="true">↪</span>Đăng xuất</button>
+            </div>
+          </div>
+        </header>
+
+        <main class="content admin-content" id="main-content" tabindex="-1" aria-busy="true">
+          <section class="supervisor-view" data-supervisor-panel="overview">
+            <div class="page-heading admin-page-heading"><div><p class="eyebrow">Bảng điều khiển</p><h1>Tổng quan thực tập</h1><p class="page-description">Dữ liệu các nhóm do bạn phụ trách.</p></div><button class="button button-secondary" type="button" data-supervisor-refresh>Làm mới dữ liệu</button></div>
+            <section class="admin-stat-grid supervisor-stat-grid">
+              <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Kỳ thực tập</span><span class="admin-stat-icon admin-stat-icon-blue" aria-hidden="true">▣</span></div><p class="summary-value" data-stat-periods>—</p><p class="summary-note">Kỳ có nhóm được phân công</p></article>
+              <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Nhóm phụ trách</span><span class="admin-stat-icon admin-stat-icon-violet" aria-hidden="true">⌘</span></div><p class="summary-value" data-stat-teams>—</p><p class="summary-note">Nhóm thuộc phạm vi của bạn</p></article>
+              <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Tiến độ tổng thể</span><span class="admin-stat-icon admin-stat-icon-teal" aria-hidden="true">◷</span></div><p class="summary-value" data-stat-progress>—</p><p class="summary-note" data-stat-progress-note>Đang tải...</p></article>
+              <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Task quá hạn</span><span class="admin-stat-icon admin-stat-icon-orange" aria-hidden="true">!</span></div><p class="summary-value" data-stat-overdue>—</p><p class="summary-note">Cần xử lý ưu tiên</p></article>
+            </section>
+            <section class="supervisor-grid">
+              <article class="panel admin-panel"><div class="panel-heading"><div><h2>Kỳ thực tập gần đây</h2><p class="muted">Các kỳ có nhóm thuộc phạm vi</p></div></div><div data-overview-periods class="supervisor-list"><p class="muted">Đang tải...</p></div></article>
+              <article class="panel admin-panel"><div class="panel-heading"><div><h2>Task sắp đến hạn</h2><p class="muted">Ưu tiên deadline gần nhất</p></div></div><div data-overview-upcoming class="supervisor-list"><p class="muted">Đang tải...</p></div></article>
+            </section>
+          </section>
+
+          <section class="supervisor-view" data-supervisor-panel="periods" hidden><div class="page-heading admin-page-heading"><div><p class="eyebrow">Thực tập</p><h1>Danh sách kỳ thực tập</h1></div></div><div class="table-scroll panel admin-panel"><table class="data-table admin-table"><thead><tr><th>Kỳ thực tập</th><th>Thời gian</th><th>Trạng thái</th><th>Mô tả</th></tr></thead><tbody data-period-rows><tr><td colspan="4" class="admin-table-state">Đang tải...</td></tr></tbody></table></div></section>
+          <section class="supervisor-view" data-supervisor-panel="teams" hidden><div class="page-heading admin-page-heading"><div><p class="eyebrow">Phụ trách</p><h1>Nhóm sinh viên</h1></div></div><div class="table-scroll panel admin-panel"><table class="data-table admin-table"><thead><tr><th>Nhóm</th><th>Thành viên</th><th>Tiến độ</th><th>Task hoàn thành</th><th>Thao tác</th></tr></thead><tbody data-team-rows><tr><td colspan="5" class="admin-table-state">Đang tải...</td></tr></tbody></table></div></section>
+          <section class="supervisor-view" data-supervisor-panel="progress" hidden><div class="page-heading admin-page-heading"><div><p class="eyebrow">Theo dõi</p><h1>Tiến độ nhóm và sinh viên</h1></div></div><div data-progress-grid class="supervisor-team-grid"><p class="muted">Đang tải...</p></div></section>
+          <section class="supervisor-view" data-supervisor-panel="diaries" hidden><div class="page-heading admin-page-heading"><div><p class="eyebrow">Nhật ký</p><h1>Nhật ký thực tập</h1></div></div><div class="table-scroll panel admin-panel"><table class="data-table admin-table"><thead><tr><th>Sinh viên</th><th>Ngày</th><th>Nội dung</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody data-diary-rows><tr><td colspan="5" class="admin-table-state">Đang tải...</td></tr></tbody></table></div></section>
+          <section class="supervisor-view" data-supervisor-panel="reports" hidden><div class="page-heading admin-page-heading"><div><p class="eyebrow">Báo cáo</p><h1>Báo cáo thực tập</h1></div></div><div class="table-scroll panel admin-panel"><table class="data-table admin-table"><thead><tr><th>Báo cáo</th><th>Đối tượng</th><th>Loại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody data-report-rows><tr><td colspan="5" class="admin-table-state">Đang tải...</td></tr></tbody></table></div></section>
+          <section class="supervisor-view" data-supervisor-panel="evaluations" hidden><div class="page-heading admin-page-heading"><div><p class="eyebrow">Đánh giá</p><h1>Phiếu đánh giá sinh viên</h1><button class="button button-primary" type="button" data-open-evaluation>Tạo đánh giá</button></div></div><div class="table-scroll panel admin-panel"><table class="data-table admin-table"><thead><tr><th>Đối tượng</th><th>Kỳ</th><th>Tổng điểm</th><th>Công bố</th><th>Nhận xét</th></tr></thead><tbody data-evaluation-rows><tr><td colspan="5" class="admin-table-state">Đang tải...</td></tr></tbody></table></div></section>
+          <section class="supervisor-view" data-supervisor-panel="notifications" hidden><div class="page-heading admin-page-heading"><div><p class="eyebrow">Thông báo</p><h1>Thông báo của tôi</h1></div></div><div class="panel admin-panel supervisor-list" data-notification-list><p class="muted">Đang tải...</p></div></section>
+        </main>
+      </div>
+    </div>
+
+    <dialog class="modal admin-dialog" data-review-dialog><form class="admin-dialog-form" data-review-form><div class="modal-header"><div><h2 class="modal-title" data-review-title>Duyệt</h2></div><button class="modal-close" type="button" data-close-review>×</button></div><div class="modal-body"><label class="form-field"><span class="form-label">Nhận xét / lý do</span><textarea class="form-control" name="content" rows="4" maxlength="5000" required></textarea></label></div><div class="modal-footer"><button class="button button-secondary" type="button" data-close-review>Hủy</button><button class="button button-primary" type="button" data-review-approved>Duyệt</button><button class="button button-danger" type="button" data-review-revision>Yêu cầu sửa</button></div></form></dialog>
+    <dialog class="modal admin-dialog" data-evaluation-dialog><form class="admin-dialog-form" data-evaluation-form><div class="modal-header"><div><h2 class="modal-title">Tạo đánh giá sinh viên</h2></div><button class="modal-close" type="button" data-close-evaluation>×</button></div><div class="modal-body admin-form-grid"><label class="form-field"><span class="form-label">Sinh viên</span><select class="form-control" name="student_id" required></select></label><label class="form-field"><span class="form-label">Kỳ thực tập</span><select class="form-control" name="period_id" required></select></label><label class="form-field admin-form-wide"><span class="form-label">Nhận xét</span><textarea class="form-control" name="comment" maxlength="5000"></textarea></label><label class="form-field admin-form-wide"><span><input type="checkbox" name="is_published"> Công bố đánh giá</span></label></div><div class="modal-footer"><button class="button button-secondary" type="button" data-close-evaluation>Hủy</button><button class="button button-primary" type="submit">Lưu đánh giá</button></div></form></dialog>
+  </body>
+</html>

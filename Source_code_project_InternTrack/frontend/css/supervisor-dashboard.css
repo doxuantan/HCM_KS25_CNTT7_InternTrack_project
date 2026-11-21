@@ -1,0 +1,220 @@
+.supervisor-dashboard .supervisor-view {
+  animation: supervisor-view-in 180ms ease-out;
+}
+
+.supervisor-dashboard .supervisor-view[hidden] {
+  display: none !important;
+}
+
+.supervisor-dashboard .supervisor-stat-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.supervisor-dashboard .admin-stat-card {
+  min-height: 128px;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.supervisor-dashboard .admin-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgb(25 48 82 / 7%);
+}
+
+.supervisor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.supervisor-team-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.supervisor-team-card {
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.supervisor-team-card h2 {
+  margin: 0 0 14px;
+  color: #243149;
+  font-size: 15px;
+}
+
+.supervisor-progress-track {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf2f7;
+}
+
+.supervisor-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2463c9, #56a3df);
+  transition: width 350ms ease;
+}
+
+.supervisor-member-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid #edf1f6;
+}
+
+.supervisor-member-row strong {
+  display: block;
+}
+
+.supervisor-member-row span {
+  color: #738097;
+  font-size: 11px;
+}
+
+.supervisor-list {
+  display: grid;
+  padding: 0;
+}
+
+.supervisor-list-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 66px;
+  padding: 12px 17px;
+  border-top: 1px solid #edf1f6;
+  transition: background-color 140ms ease;
+}
+
+.supervisor-list-item:hover {
+  background: #fafcff;
+}
+
+.supervisor-list-item:first-child {
+  border-top: 0;
+}
+
+.supervisor-list-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #29384f;
+  font-size: 12px;
+}
+
+.supervisor-list-item span,
+.supervisor-list-item time {
+  color: #738097;
+  font-size: 11px;
+}
+
+.supervisor-notification-unread {
+  border-left: 3px solid #2463c9;
+  background: #f7faff;
+}
+
+.supervisor-dashboard .admin-table tbody tr {
+  transition: background-color 140ms ease;
+}
+
+.supervisor-dashboard .admin-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.supervisor-dashboard .admin-table td {
+  max-width: 390px;
+  color: #3d4b60;
+  vertical-align: middle;
+}
+
+.supervisor-dashboard .admin-row-action {
+  min-height: 32px;
+  padding: 6px 10px;
+  text-decoration: none;
+}
+
+.supervisor-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #edf2f7;
+  color: #66758a;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.supervisor-status::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.supervisor-status-active,
+.supervisor-status-done,
+.supervisor-status-approved,
+.supervisor-status-reviewed {
+  background: #eaf6ef;
+  color: #347d57;
+}
+
+.supervisor-status-review,
+.supervisor-status-reviewing,
+.supervisor-status-in-progress,
+.supervisor-status-submitted {
+  background: #edf3fc;
+  color: #4b73a5;
+}
+
+.supervisor-status-todo,
+.supervisor-status-draft,
+.supervisor-status-revision-required,
+.supervisor-status-cancelled {
+  background: #fff3df;
+  color: #a66c27;
+}
+
+.supervisor-dashboard .admin-dialog {
+  width: min(680px, calc(100vw - 24px));
+}
+
+@keyframes supervisor-view-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1100px) {
+  .supervisor-dashboard .supervisor-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .supervisor-grid,
+  .supervisor-team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .supervisor-dashboard .supervisor-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .supervisor-list-item {
+    align-items: start;
+  }
+}
+
+@media (max-width: 480px) {
+  .supervisor-dashboard .supervisor-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

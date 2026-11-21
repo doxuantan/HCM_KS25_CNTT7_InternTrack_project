@@ -1,5 +1,6 @@
 import logging
 
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,6 +11,24 @@ from app.models.user import User
 
 
 logger = logging.getLogger(__name__)
+
+
+def list_notifications(db: Session, user: User) -> list[Notification]:
+    return db.scalars(
+        select(Notification)
+        .where(Notification.user_id == user.id)
+        .order_by(Notification.created_at.desc())
+    ).all()
+
+
+def mark_notification_read(db: Session, notification_id: int, user: User) -> None:
+    notification = db.get(Notification, notification_id)
+    if notification is None:
+        raise HTTPException(status_code=404, detail="Không tìm thấy thông báo.")
+    if notification.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Không có quyền cập nhật thông báo này.")
+    notification.is_read = True
+    db.commit()
 
 
 def create_notification(

@@ -34,8 +34,14 @@ def get_all_internships(db: Session, user: User):
             return []
         statement = (
             select(InternshipPeriod)
-            .join(Team, Team.period_id == InternshipPeriod.id)
-            .where(Team.supervisor_id == lecturer_id)
+            .where(
+                select(Team.id)
+                .where(
+                    Team.period_id == InternshipPeriod.id,
+                    Team.supervisor_id == lecturer_id,
+                )
+                .exists()
+            )
         )
     elif user.role == UserRole.STUDENT:
         student_id = db.scalar(select(Student.id).where(Student.user_id == user.id))

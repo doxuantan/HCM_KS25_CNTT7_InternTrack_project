@@ -8,6 +8,7 @@ from app.models.lecturer import Lecturer
 from app.models.student import Student
 from app.models.team import Team
 from app.models.team_member import TeamMember
+from app.models.task import Task
 from app.models.user import User, UserRole
 from app.schemas.team import (
     TeamCreate,
@@ -73,17 +74,37 @@ def _validate_references(
     db: Session,
     period_id: int,
     supervisor_id: int,
-) -> None:
+) -> int:
     if db.get(InternshipPeriod, period_id) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Không tìm thấy kỳ thực tập.",
         )
-    if db.get(Lecturer, supervisor_id) is None:
+    return _resolve_supervisor_id(db, supervisor_id)
+
+
+def _resolve_supervisor_id(db: Session, supervisor_id: int) -> int:
+    lecturer = db.get(Lecturer, supervisor_id)
+    if lecturer is not None:
+        user = db.get(User, lecturer.user_id)
+        if user is not None and user.role == UserRole.SUPERVISOR and user.is_active:
+            return lecturer.id
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Không tìm thấy giảng viên hướng dẫn.",
         )
+
+    lecturer = db.scalar(
+        select(Lecturer).where(Lecturer.user_id == supervisor_id)
+    )
+    if lecturer is not None:
+        user = db.get(User, lecturer.user_id)
+        if user is not None and user.role == UserRole.SUPERVISOR and user.is_active:
+            return lecturer.id
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Không tìm thấy giảng viên hướng dẫn.",
+    )
 
 
 def _ensure_unique_code(
@@ -110,11 +131,13 @@ def create_team(db: Session, data: TeamCreate, user: User) -> Team:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Tài khoản chưa được liên kết với hồ sơ giảng viên.",
             )
-        if data.supervisor_id is not None and data.supervisor_id != supervisor_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Giảng viên chỉ được tạo nhóm thuộc phạm vi của mình.",
-            )
+        if data.supervisor_id is not None:
+            requested_supervisor_id = _resolve_supervisor_id(db, data.supervisor_id)
+            if requested_supervisor_id != supervisor_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Giảng viên chỉ được tạo nhóm thuộc phạm vi của mình.",
+                )
     else:
         supervisor_id = data.supervisor_id
         if supervisor_id is None:
@@ -123,7 +146,7 @@ def create_team(db: Session, data: TeamCreate, user: User) -> Team:
                 detail="supervisor_id là bắt buộc khi ADMIN tạo nhóm.",
             )
 
-    _validate_references(db, data.period_id, supervisor_id)
+    supervisor_id = _validate_references(db, data.period_id, supervisor_id)
     _ensure_unique_code(db, data.team_code)
     team = Team(
         period_id=data.period_id,
@@ -157,16 +180,20 @@ def update_team(
 
     if user.role == UserRole.SUPERVISOR:
         lecturer_id = _lecturer_id(db, user)
-        if "supervisor_id" in update_data and update_data["supervisor_id"] != lecturer_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Giảng viên không thể chuyển quyền quản lý nhóm.",
-            )
+        if "supervisor_id" in update_data:
+            requested_supervisor_id = _resolve_supervisor_id(db, update_data["supervisor_id"])
+            if requested_supervisor_id != lecturer_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Giảng viên không thể chuyển quyền quản lý nhóm.",
+                )
         update_data.pop("supervisor_id", None)
 
     period_id = update_data.get("period_id", team.period_id)
     supervisor_id = update_data.get("supervisor_id", team.supervisor_id)
-    _validate_references(db, period_id, supervisor_id)
+    supervisor_id = _validate_references(db, period_id, supervisor_id)
+    if "supervisor_id" in update_data:
+        update_data["supervisor_id"] = supervisor_id
     if "team_code" in update_data:
         _ensure_unique_code(db, update_data["team_code"], exclude_team_id=team.id)
 
@@ -420,11 +447,7 @@ def change_team_supervisor(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="supervisor_id là bắt buộc.",
         )
-    if db.get(Lecturer, supervisor_id) is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Không tìm thấy giảng viên hướng dẫn.",
-        )
+    supervisor_id = _resolve_supervisor_id(db, supervisor_id)
     team.supervisor_id = supervisor_id
     try:
         db.commit()
@@ -436,3 +459,29 @@ def change_team_supervisor(
         ) from None
     db.refresh(team)
     return team
+
+
+def delete_team(db: Session, team_id: int, user: User) -> None:
+    if user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Chỉ quản trị viên được xóa nhóm.",
+        )
+
+    team = get_team(db, team_id, user)
+    member = db.scalar(select(TeamMember.id).where(TeamMember.team_id == team.id))
+    if member is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể xóa nhóm đang có thành viên. Hãy xóa thành viên trước.",
+        )
+
+    task = db.scalar(select(Task.id).where(Task.team_id == team.id))
+    if task is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể xóa nhóm đang có task.",
+        )
+
+    db.delete(team)
+    db.commit()

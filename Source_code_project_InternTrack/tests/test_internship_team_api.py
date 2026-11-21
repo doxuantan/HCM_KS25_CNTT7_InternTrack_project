@@ -224,6 +224,113 @@ class InternshipAndTeamApiTests(unittest.TestCase):
         )
         self.assertEqual(deleted.status_code, 204, deleted.text)
 
+    def test_admin_period_team_assignment_sync_for_supervisor(self) -> None:
+        payload = {
+            "name": "Synced period",
+            "start_date": "2027-01-01",
+            "end_date": "2027-06-30",
+            "status": "UPCOMING",
+        }
+        created = self.client.post(
+            "/api/v1/internship-periods",
+            json=payload,
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(created.status_code, 201, created.text)
+        period_id = created.json()["data"]["id"]
+
+        before_assignment = self.client.get(
+            "/api/v1/internship-periods",
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(before_assignment.status_code, 200, before_assignment.text)
+        self.assertNotIn(
+            period_id,
+            [item["id"] for item in before_assignment.json()["data"]],
+        )
+
+        team = self.client.post(
+            "/api/v1/teams",
+            json={
+                "period_id": period_id,
+                "supervisor_id": self.lecturer_id,
+                "team_name": "Synced team",
+                "team_code": "SYNC-01",
+                "description": "Assigned to supervisor",
+            },
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(team.status_code, 201, team.text)
+        team_id = team.json()["data"]["id"]
+
+        after_assignment = self.client.get(
+            "/api/v1/internship-periods",
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(after_assignment.status_code, 200, after_assignment.text)
+        self.assertIn(
+            period_id,
+            [item["id"] for item in after_assignment.json()["data"]],
+        )
+
+        reassigned = self.client.patch(
+            f"/api/v1/teams/{team_id}/supervisor",
+            json={"supervisor_id": self.other_lecturer_id},
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(reassigned.status_code, 200, reassigned.text)
+
+        old_supervisor = self.client.get(
+            "/api/v1/internship-periods",
+            headers=self._auth("supervisor"),
+        )
+        new_supervisor = self.client.get(
+            "/api/v1/internship-periods",
+            headers=self._auth("other_supervisor"),
+        )
+        self.assertNotIn(
+            period_id,
+            [item["id"] for item in old_supervisor.json()["data"]],
+        )
+        self.assertIn(
+            period_id,
+            [item["id"] for item in new_supervisor.json()["data"]],
+        )
+
+    def test_create_team_accepts_supervisor_user_id_22(self) -> None:
+        with self.session_factory() as db:
+            supervisor = User(
+                id=22,
+                email="supervisor22@example.test",
+                password_hash="not-used",
+                full_name="Supervisor 22",
+                role=UserRole.SUPERVISOR,
+                is_active=True,
+            )
+            db.add(supervisor)
+            db.flush()
+            lecturer = Lecturer(
+                id=4,
+                user_id=22,
+                lecturer_code="L-22",
+            )
+            db.add(lecturer)
+            db.commit()
+            lecturer_id = lecturer.id
+
+        created = self.client.post(
+            "/api/v1/teams",
+            json={
+                "period_id": self.period_id,
+                "supervisor_id": 22,
+                "team_code": "USER-ID-22",
+                "team_name": "Team for supervisor 22",
+            },
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(created.status_code, 201, created.text)
+        self.assertEqual(created.json()["data"]["supervisor_id"], lecturer_id)
+
     def test_team_crud_and_role_scoping(self) -> None:
         student_teams = self.client.get(
             "/api/v1/teams",
@@ -317,6 +424,30 @@ class InternshipAndTeamApiTests(unittest.TestCase):
             admin_created.json()["data"]["supervisor_id"],
             self.other_lecturer.id,
         )
+
+        admin_delete = self.client.delete(
+            f"/api/v1/teams/{admin_created.json()['data']['id']}",
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(admin_delete.status_code, 204, admin_delete.text)
+
+        admin_deleted_detail = self.client.get(
+            f"/api/v1/teams/{admin_created.json()['data']['id']}",
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(admin_deleted_detail.status_code, 404, admin_deleted_detail.text)
+
+        supervisor_delete = self.client.delete(
+            f"/api/v1/teams/{self.team_id}",
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(supervisor_delete.status_code, 403, supervisor_delete.text)
+
+        admin_blocked_delete = self.client.delete(
+            f"/api/v1/teams/{self.team_id}",
+            headers=self._auth("admin"),
+        )
+        self.assertEqual(admin_blocked_delete.status_code, 409, admin_blocked_delete.text)
 
         admin_updated = self.client.put(
             f"/api/v1/teams/{self.other_team_id}",

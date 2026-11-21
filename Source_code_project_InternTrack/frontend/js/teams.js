@@ -1,5 +1,5 @@
 import { apiRequest } from "./api.js";
-import { requireAuth } from "./auth.js";
+import { logout, requireAuth } from "./auth.js";
 import { confirmAction, initializeSharedUi, showToast } from "./ui.js";
 
 let teams = [];
@@ -21,10 +21,20 @@ function escapeHtml(value) {
 
 async function loadUsersAndReferences() {
   if (isStudentView()) return;
-  periods = await apiRequest("internship-periods");
-  users = currentUser?.role === "ADMIN"
-    ? await apiRequest("users?skip=0&limit=100")
-    : [];
+  try {
+    periods = await apiRequest("internship-periods");
+  } catch (error) {
+    periods = [];
+    showToast(error.message, { kind: "error" });
+  }
+  try {
+    users = currentUser?.role === "ADMIN"
+      ? await apiRequest("users?skip=0&limit=100")
+      : [];
+  } catch (error) {
+    users = [];
+    showToast(error.message, { kind: "error" });
+  }
   fillTeamFormOptions();
 }
 
@@ -38,6 +48,10 @@ function fillTeamFormOptions() {
       option.textContent = period.name;
       return option;
     }));
+    periodSelect.disabled = !periods.length;
+    if (!periods.length) {
+      periodSelect.replaceChildren(new Option("Chưa có kỳ thực tập", "", true, true));
+    }
   }
   if (supervisorSelect) {
     if (currentUser?.role === "SUPERVISOR") {
@@ -54,10 +68,14 @@ function fillTeamFormOptions() {
       option.textContent = `${user.full_name} (${user.lecturer_profile.lecturer_code})`;
       return option;
     }));
+    supervisorSelect.disabled = !supervisors.length;
+    if (!supervisors.length) {
+      supervisorSelect.replaceChildren(new Option("Chưa có giảng viên", "", true, true));
+    }
   }
 }
 
-function stateRow(message, columns = 5) {
+function stateRow(message, columns = 6) {
   const row = document.createElement("tr");
   const cell = document.createElement("td");
   cell.colSpan = columns;
@@ -71,9 +89,14 @@ function renderTeams() {
   const body = document.querySelector("[data-teams-rows]");
   if (!body) return;
   const term = document.querySelector("[data-team-search]")?.value.trim().toLocaleLowerCase("vi-VN") || "";
-  const filtered = teams.filter((team) => `${team.team_name} ${team.team_code}`.toLocaleLowerCase("vi-VN").includes(term));
+  const periodId = document.querySelector("[data-team-period-filter]")?.value || "";
+  const status = document.querySelector("[data-team-status-filter]")?.value || "";
+  const filtered = teams.filter((team) =>
+    `${team.team_name} ${team.team_code}`.toLocaleLowerCase("vi-VN").includes(term)
+    && (!periodId || String(team.period_id) === periodId)
+    && (!status || team.status === status));
   if (!filtered.length) {
-    body.replaceChildren(stateRow(teams.length ? "Không tìm thấy nhóm phù hợp." : "Chưa có nhóm thực tập."));
+    body.replaceChildren(stateRow(teams.length ? "Không tìm thấy nhóm phù hợp." : "Chưa có nhóm thực tập.", 6));
     return;
   }
   body.replaceChildren(...filtered.map((team) => {
@@ -86,8 +109,12 @@ function renderTeams() {
     periodCell.textContent = period?.name || `ID ${team.period_id}`;
     const supervisorCell = document.createElement("td");
     supervisorCell.textContent = team.supervisor_name || supervisor?.full_name || `ID ${team.supervisor_id}`;
+    const memberCell = document.createElement("td");
+    const memberCount = teamMembersCache.get(team.id)?.length;
+    memberCell.innerHTML = `<span class="team-member-count">${typeof memberCount === "number" ? memberCount : "—"} thành viên</span>`;
     const statusCell = document.createElement("td");
-    statusCell.textContent = { ACTIVE: "Đang hoạt động", INACTIVE: "Không hoạt động", COMPLETED: "Đã hoàn thành" }[team.status] || team.status;
+    const statusText = { ACTIVE: "Đang hoạt động", INACTIVE: "Không hoạt động", COMPLETED: "Đã hoàn thành" }[team.status] || team.status;
+    statusCell.innerHTML = `<span class="team-status team-status-${escapeHtml(team.status.toLowerCase())}">${escapeHtml(statusText)}</span>`;
     const actions = document.createElement("td");
     actions.className = "admin-row-actions";
     const actionItems = [["Chi tiết", "detail"]];
@@ -99,17 +126,19 @@ function renderTeams() {
     }
     if (currentUser?.role === "ADMIN") {
       actionItems.push(["Giảng viên", "supervisor"]);
+      actionItems.push(["Xóa", "delete"]);
     }
     for (const [label, action] of actionItems) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "admin-row-action";
+      if (action === "delete") button.classList.add("admin-row-action-danger");
       button.dataset.teamAction = action;
       button.dataset.teamId = String(team.id);
       button.textContent = label;
       actions.append(button);
     }
-    row.append(name, periodCell, supervisorCell, statusCell, actions);
+    row.append(name, periodCell, supervisorCell, memberCell, statusCell, actions);
     return row;
   }));
 }
@@ -139,7 +168,42 @@ async function loadAdminTeams() {
   teams = await apiRequest("teams");
   await loadUsersAndReferences();
   fillTeamFormOptions();
+  fillTeamFilters();
+  teamMembersCache.clear();
+  await Promise.all(teams.map(async (team) => {
+    try {
+      teamMembersCache.set(team.id, await apiRequest(`teams/${team.id}/members`));
+    } catch (error) {
+      teamMembersCache.set(team.id, []);
+    }
+  }));
+  renderTeamStats();
   renderTeams();
+}
+
+function fillTeamFilters() {
+  const filter = document.querySelector("[data-team-period-filter]");
+  if (filter instanceof HTMLSelectElement) {
+    const selected = filter.value;
+    filter.replaceChildren(
+      new Option("Tất cả", ""),
+      ...periods.map((period) => new Option(period.name, String(period.id))),
+    );
+    if ([...filter.options].some((option) => option.value === selected)) {
+      filter.value = selected;
+    }
+  }
+}
+
+function renderTeamStats() {
+  const total = teams.length;
+  const active = teams.filter((team) => team.status === "ACTIVE").length;
+  const members = Array.from(teamMembersCache.values()).reduce((sum, items) => sum + items.length, 0);
+  const withoutSupervisor = teams.filter((team) => !team.supervisor_id).length;
+  document.querySelector("[data-team-stat-total]")?.replaceChildren(document.createTextNode(String(total)));
+  document.querySelector("[data-team-stat-active]")?.replaceChildren(document.createTextNode(String(active)));
+  document.querySelector("[data-team-stat-members]")?.replaceChildren(document.createTextNode(String(members)));
+  document.querySelector("[data-team-stat-supervisor]")?.replaceChildren(document.createTextNode(String(withoutSupervisor)));
 }
 
 async function loadStudentTeam() {
@@ -192,6 +256,7 @@ async function loadStudentTeam() {
 async function openMemberDialog(teamId) {
   activeTeamId = teamId;
   const members = await apiRequest(`teams/${teamId}/members`);
+  teamMembersCache.set(teamId, members);
   const existing = new Set(members.map((member) => member.student_id));
   const studentSelect = document.querySelector("#member-student");
   const students = users.filter((user) => user.role === "STUDENT" && user.student_profile);
@@ -203,6 +268,9 @@ async function openMemberDialog(teamId) {
       option.textContent = `${user.full_name} (${user.student_profile.student_code})`;
       return option;
     }));
+  if (studentSelect.options.length === 0) {
+    studentSelect.replaceChildren(new Option("Không còn sinh viên phù hợp", "", true, true));
+  }
   const idField = document.querySelector("[data-member-id-field]");
   const fallbackInput = document.querySelector("#member-student-id");
   if (currentUser?.role === "SUPERVISOR") {
@@ -274,13 +342,19 @@ async function openLeaderDialog(teamId) {
   activeTeamId = teamId;
   const members = await apiRequest(`teams/${teamId}/members`);
   const select = document.querySelector("#leader-student");
-  select.replaceChildren(...members.map((member) => {
-    const option = document.createElement("option");
-    option.value = String(member.student_id);
-    option.textContent = member.student_name ? `${member.student_name} (${member.student_code || member.student_id})` : `Sinh viên ID ${member.student_id}`;
-    option.selected = member.is_leader;
-    return option;
-  }));
+  if (!members.length) {
+    select.replaceChildren(new Option("Nhóm chưa có thành viên", "", true, true));
+    select.disabled = true;
+  } else {
+    select.disabled = false;
+    select.replaceChildren(...members.map((member) => {
+      const option = document.createElement("option");
+      option.value = String(member.student_id);
+      option.textContent = member.student_name ? `${member.student_name} (${member.student_code || member.student_id})` : `Sinh viên ID ${member.student_id}`;
+      option.selected = member.is_leader;
+      return option;
+    }));
+  }
   document.querySelector("[data-leader-dialog]").showModal();
 }
 
@@ -289,23 +363,39 @@ async function openSupervisorDialog(teamId) {
   const team = teams.find((item) => item.id === teamId);
   const select = document.querySelector("#team-supervisor-change");
   const supervisors = users.filter((user) => user.role === "SUPERVISOR" && user.lecturer_profile);
-  select.replaceChildren(...supervisors.map((user) => {
-    const option = document.createElement("option");
-    option.value = String(user.lecturer_profile.id);
-    option.textContent = `${user.full_name} (${user.lecturer_profile.lecturer_code})`;
-    option.selected = user.lecturer_profile.id === team?.supervisor_id;
-    return option;
-  }));
+  if (!supervisors.length) {
+    select.replaceChildren(new Option("Chưa có giảng viên", "", true, true));
+    select.disabled = true;
+  } else {
+    select.disabled = false;
+    select.replaceChildren(...supervisors.map((user) => {
+      const option = document.createElement("option");
+      option.value = String(user.lecturer_profile.id);
+      option.textContent = `${user.full_name} (${user.lecturer_profile.lecturer_code})`;
+      option.selected = user.lecturer_profile.id === team?.supervisor_id;
+      return option;
+    }));
+  }
   document.querySelector("[data-supervisor-dialog]").showModal();
 }
 
 document.querySelector("[data-team-search]")?.addEventListener("input", renderTeams);
+document.querySelector("[data-team-period-filter]")?.addEventListener("change", renderTeams);
+document.querySelector("[data-team-status-filter]")?.addEventListener("change", renderTeams);
 document.querySelector("[data-create-team]")?.addEventListener("click", () => openTeamDialog());
 
 document.querySelector("[data-team-form]")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const teamId = form.dataset.teamId;
+  if (!form.elements.period_id.value || form.elements.period_id.disabled) {
+    showToast("Vui lòng tạo hoặc chọn kỳ thực tập.", { kind: "error" });
+    return;
+  }
+  if (currentUser?.role === "ADMIN" && (!form.elements.supervisor_id.value || form.elements.supervisor_id.disabled)) {
+    showToast("Vui lòng chọn giảng viên hướng dẫn.", { kind: "error" });
+    return;
+  }
   const body = {
     period_id: Number(form.elements.period_id.value),
     team_name: form.elements.team_name.value.trim(),
@@ -338,6 +428,10 @@ document.querySelector("[data-member-form]")?.addEventListener("submit", async (
     currentUser?.role === "SUPERVISOR"
       ? Number(fallbackInput?.value)
       : Number(form.elements.student_id.value);
+  if (!studentId) {
+    showToast("Không còn sinh viên phù hợp để thêm.", { kind: "error" });
+    return;
+  }
   try {
     await apiRequest(`teams/${activeTeamId}/members`, {
       method: "POST",
@@ -345,6 +439,7 @@ document.querySelector("[data-member-form]")?.addEventListener("submit", async (
     });
     document.querySelector("[data-member-dialog]").close();
     showToast("Đã thêm thành viên.");
+    await loadAdminTeams();
   } catch (error) {
     showToast(error.message, { kind: "error" });
   }
@@ -368,6 +463,7 @@ document.querySelector("[data-member-list]")?.addEventListener("click", async (e
       { method: "DELETE" },
     );
     showToast("Đã xóa thành viên khỏi nhóm.");
+    await loadAdminTeams();
     await openMemberDialog(activeTeamId);
   } catch (error) {
     showToast(error.message, { kind: "error" });
@@ -377,6 +473,10 @@ document.querySelector("[data-member-list]")?.addEventListener("click", async (e
 document.querySelector("[data-leader-form]")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
+  if (!form.elements.student_id.value || form.elements.student_id.disabled) {
+    showToast("Nhóm chưa có thành viên để chọn làm nhóm trưởng.", { kind: "error" });
+    return;
+  }
   try {
     await apiRequest(`teams/${activeTeamId}/leader`, {
       method: "PATCH",
@@ -392,6 +492,10 @@ document.querySelector("[data-leader-form]")?.addEventListener("submit", async (
 document.querySelector("[data-supervisor-form]")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
+  if (!form.elements.supervisor_id.value || form.elements.supervisor_id.disabled) {
+    showToast("Không có giảng viên hướng dẫn để phân công.", { kind: "error" });
+    return;
+  }
   try {
     await apiRequest(`teams/${activeTeamId}/supervisor`, {
       method: "PATCH",
@@ -423,6 +527,24 @@ document.querySelector("[data-teams-rows]")?.addEventListener("click", (event) =
   if (button.dataset.teamAction === "supervisor") {
     void openSupervisorDialog(teamId).catch((error) => showToast(error.message, { kind: "error" }));
   }
+  if (button.dataset.teamAction === "delete" && team) {
+    void (async () => {
+      const confirmed = await confirmAction({
+        title: "Xóa nhóm thực tập",
+        message: `Bạn có chắc muốn xóa nhóm "${team.team_name}"? Nhóm có thành viên hoặc task sẽ không thể xóa.`,
+        confirmLabel: "Xóa nhóm",
+        destructive: true,
+      });
+      if (!confirmed) return;
+      try {
+        await apiRequest(`teams/${teamId}`, { method: "DELETE" });
+        showToast("Đã xóa nhóm thực tập.");
+        await loadAdminTeams();
+      } catch (error) {
+        showToast(error.message, { kind: "error" });
+      }
+    })();
+  }
 });
 
 for (const [dialogSelector, closeSelector] of [
@@ -440,9 +562,70 @@ currentUser = await requireAuth();
 if (currentUser?.role !== "ADMIN") {
   document.querySelector("[data-create-team]")?.setAttribute("hidden", "");
 }
+if (currentUser) {
+  document.querySelectorAll("[data-team-user-name]").forEach((element) => {
+    element.textContent = currentUser.full_name || "Người dùng";
+  });
+  document.querySelectorAll("[data-team-user-role]").forEach((element) => {
+    element.textContent = currentUser.role;
+  });
+  const initials = (currentUser.full_name || currentUser.role || "IT")
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  document.querySelector("[data-team-user-initials]")?.replaceChildren(document.createTextNode(initials));
+}
+document.querySelectorAll("[data-logout]").forEach((button) => {
+  button.addEventListener("click", logout);
+});
+document.querySelector("[data-team-refresh]")?.addEventListener("click", async () => {
+  const button = document.querySelector("[data-team-refresh]");
+  if (button instanceof HTMLButtonElement) {
+    button.disabled = true;
+    button.textContent = "Đang làm mới...";
+  }
+  try {
+    await loadAdminTeams();
+  } catch (error) {
+    showToast(error.message, { kind: "error" });
+  } finally {
+    if (button instanceof HTMLButtonElement) {
+      button.disabled = false;
+      button.textContent = "↻ Làm mới";
+    }
+  }
+});
+document.querySelector("[data-sidebar-toggle]")?.addEventListener("click", () => {
+  document.body.classList.toggle("sidebar-open");
+});
+document.querySelector("[data-sidebar-backdrop]")?.addEventListener("click", () => {
+  document.body.classList.remove("sidebar-open");
+});
+const accountToggle = document.querySelector("[data-account-toggle]");
+const accountMenu = document.querySelector("[data-account-menu]");
+accountToggle?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  if (!(accountMenu instanceof HTMLElement)) return;
+  const open = accountMenu.hidden;
+  accountMenu.hidden = !open;
+  accountToggle.setAttribute("aria-expanded", String(open));
+});
+document.addEventListener("click", (event) => {
+  if (event.target instanceof Element && !event.target.closest("[data-account-menu-container]")) {
+    if (accountMenu instanceof HTMLElement) accountMenu.hidden = true;
+    accountToggle?.setAttribute("aria-expanded", "false");
+  }
+});
 await initializeSharedUi();
 if (isStudentView()) {
   await loadStudentTeam();
 } else {
-  await loadAdminTeams();
+  try {
+    await loadAdminTeams();
+  } catch (error) {
+    const body = document.querySelector("[data-teams-rows]");
+    if (body) body.replaceChildren(stateRow(`Không tải được danh sách nhóm: ${error.message}`, 5));
+  }
 }

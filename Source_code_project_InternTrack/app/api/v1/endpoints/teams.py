@@ -79,6 +79,19 @@ def update_team(
     return team_service.update_team(db, team_id, data, current_user)
 
 
+@router.delete(
+    "/{team_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
+)
+def delete_team(
+    team_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    team_service.delete_team(db, team_id, current_user)
+
+
 @router.post(
     "/{team_id}/members",
     response_model=TeamMemberResponse,

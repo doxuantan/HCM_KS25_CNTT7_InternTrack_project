@@ -2,7 +2,7 @@ import { apiRequest, clearAuthSession, getAccessToken, setAuthSession } from "./
 
 const ROLE_HOME = Object.freeze({
   ADMIN: "admin.html",
-  SUPERVISOR: "home.html",
+  SUPERVISOR: "supervisor/dashboard.html",
   STUDENT: "index.html",
 });
 
