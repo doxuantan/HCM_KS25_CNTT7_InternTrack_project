@@ -85,6 +85,12 @@ function createTaskRow(task, index) {
     description.textContent = task.description.trim();
     title.append(description);
   }
+  const detailButton = document.createElement("button");
+  detailButton.className = "admin-row-action task-detail-button";
+  detailButton.type = "button";
+  detailButton.dataset.taskDetailId = String(task.id);
+  detailButton.textContent = "Chi tiết";
+  title.append(detailButton);
   row.append(title, createCell(formatDeadline(task.deadline)));
 
   const priorityCell = document.createElement("td");

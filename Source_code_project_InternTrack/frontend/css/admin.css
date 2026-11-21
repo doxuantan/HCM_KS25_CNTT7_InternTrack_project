@@ -665,6 +665,89 @@
   font-size: 13px;
 }
 
+.task-detail-dialog {
+  width: min(100%, 760px);
+}
+
+.task-detail-body {
+  display: grid;
+  gap: 18px;
+}
+
+.task-detail-wide {
+  grid-column: 1 / -1;
+}
+
+.task-detail-section {
+  padding-top: 15px;
+  border-top: 1px solid #edf1f6;
+}
+
+.task-detail-section h3 {
+  margin: 0 0 11px;
+  color: #263750;
+  font-size: 13px;
+}
+
+.task-detail-update-form,
+.task-detail-upload-form,
+.task-detail-comment-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.task-detail-update-form .form-field,
+.task-detail-upload-form .form-field,
+.task-detail-comment-form .form-field {
+  flex: 1;
+}
+
+.task-detail-comment-form {
+  align-items: flex-end;
+}
+
+.task-detail-list {
+  display: grid;
+  gap: 9px;
+  margin: 0 0 13px;
+  padding: 0;
+  list-style: none;
+}
+
+.task-detail-list > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #edf1f6;
+  border-radius: 8px;
+  color: #53637a;
+  font-size: 12px;
+}
+
+.task-detail-list > li p {
+  flex-basis: 100%;
+  margin: 5px 0 0;
+  white-space: pre-wrap;
+}
+
+.task-detail-list > li strong {
+  color: #263750;
+}
+
+.task-detail-list > li time {
+  flex: 0 0 auto;
+  color: #8794a7;
+  font-size: 10px;
+}
+
+.task-detail-button {
+  margin-top: 7px;
+}
+
 .admin-footer {
   color: #8793a5;
 }
@@ -777,6 +860,23 @@
 
   .admin-dialog .modal-footer .button {
     width: 100%;
+  }
+
+  .task-detail-update-form,
+  .task-detail-upload-form,
+  .task-detail-comment-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .task-detail-update-form > .button,
+  .task-detail-upload-form > .button,
+  .task-detail-comment-form > .button {
+    width: 100%;
+  }
+
+  .task-detail-wide {
+    grid-column: auto;
   }
 }
 

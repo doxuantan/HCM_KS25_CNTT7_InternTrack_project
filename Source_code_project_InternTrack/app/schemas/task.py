@@ -33,7 +33,27 @@ class TaskCreate(BaseModel):
 
 
 class TaskAssign(BaseModel):
-    student_id: int = Field(gt=0)
+    student_id: int | None = Field(default=None, gt=0)
+    student_ids: list[int] | None = Field(default=None, min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def validate_assignees(self):
+        if (self.student_id is None) == (self.student_ids is None):
+            raise ValueError("Provide either student_id or student_ids.")
+        if self.student_ids is not None:
+            if any(student_id <= 0 for student_id in self.student_ids):
+                raise ValueError("Student IDs must be positive.")
+            if len(set(self.student_ids)) != len(self.student_ids):
+                raise ValueError("Student IDs must be unique.")
+        return self
+
+    @property
+    def assignee_ids(self) -> list[int]:
+        if self.student_ids is not None:
+            return self.student_ids
+        if self.student_id is not None:
+            return [self.student_id]
+        raise ValueError("An assignee is required.")
 
 
 class TaskStatusUpdate(BaseModel):
@@ -62,6 +82,8 @@ class TaskAssignmentResponse(BaseModel):
     assigned_at: datetime
     progress: int
     status: AssignmentStatus
+    student_name: str | None = None
+    student_code: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -110,5 +132,6 @@ class TaskCommentResponse(BaseModel):
     user_id: int
     content: str
     created_at: datetime
+    user_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)

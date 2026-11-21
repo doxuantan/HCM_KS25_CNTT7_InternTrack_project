@@ -33,3 +33,11 @@ class TaskAssignment(Base):
     task = relationship("Task", back_populates="assignments")
     student = relationship("Student")
     assigner = relationship("User", foreign_keys=[assigned_by])
+
+    @property
+    def student_name(self) -> str | None:
+        return self.student.user.full_name if self.student and self.student.user else None
+
+    @property
+    def student_code(self) -> str | None:
+        return self.student.student_code if self.student else None

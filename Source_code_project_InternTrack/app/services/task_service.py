@@ -188,50 +188,55 @@ def assign_task(
     task = _get_task(db, task_id)
     _assert_task_manager(db, task, user)
 
-    student = db.get(Student, data.student_id)
-    if student is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Không tìm thấy sinh viên được giao nhiệm vụ.",
-        )
+    students: list[Student] = []
+    for student_id in data.assignee_ids:
+        student = db.get(Student, student_id)
+        if student is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Không tìm thấy sinh viên được giao nhiệm vụ.",
+            )
+        students.append(student)
 
-    assignee = db.get(User, student.user_id)
-    if assignee is None or assignee.role != UserRole.STUDENT or not assignee.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Tài khoản được giao nhiệm vụ không hợp lệ hoặc đã bị vô hiệu hóa.",
-        )
+    for student in students:
+        assignee = db.get(User, student.user_id)
+        if assignee is None or assignee.role != UserRole.STUDENT or not assignee.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Tài khoản được giao nhiệm vụ không hợp lệ hoặc đã bị vô hiệu hóa.",
+            )
 
-    is_member = db.scalar(
-        select(TeamMember.id).where(
-            TeamMember.team_id == task.team_id,
-            TeamMember.student_id == student.id,
+        is_member = db.scalar(
+            select(TeamMember.id).where(
+                TeamMember.team_id == task.team_id,
+                TeamMember.student_id == student.id,
+            )
         )
-    )
-    if is_member is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Sinh viên được giao phải là thành viên của nhóm nhiệm vụ.",
-        )
+        if is_member is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Sinh viên được giao phải là thành viên của nhóm nhiệm vụ.",
+            )
 
-    existing_assignment = db.scalar(
-        select(TaskAssignment.id).where(
-            TaskAssignment.task_id == task.id,
-            TaskAssignment.student_id == student.id,
+        existing_assignment = db.scalar(
+            select(TaskAssignment.id).where(
+                TaskAssignment.task_id == task.id,
+                TaskAssignment.student_id == student.id,
+            )
         )
-    )
-    if existing_assignment is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Sinh viên đã được giao nhiệm vụ này.",
-        )
+        if existing_assignment is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Sinh viên đã được giao nhiệm vụ này.",
+            )
 
-    db.add(
+    db.add_all(
         TaskAssignment(
             task_id=task.id,
             student_id=student.id,
             assigned_by=user.id,
         )
+        for student in students
     )
     try:
         db.commit()
@@ -243,12 +248,13 @@ def assign_task(
         ) from None
 
     db.refresh(task)
-    notify_task_assigned(
-        db,
-        student=student,
-        task_title=task.title,
-        assigned_by=user,
-    )
+    for student in students:
+        notify_task_assigned(
+            db,
+            student=student,
+            task_title=task.title,
+            assigned_by=user,
+        )
     return task
 
 
@@ -443,6 +449,41 @@ def update_task_progress(
             pass
     db.commit()
     db.refresh(assignment)
+    return assignment
+
+
+def get_task_progress(
+    db: Session,
+    task_id: int,
+    user: User,
+) -> TaskAssignment:
+    task = _get_task(db, task_id)
+    if user.role != UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Chỉ sinh viên được giao nhiệm vụ mới có thể xem tiến độ cá nhân.",
+        )
+
+    student_id = db.scalar(
+        select(Student.id).where(Student.user_id == user.id)
+    )
+    if student_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tài khoản chưa được liên kết với hồ sơ sinh viên.",
+        )
+
+    assignment = db.scalar(
+        select(TaskAssignment).where(
+            TaskAssignment.task_id == task.id,
+            TaskAssignment.student_id == student_id,
+        )
+    )
+    if assignment is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn không được giao nhiệm vụ này.",
+        )
     return assignment
 
 

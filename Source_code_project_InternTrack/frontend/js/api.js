@@ -4,7 +4,7 @@ const configuredApiUrl =
   document.querySelector('meta[name="api-base-url"]')?.getAttribute("content")?.trim() ||
   window.INTERTRACK_API_BASE_URL ||
   "http://localhost:8000/api/v1";
-const API_BASE_URL = configuredApiUrl.replace(/\/+$/, "");
+export const API_BASE_URL = configuredApiUrl.replace(/\/+$/, "");
 
 export class ApiError extends Error {
   constructor(message, status, payload = null) {
