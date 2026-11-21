@@ -287,6 +287,11 @@ def review_task(
             assignment.status = AssignmentStatus.DONE
             assignment.progress = 100
         description = "Task review approved."
+    elif data.status == TaskReviewStatus.REJECTED:
+        new_status = TaskStatus.CANCELLED
+        for assignment in task.assignments:
+            assignment.status = AssignmentStatus.IN_PROGRESS
+        description = "Task review rejected."
     else:
         new_status = TaskStatus.IN_PROGRESS
         for assignment in task.assignments:
@@ -313,7 +318,11 @@ def review_task(
         "message": (
             "Đã duyệt nhiệm vụ."
             if data.status == TaskReviewStatus.APPROVED
-            else "Đã yêu cầu sinh viên sửa lại nhiệm vụ."
+            else (
+                "Đã từ chối nhiệm vụ."
+                if data.status == TaskReviewStatus.REJECTED
+                else "Đã yêu cầu sinh viên sửa lại nhiệm vụ."
+            )
         ),
         "status": data.status,
         "task": TaskResponse.model_validate(task),

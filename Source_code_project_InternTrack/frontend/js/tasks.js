@@ -54,6 +54,13 @@ export function updateTaskProgress(taskId, progress) {
   });
 }
 
+export function reviewTask(taskId, status, comment = null) {
+  return apiRequest(`tasks/${taskId}/review`, {
+    method: "POST",
+    body: { status, comment: comment?.trim() || null },
+  });
+}
+
 export function getMyTaskProgress(taskId) {
   return apiRequest(`tasks/${taskId}/progress`);
 }
@@ -168,7 +175,7 @@ function renderSupervisorTasks() {
     statusButton.type = "button";
     statusButton.className = "admin-row-action";
     statusButton.dataset.taskStatusId = String(task.id);
-    statusButton.textContent = "Trạng thái";
+    statusButton.textContent = "Duyệt task";
     statusButton.disabled = task.status !== "REVIEW";
     actions.append(detailButton, statusButton);
     row.append(title, assignee, statusCell, priorityCell, deadline, actions);
@@ -449,8 +456,12 @@ document.querySelector("[data-supervisor-task-rows]")?.addEventListener("click",
   if (!(button instanceof HTMLButtonElement)) return;
   activeTaskId = Number(button.dataset.taskStatusId);
   const task = supervisorTasks.find((item) => Number(item.id) === activeTaskId);
-  if (task) document.querySelector("#task-status").value = "DONE";
-  document.querySelector("[data-task-status-dialog]")?.showModal();
+  if (!task) return;
+  const form = document.querySelector("[data-task-review-form]");
+  if (form instanceof HTMLFormElement) form.reset();
+  const title = document.querySelector("[data-task-review-title]");
+  if (title) title.textContent = task.title;
+  document.querySelector("[data-task-review-dialog]")?.showModal();
 });
 
 document.querySelector("[data-task-rows]")?.addEventListener("click", (event) => {
@@ -512,22 +523,42 @@ document.querySelector("[data-task-detail-dialog]")?.addEventListener("click", a
   }
 });
 
-document.querySelector("[data-task-status-form]")?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const form = event.currentTarget;
+async function submitTaskReview(reviewStatus) {
+  if (!activeTaskId) return;
+  const form = document.querySelector("[data-task-review-form]");
+  if (!(form instanceof HTMLFormElement)) return;
+  const comment = form.elements.comment.value.trim();
+  if (reviewStatus === "REJECTED" && !comment) {
+    showToast("Vui lòng nhập lý do từ chối.", { kind: "error" });
+    form.elements.comment.focus();
+    return;
+  }
   try {
-    await updateTaskStatus(activeTaskId, form.elements.status.value);
-    document.querySelector("[data-task-status-dialog]")?.close();
-    showToast("Đã cập nhật trạng thái.");
+    const result = await reviewTask(activeTaskId, reviewStatus, comment);
+    document.querySelector("[data-task-review-dialog]")?.close();
+    showToast(result?.message || "Đã cập nhật kết quả duyệt.");
     await loadSupervisorTasks();
   } catch (error) {
     showToast(error.message, { kind: "error" });
   }
+}
+
+document.querySelector("[data-task-review-approved]")?.addEventListener("click", () => {
+  void submitTaskReview("APPROVED");
+});
+document.querySelector("[data-task-review-revision]")?.addEventListener("click", () => {
+  void submitTaskReview("REVISION_REQUIRED");
+});
+document.querySelector("[data-task-review-rejected]")?.addEventListener("click", () => {
+  void submitTaskReview("REJECTED");
+});
+document.querySelector("[data-task-review-form]")?.addEventListener("submit", (event) => {
+  event.preventDefault();
 });
 
 for (const [dialogSelector, closeSelector] of [
   ["[data-task-dialog]", "[data-close-task-dialog]"],
-  ["[data-task-status-dialog]", "[data-close-task-status-dialog]"],
+  ["[data-task-review-dialog]", "[data-close-task-review-dialog]"],
   ["[data-task-detail-dialog]", "[data-close-task-detail-dialog]"],
 ]) {
   const dialog = document.querySelector(dialogSelector);
