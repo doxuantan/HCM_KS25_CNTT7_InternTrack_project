@@ -480,6 +480,29 @@ class TaskApiTests(unittest.TestCase):
         self.assertEqual(revision.status_code, 200, revision.text)
         self.assertEqual(revision.json()["data"]["task"]["status"], "IN_PROGRESS")
 
+        rejected_task_id = self._create_task(title="Rejected work")
+        with self.session_factory() as db:
+            task = db.get(Task, rejected_task_id)
+            task.status = TaskStatus.REVIEW
+            db.commit()
+
+        missing_reason = self.client.post(
+            f"/api/v1/tasks/{rejected_task_id}/review",
+            json={"status": "REJECTED"},
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(missing_reason.status_code, 422, missing_reason.text)
+
+        rejected = self.client.post(
+            f"/api/v1/tasks/{rejected_task_id}/review",
+            json={"status": "REJECTED", "comment": "Không đạt yêu cầu nghiệm thu"},
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(rejected.status_code, 200, rejected.text)
+        rejected_data = rejected.json()["data"]
+        self.assertEqual(rejected_data["status"], "REJECTED")
+        self.assertEqual(rejected_data["task"]["status"], "CANCELLED")
+
     def test_task_filters_pagination_and_permissions(self) -> None:
         first_id = self._create_task(title="First")
         second_id = self._create_task(title="Second")

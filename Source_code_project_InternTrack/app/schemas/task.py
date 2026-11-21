@@ -67,11 +67,19 @@ class TaskProgressUpdate(BaseModel):
 class TaskReviewStatus(str, enum.Enum):
     APPROVED = "APPROVED"
     REVISION_REQUIRED = "REVISION_REQUIRED"
+    REJECTED = "REJECTED"
 
 
 class TaskReviewUpdate(BaseModel):
     status: TaskReviewStatus
     comment: str | None = Field(default=None, max_length=5000)
+
+    @model_validator(mode="after")
+    def validate_review_comment(self):
+        if self.status == TaskReviewStatus.REJECTED:
+            if not self.comment or not self.comment.strip():
+                raise ValueError("Rejection reason is required.")
+        return self
 
 
 class TaskAssignmentResponse(BaseModel):

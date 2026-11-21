@@ -49,11 +49,19 @@
         <div class="modal-footer"><button class="button button-secondary" type="button" data-close-task-dialog>Hủy</button><button class="button button-primary" type="submit">Tạo công việc</button></div>
       </form>
     </dialog>
-    <dialog class="modal admin-dialog" data-task-status-dialog>
-      <form class="admin-dialog-form" data-task-status-form>
-        <div class="modal-header"><div><h2 class="modal-title">Cập nhật trạng thái</h2></div><button class="modal-close" type="button" data-close-task-status-dialog aria-label="Đóng">×</button></div>
-        <div class="modal-body"><label class="form-field" for="task-status"><span class="form-label">Trạng thái</span><select class="form-control" id="task-status" name="status" required><option value="DONE">Hoàn thành</option></select></label></div>
-        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-task-status-dialog>Hủy</button><button class="button button-primary" type="submit">Cập nhật</button></div>
+    <dialog class="modal admin-dialog" data-task-review-dialog>
+      <form class="admin-dialog-form" data-task-review-form>
+        <div class="modal-header"><div><h2 class="modal-title">Duyệt công việc</h2><p class="form-hint" data-task-review-title></p></div><button class="modal-close" type="button" data-close-task-review-dialog aria-label="Đóng">×</button></div>
+        <div class="modal-body">
+          <label class="form-field" for="task-review-comment"><span class="form-label">Nhận xét / lý do</span><textarea class="form-control" id="task-review-comment" name="comment" maxlength="5000" rows="4" placeholder="Nhập lý do khi yêu cầu sửa hoặc từ chối"></textarea></label>
+          <p class="admin-form-message" data-task-review-message role="alert" hidden></p>
+        </div>
+        <div class="modal-footer">
+          <button class="button button-secondary" type="button" data-close-task-review-dialog>Hủy</button>
+          <button class="button button-danger" type="button" data-task-review-rejected>Từ chối</button>
+          <button class="button button-secondary" type="button" data-task-review-revision>Yêu cầu sửa</button>
+          <button class="button button-primary" type="button" data-task-review-approved>Chấp nhận</button>
+        </div>
       </form>
     </dialog>
     <dialog class="modal admin-dialog task-detail-dialog" data-task-detail-dialog>
