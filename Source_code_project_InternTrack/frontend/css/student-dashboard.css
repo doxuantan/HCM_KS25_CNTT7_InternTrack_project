@@ -1,15 +1,38 @@
 .student-dashboard .student-page-heading {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   margin-bottom: 25px;
+  padding: 25px 28px;
+  border: 1px solid #dfe7ef;
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 92% 10%, rgb(73 165 153 / 12%), transparent 34%),
+    linear-gradient(125deg, #fff 0%, #f5faf9 100%);
+  box-shadow: 0 12px 30px rgb(22 43 67 / 6%);
 }
 
 .student-dashboard .student-page-heading h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
+  margin-bottom: 9px;
 }
 
 .student-dashboard [data-student-name] {
   color: #287c72;
+}
+
+.student-dashboard [data-student-profile] {
+  display: block;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border: 1px solid #e4ebf0;
+  border-radius: 10px;
+  background: rgb(244 248 251 / 82%);
+  color: #718096;
+  font-size: 11px;
+  line-height: 1.55;
 }
 
 .student-dashboard .student-summary-grid {
@@ -104,7 +127,39 @@
 }
 
 .student-dashboard .student-task-table {
-  min-width: 760px;
+  width: calc(100% - 1px);
+  min-width: 840px;
+  table-layout: fixed;
+}
+
+.student-dashboard .student-task-table th:nth-child(1),
+.student-dashboard .student-task-table td:nth-child(1) {
+  width: 6%;
+}
+
+.student-dashboard .student-task-table th:nth-child(2),
+.student-dashboard .student-task-table td:nth-child(2) {
+  width: 40%;
+}
+
+.student-dashboard .student-task-table th:nth-child(3),
+.student-dashboard .student-task-table td:nth-child(3) {
+  width: 14%;
+}
+
+.student-dashboard .student-task-table th:nth-child(4),
+.student-dashboard .student-task-table td:nth-child(4) {
+  width: 10%;
+}
+
+.student-dashboard .student-task-table th:nth-child(5),
+.student-dashboard .student-task-table td:nth-child(5) {
+  width: 15%;
+}
+
+.student-dashboard .student-task-table th:nth-child(6),
+.student-dashboard .student-task-table td:nth-child(6) {
+  width: 15%;
 }
 
 .student-dashboard .student-task-table th {
@@ -133,6 +188,27 @@
   color: #2b374d;
   font-weight: 600;
   white-space: normal;
+}
+
+.student-dashboard .student-task-title .task-detail-button {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border: 1px solid #dce5ef;
+  border-radius: 8px;
+  background: #f5f8fc;
+  color: #5266bc;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.student-dashboard .student-task-title .task-detail-button:hover:not(:disabled) {
+  border-color: #b7c5e5;
+  background: #edf2ff;
+  color: #4658a8;
 }
 
 .student-dashboard .student-task-description {
@@ -303,13 +379,98 @@
   line-height: 1.6;
 }
 
+.student-dashboard .student-tasks-panel .student-panel-heading {
+  flex-wrap: wrap;
+  gap: 15px 20px;
+}
+
+.student-dashboard .student-tasks-panel .admin-toolbar {
+  display: grid;
+  width: min(390px, 100%);
+  min-height: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.student-dashboard .student-tasks-panel .admin-filter {
+  min-width: 0 !important;
+  gap: 7px;
+}
+
+.student-dashboard .student-tasks-panel .admin-filter .form-control {
+  border-radius: 10px;
+}
+
+.student-dashboard .student-table-scroll {
+  scrollbar-color: #c4cfdd #f4f7fa;
+  scrollbar-width: thin;
+}
+
+.student-dashboard .student-table-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.student-dashboard .student-table-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #c4cfdd;
+  background-clip: padding-box;
+}
+
+.student-dashboard .student-table-scroll::-webkit-scrollbar-track {
+  background: #f4f7fa;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-page-heading {
+  border-color: #343148;
+  background:
+    radial-gradient(ellipse at 92% 10%, rgb(109 83 180 / 20%), transparent 34%),
+    linear-gradient(125deg, #151722 0%, #171a28 100%);
+  box-shadow: 0 14px 34px rgb(0 0 0 / 18%);
+}
+
+:root[data-theme="dark"] .student-dashboard [data-student-profile] {
+  border-color: #303346;
+  background: rgb(13 16 26 / 54%);
+  color: #a0a8ba;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-task-title .task-detail-button {
+  border-color: #3a3b54;
+  background: #222235;
+  color: #c1a8ff;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-task-title .task-detail-button:hover:not(:disabled) {
+  border-color: #7356a9;
+  background: #2a2740;
+  color: #d3c1ff;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-table-scroll {
+  scrollbar-color: #596078 #1a1d29;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-table-scroll::-webkit-scrollbar-thumb {
+  background: #596078;
+  background-clip: padding-box;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-table-scroll::-webkit-scrollbar-track {
+  background: #1a1d29;
+}
+
 @keyframes student-loading {
   to {
     transform: rotate(360deg);
   }
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1620px) {
   .student-dashboard .student-dashboard-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -322,6 +483,7 @@
 @media (max-width: 760px) {
   .student-dashboard .student-page-heading {
     align-items: flex-start;
+    padding: 21px;
   }
 
   .student-dashboard .student-dashboard-grid,
@@ -336,6 +498,122 @@
 
   .student-dashboard .student-panel-heading {
     padding: 18px;
+  }
+
+  .student-dashboard .student-tasks-panel .student-panel-heading {
+    gap: 14px;
+  }
+
+  .student-dashboard .student-tasks-panel .admin-toolbar {
+    width: 100%;
+  }
+
+  .student-dashboard .student-table-scroll {
+    overflow: visible;
+    border: 0;
+  }
+
+  .student-dashboard .student-task-table {
+    display: block;
+    width: 100%;
+    table-layout: auto;
+  }
+
+  .student-dashboard .student-table-scroll .student-task-table {
+    min-width: 0;
+  }
+
+  .student-dashboard .student-task-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .student-dashboard .student-task-table tbody {
+    display: grid;
+    min-width: 0;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .student-dashboard .student-task-table tbody tr {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid var(--theme-line, #e3e8ef);
+    border-radius: 12px;
+    background: var(--theme-surface, #fff);
+  }
+
+  .student-dashboard .student-task-table tbody tr:hover {
+    transform: none;
+  }
+
+  .student-dashboard .student-task-table tbody td {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 10px 11px;
+    border: 0;
+    color: var(--theme-text, #20283a);
+    font-size: 12px;
+  }
+
+  .student-dashboard .student-task-table tbody td::before {
+    color: var(--theme-muted-text, #718096);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .student-dashboard .student-task-table tbody td:first-child:not(.student-state-cell) {
+    display: none;
+  }
+
+  .student-dashboard .student-task-table tbody td:nth-child(2) {
+    grid-column: 1 / -1;
+  }
+
+  .student-dashboard .student-task-table tbody td:nth-child(2)::before {
+    content: "Công việc";
+  }
+
+  .student-dashboard .student-task-table tbody td:nth-child(3)::before {
+    content: "Hạn hoàn thành";
+  }
+
+  .student-dashboard .student-task-table tbody td:nth-child(4)::before {
+    content: "Ưu tiên";
+  }
+
+  .student-dashboard .student-task-table tbody td:nth-child(5)::before {
+    content: "Trạng thái";
+  }
+
+  .student-dashboard .student-task-table tbody td:nth-child(6)::before {
+    content: "Tiến độ";
+  }
+
+  .student-dashboard .student-task-table tbody .student-state-cell {
+    display: grid;
+    grid-column: 1 / -1;
+  }
+
+  .student-dashboard .student-task-table tbody .student-state-cell::before {
+    content: none;
+  }
+
+  .student-dashboard .student-task-title,
+  .student-dashboard .student-task-progress {
+    min-width: 0;
   }
 
   .student-dashboard .student-progress-content {
@@ -356,6 +634,10 @@
 @media (max-width: 560px) {
   .student-dashboard .student-side-column {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .student-dashboard .student-page-heading {
+    padding: 19px 17px;
   }
 
   .student-dashboard .student-stat-card {

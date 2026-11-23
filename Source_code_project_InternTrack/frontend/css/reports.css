@@ -1,0 +1,313 @@
+.workflow-main [data-report-form] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 8px 22px 22px;
+}
+
+.workflow-main .page-heading > nav.admin-toolbar {
+  display: flex;
+  width: auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.workflow-main .page-heading > nav.admin-toolbar .button {
+  margin: 0;
+}
+
+.workflow-main [data-report-form] > label:first-child,
+.workflow-main [data-report-form] > .admin-form-wide:last-child {
+  grid-column: 1 / -1;
+}
+
+.workflow-main [data-report-form] > label.admin-form-wide {
+  grid-column: auto;
+}
+
+.workflow-main [data-report-form] > .admin-form-wide:last-child {
+  display: flex;
+  align-items: center;
+}
+
+.workflow-main [data-report-form] .form-control {
+  min-width: 0;
+  border-radius: 10px;
+}
+
+.workflow-main [data-report-form] input[type="file"] {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.workflow-main input[type="file"]::file-selector-button {
+  min-height: 30px;
+  margin-right: 10px;
+  padding: 5px 10px;
+  border: 1px solid #d5deea;
+  border-radius: 7px;
+  background: #f2f5fa;
+  color: #43516a;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.workflow-main input[type="file"]::file-selector-button:hover {
+  background: #e8edf5;
+}
+
+.workflow-main .student-tasks-panel > .student-panel-heading {
+  padding: 20px 22px 14px;
+}
+
+.workflow-main .student-task-table {
+  width: 100%;
+  min-width: 900px;
+  table-layout: fixed;
+}
+
+.workflow-main .student-task-table th:nth-child(1),
+.workflow-main .student-task-table td:nth-child(1) {
+  width: 30%;
+}
+
+.workflow-main .student-task-table th:nth-child(2),
+.workflow-main .student-task-table td:nth-child(2) {
+  width: 12%;
+}
+
+.workflow-main .student-task-table th:nth-child(3),
+.workflow-main .student-task-table td:nth-child(3) {
+  width: 18%;
+}
+
+.workflow-main .student-task-table th:nth-child(4),
+.workflow-main .student-task-table td:nth-child(4) {
+  width: 14%;
+}
+
+.workflow-main .student-task-table th:nth-child(5),
+.workflow-main .student-task-table td:nth-child(5) {
+  width: 26%;
+}
+
+.workflow-main .student-task-table td:first-child {
+  font-weight: 600;
+}
+
+.workflow-main .student-task-table td:first-child .muted {
+  display: block;
+  margin: 8px 0 0;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.workflow-main .student-task-table td:nth-child(3) {
+  white-space: normal;
+}
+
+.workflow-main [data-report-rows] td:last-child {
+  vertical-align: top;
+}
+
+.workflow-main [data-report-rows] td:last-child > button,
+.workflow-main [data-report-rows] td:last-child > input {
+  display: block;
+  max-width: 100%;
+  margin-bottom: 8px;
+}
+
+.workflow-main [data-report-rows] .admin-row-action {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 10px;
+  border: 1px solid #dce5ef;
+  border-radius: 8px;
+  background: #f6f8fc;
+  color: #5266bc;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.workflow-main [data-report-rows] input[type="file"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid #e1e6ef;
+  border-radius: 8px;
+  background: #f8f9fc;
+  color: #647189;
+  font-size: 11px;
+}
+
+.workflow-main [data-attachment-list] {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+:root[data-theme="dark"] .workflow-main input[type="file"]::file-selector-button {
+  border-color: #3a4053;
+  background: #262a3a;
+  color: #d3d8e6;
+}
+
+:root[data-theme="dark"] .workflow-main input[type="file"]::file-selector-button:hover {
+  background: #30354a;
+}
+
+:root[data-theme="dark"] .workflow-main [data-report-rows] .admin-row-action {
+  border-color: #3a3b54;
+  background: #222235;
+  color: #c1a8ff;
+}
+
+:root[data-theme="dark"] .workflow-main [data-report-rows] .admin-row-action:hover:not(:disabled) {
+  border-color: #7356a9;
+  background: #2a2740;
+  color: #d3c1ff;
+}
+
+:root[data-theme="dark"] .workflow-main [data-report-rows] input[type="file"] {
+  border-color: #303447;
+  background: #1a1d29;
+  color: #a0a8ba;
+}
+
+@media (max-width: 900px) {
+  .workflow-main [data-report-form] {
+    gap: 14px;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .workflow-main .page-heading > nav.admin-toolbar {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .workflow-main [data-report-form] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workflow-main [data-report-form] > label:first-child,
+  .workflow-main [data-report-form] > label.admin-form-wide,
+  .workflow-main [data-report-form] > .admin-form-wide:last-child {
+    grid-column: 1;
+  }
+
+  .workflow-main .table-scroll {
+    overflow: visible;
+    border: 0;
+  }
+
+  .workflow-main .student-task-table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    table-layout: auto;
+  }
+
+  .workflow-main .student-task-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .workflow-main .student-task-table tbody {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .workflow-main .student-task-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid var(--theme-line, #e3e8ef);
+    border-radius: 12px;
+    background: var(--theme-surface, #fff);
+  }
+
+  .workflow-main .student-task-table tbody td {
+    display: flex;
+    width: auto !important;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 10px 11px;
+    border: 0;
+  }
+
+  .workflow-main .student-task-table tbody td::before {
+    color: var(--theme-muted-text, #718096);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .workflow-main .student-task-table tbody td:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .workflow-main .student-task-table tbody td:first-child::before {
+    content: "Báo cáo";
+  }
+
+  .workflow-main .student-task-table tbody td:nth-child(2)::before {
+    content: "Loại";
+  }
+
+  .workflow-main .student-task-table tbody td:nth-child(3)::before {
+    content: "Ngày nộp";
+  }
+
+  .workflow-main .student-task-table tbody td:nth-child(4)::before {
+    content: "Trạng thái";
+  }
+
+  .workflow-main .student-task-table tbody td:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+
+  .workflow-main .student-task-table tbody td:nth-child(5)::before {
+    content: "Thao tác";
+  }
+
+  .workflow-main .student-task-table tbody td.admin-table-state {
+    display: grid;
+    grid-column: 1 / -1;
+  }
+
+  .workflow-main .student-task-table tbody td.admin-table-state::before {
+    content: none;
+  }
+
+  .workflow-main [data-report-rows] td:last-child {
+    width: 100%;
+  }
+
+  .workflow-main [data-report-rows] input[type="file"] {
+    max-width: 100%;
+  }
+}

@@ -4,12 +4,12 @@ const DARK_THEME = "dark";
 
 function readThemePreference() {
   try {
-    return window.localStorage.getItem(THEME_STORAGE_KEY) === DARK_THEME
-      ? DARK_THEME
-      : LIGHT_THEME;
+    return window.localStorage.getItem(THEME_STORAGE_KEY) === LIGHT_THEME
+      ? LIGHT_THEME
+      : DARK_THEME;
   } catch (error) {
     console.error("Could not read the saved color theme.", error);
-    return LIGHT_THEME;
+    return DARK_THEME;
   }
 }
 
@@ -32,7 +32,7 @@ function applyTheme(theme, persist = false) {
 
   const themeColor = document.querySelector('meta[name="theme-color"]');
   if (themeColor) {
-    themeColor.content = theme === DARK_THEME ? "#101a2b" : "#f5f7fb";
+    themeColor.content = theme === DARK_THEME ? "#0b0d14" : "#f5f7fb";
   }
 
   if (persist) {
