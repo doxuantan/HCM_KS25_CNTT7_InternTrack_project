@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Tiến độ cá nhân | InterTrack</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/student-dashboard.css">
+    <link rel="stylesheet" href="../css/task-workflows.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <script type="module" src="../js/progress.js"></script>
+  </head>
+  <body class="student-dashboard" data-allowed-roles="STUDENT">
+    <main class="content workflow-main" id="main-content" aria-busy="true">
+      <div class="page-heading student-page-heading">
+        <div><p class="eyebrow">Không gian sinh viên</p><h1>Tiến độ cá nhân</h1></div>
+        <a class="button button-secondary" href="my-tasks.html">Xem danh sách task</a>
+      </div>
+
+      <section class="summary-grid student-summary-grid" aria-label="Thống kê tiến độ">
+        <article class="summary-card student-stat-card"><div class="summary-card-top"><span class="summary-label">Tổng task</span></div><p class="summary-value" data-progress-total>—</p></article>
+        <article class="summary-card student-stat-card"><div class="summary-card-top"><span class="summary-label">Đã hoàn thành</span></div><p class="summary-value" data-progress-completed>—</p></article>
+        <article class="summary-card student-stat-card"><div class="summary-card-top"><span class="summary-label">Đang thực hiện</span></div><p class="summary-value" data-progress-in-progress>—</p></article>
+        <article class="summary-card student-stat-card"><div class="summary-card-top"><span class="summary-label">Chưa bắt đầu</span></div><p class="summary-value" data-progress-todo>—</p></article>
+      </section>
+
+      <section class="panel student-progress-panel">
+        <div class="panel-heading student-panel-heading">
+          <div><h2>Mức hoàn thành công việc</h2><p class="muted">Tính theo task đã hoàn thành / tổng task</p></div>
+          <strong class="student-progress-value" data-progress-percent>—</strong>
+        </div>
+        <div class="student-progress-track" role="progressbar" aria-label="Tiến độ hoàn thành" aria-valuemin="0" aria-valuemax="100" data-progress-bar>
+          <span data-progress-fill></span>
+        </div>
+      </section>
+
+      <section class="panel student-tasks-panel">
+        <div class="panel-heading student-panel-heading"><div><h2>Danh sách task cá nhân</h2></div></div>
+        <div class="table-scroll student-table-scroll">
+          <table class="data-table student-task-table">
+            <thead><tr><th>Tên task</th><th>Trạng thái</th><th>Ưu tiên</th><th>Hạn hoàn thành</th></tr></thead>
+            <tbody data-progress-task-rows><tr><td colspan="4" class="student-state-cell"><div class="student-state" role="status">Đang tải tiến độ...</div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

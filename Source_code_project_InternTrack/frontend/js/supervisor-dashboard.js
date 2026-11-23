@@ -93,6 +93,14 @@ async function loadDashboard() {
       : "Không tải được dữ liệu tiến độ",
   );
 
+  const teamFilter = document.querySelector("[data-dashboard-team]");
+  if (teamFilter instanceof HTMLSelectElement) {
+    teamFilter.replaceChildren(
+      new Option("Tất cả nhóm", ""),
+      ...teams.map((team) => new Option(team.team_name || `Nhóm #${team.id}`, String(team.id))),
+    );
+  }
+
   renderPeriods();
   await renderTeamsAndProgress();
   renderUpcoming(overview?.upcoming_tasks || []);
@@ -154,7 +162,7 @@ async function renderTeamsAndProgress() {
 
   if (teamBody) {
     teamBody.innerHTML = teamProgress.map((progress) => `
-      <tr>
+      <tr data-team-progress-row="${progress.team_id}">
         <td><strong>${escapeHtml(progress.team_name)}</strong></td>
         <td>${progress.members?.length || 0}</td>
         <td><strong>${Number(progress.progress).toFixed(1)}%</strong></td>
@@ -166,15 +174,15 @@ async function renderTeamsAndProgress() {
 
   if (progressGrid) {
     progressGrid.innerHTML = teamProgress.map((progress) => `
-      <article class="panel admin-panel supervisor-team-card">
+      <article class="panel admin-panel supervisor-team-card" data-team-progress-card="${progress.team_id}">
         <h2>${escapeHtml(progress.team_name)}</h2>
         <div class="supervisor-progress-track" aria-label="Tiến độ ${escapeHtml(progress.team_name)}"><span style="width:${Number(progress.progress)}%"></span></div>
         <p><strong>${Number(progress.progress).toFixed(1)}%</strong> · ${progress.completed_tasks}/${progress.total_tasks} task hoàn thành</p>
         ${progress.members.map((member) => `
-          <div class="supervisor-member-row">
+          <button class="supervisor-member-row" type="button" data-member-progress="${member.student_id}">
             <div><strong>${escapeHtml(member.student_name || `Sinh viên #${member.student_id}`)}</strong><span>${escapeHtml(member.student_code || "")}</span></div>
             <strong>${Number(member.progress).toFixed(1)}%</strong>
-          </div>
+          </button>
         `).join("") || '<p class="muted">Chưa có thành viên.</p>'}
       </article>
     `).join("") || '<p class="muted">Không tải được tiến độ các nhóm.</p>';
@@ -369,11 +377,38 @@ document.addEventListener("click", (event) => {
 document.querySelectorAll("[data-close-review], [data-close-evaluation]").forEach((button) => {
   button.addEventListener("click", () => button.closest("dialog")?.close());
 });
+document.querySelector("[data-close-member-progress]")?.addEventListener("click", () => {
+  document.querySelector("[data-member-progress-dialog]")?.close();
+});
 document.querySelector("[data-review-approved]")?.addEventListener("click", () => void submitReview("APPROVED"));
 document.querySelector("[data-review-revision]")?.addEventListener("click", () => void submitReview("REVISION_REQUIRED"));
 
 document.addEventListener("click", (event) => {
   const target = event.target instanceof Element ? event.target : null;
+  const memberButton = target?.closest("[data-member-progress]");
+  if (memberButton) {
+    const studentId = Number(memberButton.dataset.memberProgress);
+    const dialog = document.querySelector("[data-member-progress-dialog]");
+    const body = document.querySelector("[data-member-progress-body]");
+    if (dialog instanceof HTMLDialogElement) {
+      if (body instanceof HTMLElement) body.textContent = "Đang tải...";
+      dialog.showModal();
+      void apiRequest(`progress/member/${studentId}`)
+        .then((progress) => {
+          setText("[data-member-progress-title]", progress.student_name || `Sinh viên #${progress.student_id}`);
+          if (body instanceof HTMLElement) {
+            body.innerHTML = `
+              <p><strong>Mã sinh viên:</strong> ${escapeHtml(progress.student_code || "—")}</p>
+              <p><strong>Tiến độ:</strong> ${Number(progress.progress).toFixed(1)}%</p>
+              <p><strong>Tổng task:</strong> ${progress.total_tasks} · <strong>Hoàn thành:</strong> ${progress.completed_tasks} · <strong>Đang làm:</strong> ${progress.in_progress_tasks} · <strong>Quá hạn:</strong> ${progress.overdue_tasks}</p>
+            `;
+          }
+        })
+        .catch((error) => {
+          if (body instanceof HTMLElement) body.textContent = error.message;
+        });
+    }
+  }
   const teamButton = target?.closest("[data-progress-team]");
   if (teamButton) {
     const progressLink = document.querySelector('[data-supervisor-view="progress"]');
@@ -427,6 +462,39 @@ document.querySelector("[data-supervisor-refresh]")?.addEventListener("click", (
       button.textContent = "Làm mới dữ liệu";
     }
   });
+});
+
+function applyDashboardFilters() {
+  const teamId = document.querySelector("[data-dashboard-team]")?.value || "";
+  const status = document.querySelector("[data-dashboard-status]")?.value || "";
+  const from = document.querySelector("[data-dashboard-from]")?.value || "";
+  const to = document.querySelector("[data-dashboard-to]")?.value || "";
+
+  document.querySelectorAll("[data-team-progress-row], [data-team-progress-card]").forEach((element) => {
+    const elementTeamId = element.dataset.teamProgressRow || element.dataset.teamProgressCard;
+    element.hidden = Boolean(teamId && elementTeamId !== teamId);
+  });
+
+  const filtered = tasks.filter((task) => {
+    const deadline = task.deadline ? new Date(task.deadline) : null;
+    const fromOk = !from || (deadline && deadline >= new Date(`${from}T00:00:00`));
+    const toOk = !to || (deadline && deadline <= new Date(`${to}T23:59:59`));
+    return (!teamId || String(task.team_id) === teamId)
+      && (!status || task.status === status)
+      && fromOk
+      && toOk;
+  });
+  renderUpcoming(filtered);
+}
+
+["[data-dashboard-team]", "[data-dashboard-status]", "[data-dashboard-from]", "[data-dashboard-to]"].forEach((selector) => {
+  document.querySelector(selector)?.addEventListener("change", applyDashboardFilters);
+});
+document.querySelector("[data-dashboard-clear]")?.addEventListener("click", () => {
+  document.querySelectorAll("[data-dashboard-team], [data-dashboard-status], [data-dashboard-from], [data-dashboard-to]").forEach((control) => {
+    if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement) control.value = "";
+  });
+  applyDashboardFilters();
 });
 document.querySelector("[data-sidebar-toggle]")?.addEventListener("click", () => {
   document.body.classList.toggle("sidebar-open");

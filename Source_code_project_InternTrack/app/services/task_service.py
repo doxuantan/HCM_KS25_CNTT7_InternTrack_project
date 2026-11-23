@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -115,6 +115,11 @@ def list_tasks(
     team: int | None = None,
     status: TaskStatus | None = None,
     assignee: int | None = None,
+    priority = None,
+    q: str | None = None,
+    deadline_from: datetime | None = None,
+    deadline_to: datetime | None = None,
+    sort: str = "created_desc",
     page: int = 1,
     limit: int = 20,
 ) -> dict:
@@ -161,13 +166,32 @@ def list_tasks(
             )
             .exists()
         )
+    if priority is not None:
+        statement = statement.where(Task.priority == priority)
+    if q and q.strip():
+        keyword = f"%{q.strip()}%"
+        statement = statement.where(
+            or_(Task.title.ilike(keyword), Task.description.ilike(keyword))
+        )
+    if deadline_from is not None:
+        statement = statement.where(Task.deadline >= deadline_from)
+    if deadline_to is not None:
+        statement = statement.where(Task.deadline <= deadline_to)
 
     count_statement = select(func.count()).select_from(
         statement.with_only_columns(Task.id).order_by(None).subquery()
     )
     total = db.scalar(count_statement) or 0
+    sort_options = {
+        "title_asc": Task.title.asc(),
+        "title_desc": Task.title.desc(),
+        "created_asc": Task.created_at.asc(),
+        "created_desc": Task.created_at.desc(),
+        "deadline_asc": Task.deadline.asc(),
+        "deadline_desc": Task.deadline.desc(),
+    }
     tasks = db.scalars(
-        statement.order_by(Task.id.desc()).offset((page - 1) * limit).limit(limit)
+        statement.order_by(sort_options[sort], Task.id.desc()).offset((page - 1) * limit).limit(limit)
     ).unique().all()
     total_pages = (total + limit - 1) // limit if total else 0
     return {
@@ -362,23 +386,21 @@ def update_task_status(
                 detail="Bạn không được giao nhiệm vụ này.",
             )
 
-        # Sinh viên chỉ được bắt đầu hoặc gửi duyệt
-        allowed_transitions = {
-            TaskStatus.TODO: TaskStatus.IN_PROGRESS,
-            TaskStatus.IN_PROGRESS: TaskStatus.REVIEW,
+        allowed_for_student = {
+            TaskStatus.TODO: {TaskStatus.IN_PROGRESS},
+            TaskStatus.IN_PROGRESS: {TaskStatus.TODO, TaskStatus.REVIEW},
+            TaskStatus.REVIEW: {TaskStatus.IN_PROGRESS},
         }
 
-        if allowed_transitions.get(old_status) != new_status:
+        if new_status not in allowed_for_student.get(old_status, set()):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Sinh viên chỉ được chuyển TODO sang IN_PROGRESS "
-                       "hoặc IN_PROGRESS sang REVIEW.",
+                detail="Sinh viên chỉ được chuyển task trong các cột "
+                       "TODO, In Progress và trạng thái REVIEW.",
             )
 
     else:
-        # Chỉ người quản lý nhóm hoặc ADMIN được duyệt hoàn thành
         _assert_task_manager(db, task, user)
-
         if old_status != TaskStatus.REVIEW or new_status != TaskStatus.DONE:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -391,7 +413,10 @@ def update_task_status(
 
     # Đồng bộ trạng thái các bản ghi phân công
     for assignment in task.assignments:
-        assignment.status = AssignmentStatus(new_status.value)
+        try:
+            assignment.status = AssignmentStatus(new_status.value)
+        except ValueError:
+            pass
 
         if new_status == TaskStatus.DONE:
             assignment.progress = 100
