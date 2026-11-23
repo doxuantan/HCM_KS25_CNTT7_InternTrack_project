@@ -20,8 +20,15 @@
       </div>
       <section class="panel admin-panel">
         <div class="admin-toolbar">
+          <div class="admin-filter"><label for="supervisor-task-search">Tìm kiếm</label><input class="form-control" id="supervisor-task-search" type="search" placeholder="Tên hoặc mô tả" data-supervisor-task-search></div>
+          <div class="admin-filter"><label for="supervisor-task-team">Nhóm</label><select class="form-control" id="supervisor-task-team" data-supervisor-task-team><option value="">Tất cả</option></select></div>
+          <div class="admin-filter"><label for="supervisor-task-assignee">Người được giao</label><select class="form-control" id="supervisor-task-assignee" data-supervisor-task-assignee><option value="">Tất cả</option></select></div>
           <div class="admin-filter"><label for="supervisor-task-status">Trạng thái</label><select class="form-control" id="supervisor-task-status" data-supervisor-task-status><option value="">Tất cả</option><option value="TODO">Chưa bắt đầu</option><option value="IN_PROGRESS">Đang thực hiện</option><option value="REVIEW">Chờ duyệt</option><option value="DONE">Hoàn thành</option><option value="CANCELLED">Đã hủy</option></select></div>
           <div class="admin-filter"><label for="supervisor-task-priority">Ưu tiên</label><select class="form-control" id="supervisor-task-priority" data-supervisor-task-priority><option value="">Tất cả</option><option value="LOW">Thấp</option><option value="MEDIUM">Trung bình</option><option value="HIGH">Cao</option></select></div>
+          <div class="admin-filter"><label for="supervisor-task-from">Deadline từ</label><input class="form-control" id="supervisor-task-from" type="datetime-local" data-supervisor-task-from></div>
+          <div class="admin-filter"><label for="supervisor-task-to">Deadline đến</label><input class="form-control" id="supervisor-task-to" type="datetime-local" data-supervisor-task-to></div>
+          <div class="admin-filter"><label for="supervisor-task-sort">Sắp xếp</label><select class="form-control" id="supervisor-task-sort" data-supervisor-task-sort><option value="created_desc">Mới tạo</option><option value="title_asc">Tên A-Z</option><option value="title_desc">Tên Z-A</option><option value="deadline_asc">Deadline sớm nhất</option><option value="deadline_desc">Deadline muộn nhất</option></select></div>
+          <button class="button button-secondary" type="button" data-clear-supervisor-task-filters>Xóa bộ lọc</button>
           <button class="button button-primary" type="button" data-create-task>Tạo công việc</button>
         </div>
         <div class="table-scroll">

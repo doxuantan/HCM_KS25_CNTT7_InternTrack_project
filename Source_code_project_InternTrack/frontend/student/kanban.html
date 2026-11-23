@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Bảng Kanban | InterTrack</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/student-dashboard.css">
+    <link rel="stylesheet" href="../css/task-workflows.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <script type="module" src="../js/kanban.js"></script>
+  </head>
+  <body class="student-dashboard" data-allowed-roles="STUDENT,SUPERVISOR,ADMIN">
+    <main class="content workflow-main" id="main-content" aria-busy="true">
+      <div class="page-heading student-page-heading">
+        <div><p class="eyebrow">Quản lý công việc</p><h1>Bảng Kanban</h1></div>
+        <a class="button button-secondary" href="../index.html">Về bảng điều khiển</a>
+      </div>
+
+      <section class="panel kanban-filter-panel">
+        <div class="admin-toolbar kanban-toolbar">
+          <label class="admin-filter" for="kanban-search"><span>Tìm kiếm</span><input class="form-control" id="kanban-search" type="search" placeholder="Tên hoặc mô tả task" data-kanban-search></label>
+          <label class="admin-filter" for="kanban-status"><span>Trạng thái</span><select class="form-control" id="kanban-status" data-kanban-status><option value="">Tất cả</option><option value="TODO">Chưa bắt đầu</option><option value="IN_PROGRESS">Đang thực hiện</option><option value="REVIEW">Chờ duyệt</option><option value="DONE">Hoàn thành</option></select></label>
+          <label class="admin-filter" for="kanban-priority"><span>Ưu tiên</span><select class="form-control" id="kanban-priority" data-kanban-priority><option value="">Tất cả</option><option value="LOW">Thấp</option><option value="MEDIUM">Trung bình</option><option value="HIGH">Cao</option></select></label>
+          <label class="admin-filter" for="kanban-sort"><span>Sắp xếp</span><select class="form-control" id="kanban-sort" data-kanban-sort><option value="created_desc">Mới tạo</option><option value="title_asc">Tên A-Z</option><option value="title_desc">Tên Z-A</option><option value="deadline_asc">Deadline sớm nhất</option><option value="deadline_desc">Deadline muộn nhất</option></select></label>
+          <button class="button button-secondary" type="button" data-kanban-clear>Xóa bộ lọc</button>
+        </div>
+      </section>
+
+      <section class="kanban-board" aria-label="Bảng công việc" aria-busy="true" data-kanban-board>
+        <article class="kanban-column" data-kanban-column="TODO"><header><h2>To Do</h2><span data-kanban-count="TODO">0</span></header><div class="kanban-list" data-kanban-list="TODO"></div></article>
+        <article class="kanban-column" data-kanban-column="IN_PROGRESS"><header><h2>In Progress</h2><span data-kanban-count="IN_PROGRESS">0</span></header><div class="kanban-list" data-kanban-list="IN_PROGRESS"></div></article>
+        <article class="kanban-column" data-kanban-column="DONE"><header><h2>Done</h2><span data-kanban-count="DONE">0</span></header><div class="kanban-list" data-kanban-list="DONE"></div></article>
+      </section>
+    </main>
+  </body>
+</html>

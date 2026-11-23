@@ -146,9 +146,15 @@ function renderSupervisorTasks() {
   if (!body) return;
   const status = document.querySelector("[data-supervisor-task-status]")?.value || "";
   const priority = document.querySelector("[data-supervisor-task-priority]")?.value || "";
+  const team = document.querySelector("[data-supervisor-task-team]")?.value || "";
+  const assignee = document.querySelector("[data-supervisor-task-assignee]")?.value || "";
+  const search = document.querySelector("[data-supervisor-task-search]")?.value.trim().toLowerCase() || "";
   const filtered = supervisorTasks.filter((task) =>
     (!status || task.status === status) &&
-    (!priority || task.priority === priority));
+    (!priority || task.priority === priority) &&
+    (!team || String(task.team_id) === team) &&
+    (!assignee || task.assignments?.some((item) => String(item.student_id) === assignee)) &&
+    (!search || `${task.title} ${task.description || ""}`.toLowerCase().includes(search)));
   if (!filtered.length) {
     body.replaceChildren(taskStateRow(supervisorTasks.length ? "Không có task phù hợp bộ lọc." : "Chưa có task hoặc API danh sách chưa được backend hỗ trợ.", 6));
     return;
@@ -185,6 +191,13 @@ function renderSupervisorTasks() {
 
 async function loadSupervisorTeams() {
   const teams = await apiRequest("teams");
+  const teamFilter = document.querySelector("[data-supervisor-task-team]");
+  if (teamFilter instanceof HTMLSelectElement) {
+    teamFilter.replaceChildren(
+      new Option("Tất cả", ""),
+      ...(Array.isArray(teams) ? teams.map((team) => new Option(team.team_name || `Nhóm ID ${team.id}`, String(team.id))) : [])
+    );
+  }
   const select = document.getElementById("task-team");
   if (select) {
     select.replaceChildren(...(Array.isArray(teams) ? teams : []).filter((team) => team.status === "ACTIVE" || !team.status).map((team) => {
@@ -206,6 +219,18 @@ async function loadTaskAssignees() {
   if (!teamSelect.value) return;
   try {
     const members = await apiRequest(`teams/${teamSelect.value}/members`);
+    const filterSelect = document.querySelector("[data-supervisor-task-assignee]");
+    if (filterSelect instanceof HTMLSelectElement) {
+      filterSelect.replaceChildren(
+        new Option("Tất cả", ""),
+        ...(Array.isArray(members) ? members.map((member) => {
+          const label = member.student_name
+            ? `${member.student_name}${member.student_code ? ` (${member.student_code})` : ""}`
+            : `Sinh viên ID ${member.student_id}`;
+          return new Option(label, String(member.student_id));
+        }) : [])
+      );
+    }
     assigneeSelect.replaceChildren(
       ...(Array.isArray(members) ? members : []).map((member) => {
         const label = member.student_name
@@ -224,7 +249,23 @@ async function loadSupervisorTasks() {
   const body = document.querySelector("[data-supervisor-task-rows]");
   if (body) body.replaceChildren(taskStateRow("Đang tải công việc...", 6));
   try {
-    const payload = await getTasks();
+    const search = document.querySelector("[data-supervisor-task-search]")?.value.trim();
+    const team = document.querySelector("[data-supervisor-task-team]")?.value;
+    const assignee = document.querySelector("[data-supervisor-task-assignee]")?.value;
+    const status = document.querySelector("[data-supervisor-task-status]")?.value;
+    const priority = document.querySelector("[data-supervisor-task-priority]")?.value;
+    const from = document.querySelector("[data-supervisor-task-from]")?.value;
+    const to = document.querySelector("[data-supervisor-task-to]")?.value;
+    const sort = document.querySelector("[data-supervisor-task-sort]")?.value || "created_desc";
+    const params = new URLSearchParams({ limit: "100", sort });
+    if (search) params.set("q", search);
+    if (team) params.set("team", team);
+    if (assignee) params.set("assignee", assignee);
+    if (status) params.set("status", status);
+    if (priority) params.set("priority", priority);
+    if (from) params.set("deadline_from", new Date(from).toISOString());
+    if (to) params.set("deadline_to", new Date(to).toISOString());
+    const payload = await apiRequest(`tasks?${params}`);
     supervisorTasks = normalizeTasks(payload);
   } catch (error) {
     supervisorTasks = [];
@@ -388,8 +429,21 @@ async function downloadTaskAttachment(attachmentId) {
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }
 
-document.querySelector("[data-supervisor-task-status]")?.addEventListener("change", renderSupervisorTasks);
-document.querySelector("[data-supervisor-task-priority]")?.addEventListener("change", renderSupervisorTasks);
+["[data-supervisor-task-search]", "[data-supervisor-task-team]", "[data-supervisor-task-assignee]", "[data-supervisor-task-status]", "[data-supervisor-task-priority]", "[data-supervisor-task-from]", "[data-supervisor-task-to]", "[data-supervisor-task-sort]"].forEach((selector) => {
+  const control = document.querySelector(selector);
+  const eventName = control instanceof HTMLInputElement && control.type === "text" || control instanceof HTMLInputElement && control.type === "search"
+    ? "input"
+    : "change";
+  control?.addEventListener(eventName, () => void loadSupervisorTasks());
+});
+document.querySelector("[data-clear-supervisor-task-filters]")?.addEventListener("click", () => {
+  document.querySelectorAll("[data-supervisor-task-search], [data-supervisor-task-team], [data-supervisor-task-assignee], [data-supervisor-task-status], [data-supervisor-task-priority], [data-supervisor-task-from], [data-supervisor-task-to], [data-supervisor-task-sort]").forEach((control) => {
+    if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement) {
+      control.value = control.matches("[data-supervisor-task-sort]") ? "created_desc" : "";
+    }
+  });
+  void loadSupervisorTasks();
+});
 document.getElementById("task-team")?.addEventListener("change", () => {
   void loadTaskAssignees();
 });

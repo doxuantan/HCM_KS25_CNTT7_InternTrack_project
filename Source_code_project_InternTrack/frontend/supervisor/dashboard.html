@@ -60,6 +60,15 @@
         <main class="content admin-content" id="main-content" tabindex="-1" aria-busy="true">
           <section class="supervisor-view" data-supervisor-panel="overview">
             <div class="page-heading admin-page-heading"><div><p class="eyebrow">Bảng điều khiển</p><h1>Tổng quan thực tập</h1><p class="page-description">Dữ liệu các nhóm do bạn phụ trách.</p></div><button class="button button-secondary" type="button" data-supervisor-refresh>Làm mới dữ liệu</button></div>
+            <section class="panel admin-panel" style="margin-bottom:16px">
+              <div class="admin-toolbar">
+                <div class="admin-filter"><label for="dashboard-team-filter">Nhóm</label><select class="form-control" id="dashboard-team-filter" data-dashboard-team><option value="">Tất cả nhóm</option></select></div>
+                <div class="admin-filter"><label for="dashboard-status-filter">Trạng thái task</label><select class="form-control" id="dashboard-status-filter" data-dashboard-status><option value="">Tất cả trạng thái</option><option value="TODO">Chưa bắt đầu</option><option value="IN_PROGRESS">Đang thực hiện</option><option value="REVIEW">Chờ nghiệm thu</option><option value="DONE">Hoàn thành</option><option value="CANCELLED">Đã hủy</option></select></div>
+                <div class="admin-filter"><label for="dashboard-from-filter">Hạn từ</label><input class="form-control" id="dashboard-from-filter" type="date" data-dashboard-from></div>
+                <div class="admin-filter"><label for="dashboard-to-filter">Hạn đến</label><input class="form-control" id="dashboard-to-filter" type="date" data-dashboard-to></div>
+                <button class="button button-secondary" type="button" data-dashboard-clear>Xóa bộ lọc</button>
+              </div>
+            </section>
             <section class="admin-stat-grid supervisor-stat-grid">
               <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Kỳ thực tập</span><span class="admin-stat-icon admin-stat-icon-blue" aria-hidden="true">▣</span></div><p class="summary-value" data-stat-periods>—</p><p class="summary-note">Kỳ có nhóm được phân công</p></article>
               <article class="summary-card admin-stat-card"><div class="summary-card-top"><span class="summary-label">Nhóm phụ trách</span><span class="admin-stat-icon admin-stat-icon-violet" aria-hidden="true">⌘</span></div><p class="summary-value" data-stat-teams>—</p><p class="summary-note">Nhóm thuộc phạm vi của bạn</p></article>
@@ -83,6 +92,12 @@
       </div>
     </div>
 
+    <dialog class="modal admin-dialog" data-member-progress-dialog>
+      <div class="admin-dialog-form">
+        <div class="modal-header"><div><h2 class="modal-title" data-member-progress-title>Tiến độ thành viên</h2></div><button class="modal-close" type="button" data-close-member-progress>×</button></div>
+        <div class="modal-body" data-member-progress-body>Đang tải...</div>
+      </div>
+    </dialog>
     <dialog class="modal admin-dialog" data-review-dialog><form class="admin-dialog-form" data-review-form><div class="modal-header"><div><h2 class="modal-title" data-review-title>Duyệt</h2></div><button class="modal-close" type="button" data-close-review>×</button></div><div class="modal-body"><label class="form-field"><span class="form-label">Nhận xét / lý do</span><textarea class="form-control" name="content" rows="4" maxlength="5000" required></textarea></label></div><div class="modal-footer"><button class="button button-secondary" type="button" data-close-review>Hủy</button><button class="button button-primary" type="button" data-review-approved>Duyệt</button><button class="button button-danger" type="button" data-review-revision>Yêu cầu sửa</button></div></form></dialog>
     <dialog class="modal admin-dialog" data-evaluation-dialog><form class="admin-dialog-form" data-evaluation-form><div class="modal-header"><div><h2 class="modal-title">Tạo đánh giá sinh viên</h2></div><button class="modal-close" type="button" data-close-evaluation>×</button></div><div class="modal-body admin-form-grid"><label class="form-field"><span class="form-label">Sinh viên</span><select class="form-control" name="student_id" required></select></label><label class="form-field"><span class="form-label">Kỳ thực tập</span><select class="form-control" name="period_id" required></select></label><label class="form-field admin-form-wide"><span class="form-label">Nhận xét</span><textarea class="form-control" name="comment" maxlength="5000"></textarea></label><label class="form-field admin-form-wide"><span><input type="checkbox" name="is_published"> Công bố đánh giá</span></label></div><div class="modal-footer"><button class="button button-secondary" type="button" data-close-evaluation>Hủy</button><button class="button button-primary" type="submit">Lưu đánh giá</button></div></form></dialog>
   </body>
