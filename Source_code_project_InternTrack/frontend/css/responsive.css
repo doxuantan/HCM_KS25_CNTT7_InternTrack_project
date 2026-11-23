@@ -138,3 +138,71 @@
   border-bottom: 1px solid var(--line, #e5eaf1);
   background: var(--panel-bg, #fff);
 }
+
+@media (max-width: 760px) {
+  .admin-dashboard .admin-filter {
+    min-width: min(175px, calc(50% - 8px)) !important;
+    flex: 1 1 150px !important;
+  }
+
+  .admin-dashboard .admin-toolbar > .button {
+    width: auto;
+  }
+
+  .admin-dashboard .table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  .admin-dashboard .admin-table {
+    min-width: 790px;
+  }
+
+  .admin-dashboard .admin-recent-table {
+    min-width: 620px;
+  }
+
+  .admin-dashboard .admin-period-table {
+    min-width: 760px;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-dashboard .admin-filter {
+    min-width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  .admin-dashboard .admin-toolbar > .button {
+    width: 100%;
+  }
+
+  .admin-dashboard .page-description {
+    max-width: none;
+  }
+
+  .admin-dashboard .panel-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .admin-dashboard .admin-dialog {
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+    overflow-y: auto;
+  }
+
+  .admin-dashboard .admin-dialog-form {
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+
+  .admin-dashboard .admin-dialog-form .modal-body {
+    max-height: none;
+    overflow: visible;
+  }
+}
