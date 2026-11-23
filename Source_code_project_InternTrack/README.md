@@ -66,7 +66,7 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 
 `SECRET_KEY` phải dài ít nhất 32 ký tự. Mật khẩu seed tối thiểu 8 ký tự và không vượt quá 72 byte UTF-8. Nếu mật khẩu database có ký tự đặc biệt, URL-encode phần mật khẩu trong `DATABASE_URL`.
 
-Các giá trị mặc định và tên biến cấu hình khác được liệt kê trong [.env.example](./.env.example). Hiện CORS trong `app/main.py` cho phép `http://127.0.0.1:5500` và `http://localhost:5500`; biến `ALLOWED_ORIGINS` trong `.env` chưa được dùng để thay đổi danh sách này.
+Các giá trị mặc định và tên biến cấu hình khác được liệt kê trong [.env.example](./.env.example). Backend chỉ cho phép các origin được khai báo trong `ALLOWED_ORIGINS`; giữ origin ở dạng nguồn chính xác (scheme, hostname và port) và không cấu hình wildcard khi dùng credentials.
 
 ## 3. Schema, migration và dữ liệu seed
 
@@ -96,13 +96,13 @@ Seed tài khoản mẫu (tùy chọn, chỉ dùng database development/test):
 python -m app.db.seed_sample_data
 ```
 
-Lệnh này cần `SAMPLE_USER_PASSWORD`; trong development, nó cũng đảm bảo tài khoản ADMIN mặc định đã tồn tại. Seed kỳ thực tập, tiêu chí đánh giá và phân nhóm mẫu (tùy chọn):
+Lệnh này cần `SAMPLE_USER_PASSWORD`; trong development, nó cũng đảm bảo tài khoản ADMIN mặc định đã tồn tại. Seed kỳ thực tập, tiêu chí đánh giá, phân nhóm và dữ liệu mẫu cho nhật ký, báo cáo, đánh giá (tùy chọn):
 
 ```powershell
 python -m app.db.seed
 ```
 
-Chỉ chạy seed mẫu trên database dùng thử; lệnh cuối tạo dữ liệu mẫu và có thể gán các sinh viên hiện có vào nhóm.
+Chỉ chạy seed mẫu trên database dùng thử; `seed.py` có thể gán sinh viên hiện có vào nhóm và tạo dữ liệu mẫu có liên kết. Có thể chạy lại an toàn; báo cáo mẫu được tạo ở trạng thái nháp để không giả lập tệp đã nộp.
 
 ## 4. Chạy backend
 
@@ -125,7 +125,7 @@ python -m http.server 5500 --bind 127.0.0.1 --directory frontend
 
 Mở <http://127.0.0.1:5500/home.html>. Đăng nhập bằng tài khoản ADMIN development đã seed để vào [admin.html](./frontend/admin.html); [users.html](./frontend/users.html) chuyển tới màn quản lý user trong dashboard ADMIN hiện có. Không mở HTML trực tiếp bằng `file://` vì ứng dụng dùng JavaScript ES modules và cần gọi API.
 
-Frontend hiện cấu hình API tại `http://localhost:8000/api/v1`. Nếu đổi địa chỉ backend, cập nhật thẻ `meta[name="api-base-url"]` trong các trang frontend tương ứng. Khi đổi port/origin frontend, cập nhật danh sách CORS trong `app/main.py`.
+Frontend hiện cấu hình API tại `http://localhost:8000/api/v1`. Nếu đổi địa chỉ backend, cập nhật thẻ `meta[name="api-base-url"]` trong các trang frontend tương ứng. Khi đổi port/origin frontend, cập nhật biến `ALLOWED_ORIGINS` trong `.env`.
 
 ## 6. Chạy kiểm thử
 

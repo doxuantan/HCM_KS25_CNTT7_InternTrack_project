@@ -15,7 +15,7 @@ from app.core.config import settings
 from app.models.attachment import Attachment
 from app.models.internship_diary import InternshipDiary
 from app.models.lecturer import Lecturer
-from app.models.report import Report
+from app.models.report import Report, ReportStatus
 from app.models.student import Student
 from app.models.task import Task
 from app.models.task_assignment import TaskAssignment
@@ -302,6 +302,12 @@ async def upload_attachment(
         diary_id=diary_id,
         report_id=report_id,
     )
+    if report_id is not None:
+        report = db.get(Report, report_id)
+        if current_user.role == UserRole.SUPERVISOR:
+            raise _http_error(status.HTTP_403_FORBIDDEN, "Giảng viên không thể tải tệp thay cho báo cáo của sinh viên.")
+        if report is not None and report.status == ReportStatus.APPROVED:
+            raise _http_error(status.HTTP_409_CONFLICT, "Báo cáo đã duyệt và không thể thay đổi tệp.")
     original_name, extension = _clean_original_filename(file.filename)
     mime_type = _validate_declared_mime_type(file.content_type, extension)
     max_file_size = settings.MAX_ATTACHMENT_SIZE_MB * 1024 * 1024
@@ -406,19 +412,48 @@ def get_attachment_file(
     return attachment, file_path
 
 
+def list_target_attachments(
+    *,
+    db: Session,
+    task_id: int | None,
+    diary_id: int | None,
+    report_id: int | None,
+    current_user: User,
+) -> list[Attachment]:
+    _assert_target_access(
+        db,
+        current_user,
+        task_id=task_id,
+        diary_id=diary_id,
+        report_id=report_id,
+    )
+    target_column = (
+        Attachment.task_id if task_id is not None
+        else Attachment.diary_id if diary_id is not None
+        else Attachment.report_id
+    )
+    target_id = task_id if task_id is not None else diary_id if diary_id is not None else report_id
+    return list(
+        db.scalars(
+            select(Attachment)
+            .where(target_column == target_id)
+            .order_by(Attachment.uploaded_at.asc(), Attachment.id.asc())
+        ).all()
+    )
+
+
 def list_task_attachments(
     *,
     db: Session,
     task_id: int,
     current_user: User,
 ) -> list[Attachment]:
-    _assert_target_access(db, current_user, task_id=task_id)
-    return list(
-        db.scalars(
-            select(Attachment)
-            .where(Attachment.task_id == task_id)
-            .order_by(Attachment.uploaded_at.asc(), Attachment.id.asc())
-        ).all()
+    return list_target_attachments(
+        db=db,
+        task_id=task_id,
+        diary_id=None,
+        report_id=None,
+        current_user=current_user,
     )
 
 
@@ -432,6 +467,10 @@ def delete_attachment(
     if attachment is None:
         raise _http_error(status.HTTP_404_NOT_FOUND, "Attachment not found.")
     _check_attachment_access(db, current_user, attachment)
+    if attachment.report_id is not None:
+        report = db.get(Report, attachment.report_id)
+        if report is not None and report.status == ReportStatus.APPROVED:
+            raise _http_error(status.HTTP_409_CONFLICT, "Báo cáo đã duyệt và không thể thay đổi tệp.")
 
     is_admin = current_user.role == UserRole.ADMIN
     is_uploader = attachment.uploaded_by == current_user.id

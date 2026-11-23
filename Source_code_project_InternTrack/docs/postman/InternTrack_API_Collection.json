@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "6f96e970-1f30-4ead-9a7d-2f73f2343e8b",
     "name": "InternTrack_API_Collection",
-    "description": "InternTrack API collection for Auth, User, Team, Task, Progress, Schedule, Notification and Attachment.",
+    "description": "InternTrack API collection for Auth, User, Team, Task, Progress, Diary, Report, Evaluation, Schedule, Notification and Attachment.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -38,7 +38,8 @@
           "  'Create Student': 201, 'Create Supervisor': 201, 'Delete User': 204,",
           "  'List Internship Periods': 200, 'Get unknown Internship Period': 404,",
           "  'Create Internship Period': 201, 'Delete Internship Period': 204,",
-          "  'Upload Attachment': 201, 'Download Attachment': 200, 'Delete Attachment': 204",
+          "  'Upload Attachment': 201, 'Upload Report Attachment': 201, 'Create Diary': 201, 'Create Report': 201, 'Create Evaluation': 201,",
+          "  'Download Attachment': 200, 'Delete Attachment': 204",
           "};",
           "pm.variables.set('expected_status', expected[pm.info.requestName] || 200);",
           "if (pm.info.requestName === 'Register') {",
@@ -98,6 +99,10 @@
           "  if (name === 'Create Schedule' && expected === 201) pm.environment.set('schedule_id', body.data.id);",
           "  if (name === 'Mark Notification Read' && expected === 204) pm.environment.set('notification_id', pm.variables.get('notification_id') || '');",
           "  if (name === 'Upload Attachment') pm.environment.set('attachment_id', body.data.id);",
+          "  if (name === 'Create Diary') pm.environment.set('diary_id', body.data.id);",
+          "  if (name === 'Create Report') pm.environment.set('report_id', body.data.id);",
+          "  if (name === 'Create Evaluation') pm.environment.set('evaluation_id', body.data.id);",
+          "  if (name === 'Upload Report Attachment') pm.environment.set('report_attachment_id', body.data.id);",
           "} else if (expected < 400) {",
           "  pm.test('Binary response has a download filename', () => pm.expect(pm.response.headers.get('Content-Disposition') || '').to.include('filename='));",
           "}"
@@ -1844,6 +1849,308 @@
                 "{{schedule_id}}"
               ]
             }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Diary",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{student_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List Diaries",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/diaries"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Diary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"work_date\":\"{{period_start_date}}\",\"work_content\":\"Postman integration diary entry\",\"result\":\"Completed test scenario\",\"difficulties\":\"None\",\"lessons_learned\":\"Verify API workflow\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/diaries"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Diary Reviews",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/diaries/{{diary_id}}/review"
+          },
+          "response": []
+        },
+        {
+          "name": "Review Diary",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supervisor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"REVIEWED\",\"content\":\"Diary reviewed by Postman.\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/diaries/{{diary_id}}/review"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{student_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List Reports",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/reports"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"period_id\":\"{{internship_period_id}}\",\"title\":\"Postman weekly report\",\"report_type\":\"WEEKLY\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/reports"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Report Attachment",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{upload_file_path}}"
+                },
+                {
+                  "key": "report_id",
+                  "value": "{{report_id}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{base_url}}/attachments/upload"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Report",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/reports/{{report_id}}/submit"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report Reviews",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/reports/{{report_id}}/review"
+          },
+          "response": []
+        },
+        {
+          "name": "Review Report",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supervisor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"REVISION_REQUIRED\",\"content\":\"Add the weekly outcomes.\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/reports/{{report_id}}/review"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Evaluations",
+      "item": [
+        {
+          "name": "List Evaluation Criteria",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supervisor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{base_url}}/evaluations/criteria"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Evaluation",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supervisor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student_id\":\"{{student_profile_id}}\",\"period_id\":\"{{internship_period_id}}\",\"comment\":\"Evaluation created through Postman.\",\"details\":[]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/evaluations"
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Evaluation",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supervisor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{base_url}}/evaluations/{{evaluation_id}}/publish"
+          },
+          "response": []
+        },
+        {
+          "name": "List Student Evaluations",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{base_url}}/evaluations"
           },
           "response": []
         }

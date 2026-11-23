@@ -42,7 +42,7 @@ export function clearAuthSession() {
 
 function redirectToLogin() {
   if (!window.location.pathname.endsWith("/login.html")) {
-    window.location.replace(new URL("./login.html", window.location.href));
+    window.location.replace(new URL("../login.html", import.meta.url));
   }
 }
 
@@ -131,4 +131,52 @@ export async function apiRequest(path, options = {}) {
   }
 
   return payload;
+}
+
+export async function downloadAttachment(attachmentId, filename) {
+  const token = getAccessToken();
+  const headers = new Headers();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  let response;
+  try {
+    response = await fetch(
+      new URL(`${API_BASE_URL}/attachments/${encodeURIComponent(attachmentId)}`, window.location.href),
+      { headers },
+    );
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new ApiError(
+        "Không thể kết nối máy chủ. Vui lòng kiểm tra API, kết nối mạng và cấu hình CORS.",
+        0,
+      );
+    }
+    throw error;
+  }
+
+  if (!response.ok) {
+    const payload = await readResponse(response);
+    const message =
+      typeof payload?.message === "string"
+        ? payload.message
+        : typeof payload?.detail === "string"
+          ? payload.detail
+          : `Yêu cầu thất bại (${response.status}).`;
+    if (response.status === 401 && token) {
+      clearAuthSession();
+      redirectToLogin();
+    }
+    throw new ApiError(message, response.status, payload);
+  }
+
+  const objectUrl = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = filename || `attachment-${attachmentId}`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }

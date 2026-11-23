@@ -1,6 +1,6 @@
-import { apiRequest } from "./api.js";
+import { apiRequest, downloadAttachment } from "./api.js";
 import { requireAuth, logout } from "./auth.js";
-import { initializeSharedUi, showToast } from "./ui.js";
+import { confirmAction, initializeSharedUi, showToast } from "./ui.js";
 import { initializeNotifications } from "./notifications.js";
 
 let currentUser = null;
@@ -9,6 +9,9 @@ let periods = [];
 let tasks = [];
 let teamProgress = [];
 let activeReview = null;
+let evaluations = [];
+let evaluationCriteria = [];
+let editingEvaluationId = null;
 
 function escapeHtml(value) {
   const node = document.createElement("div");
@@ -160,6 +163,18 @@ async function renderTeamsAndProgress() {
     ),
   );
   teamProgress = results.filter(Boolean);
+  const studentFilter = document.querySelector("[data-diary-student]");
+  if (studentFilter instanceof HTMLSelectElement) {
+    const members = new Map();
+    teamProgress.forEach((team) => {
+      (team.members || []).forEach((member) => members.set(member.student_id, member));
+    });
+    studentFilter.replaceChildren(
+      new Option("Tất cả sinh viên", ""),
+      ...Array.from(members.values()).map((member) =>
+        new Option(member.student_name || `Sinh viên #${member.student_id}`, String(member.student_id))),
+    );
+  }
 
   if (teamBody) {
     teamBody.innerHTML = teamProgress.map((progress) => `
@@ -209,7 +224,15 @@ async function renderDiaries() {
   const body = document.querySelector("[data-diary-rows]");
   if (!body) return;
   try {
-    const diaries = normalizeList(await apiRequest("diaries"));
+    const params = new URLSearchParams();
+    const studentId = document.querySelector("[data-diary-student]")?.value;
+    const workDate = document.querySelector("[data-diary-date]")?.value;
+    const diaryStatus = document.querySelector("[data-diary-status]")?.value;
+    if (studentId) params.set("student_id", studentId);
+    if (workDate) params.set("work_date", workDate);
+    if (diaryStatus) params.set("status", diaryStatus);
+    const query = params.size ? `?${params}` : "";
+    const diaries = normalizeList(await apiRequest(`diaries${query}`));
     if (!diaries.length) {
       stateRow(body, "Chưa có nhật ký thực tập.", 5);
       return;
@@ -218,9 +241,9 @@ async function renderDiaries() {
       <tr>
         <td><strong>${escapeHtml(diary.student_name || `Sinh viên #${diary.student_id}`)}</strong><br><span class="muted">${escapeHtml(diary.student_code || "")}</span></td>
         <td>${escapeHtml(formatDate(diary.work_date))}</td>
-        <td>${escapeHtml(diary.work_content)}</td>
+        <td>${escapeHtml(diary.work_content)}${(diary.reviews || []).map((review) => `<p class="muted">${escapeHtml(statusLabel(review.status))}: ${escapeHtml(review.content)}</p>`).join("")}</td>
         <td>${statusBadge(diary.status)}</td>
-        <td><button class="admin-row-action" type="button" data-diary-review="${diary.id}" data-diary-title="${escapeHtml(diary.student_name || "Nhật ký")}">Duyệt</button></td>
+        <td>${diary.status === "SUBMITTED" ? `<button class="admin-row-action" type="button" data-diary-review="${diary.id}" data-diary-title="${escapeHtml(diary.student_name || "Nhật ký")}">Nhận xét</button>` : "—"}</td>
       </tr>
     `).join("");
   } catch (error) {
@@ -239,11 +262,11 @@ async function renderReports() {
     }
     body.innerHTML = reports.map((report) => `
       <tr>
-        <td><strong>${escapeHtml(report.title)}</strong></td>
+        <td><strong>${escapeHtml(report.title)}</strong>${(report.reviews || []).map((review) => `<p class="muted">${escapeHtml(statusLabel(review.status))}: ${escapeHtml(review.content)}</p>`).join("")}</td>
         <td>${escapeHtml(report.owner_name || "—")}</td>
         <td>${escapeHtml(report.report_type)}</td>
         <td>${statusBadge(report.status)}</td>
-        <td>${report.file_url ? `<a class="admin-row-action" href="${escapeHtml(report.file_url)}" target="_blank" rel="noopener">Xem</a>` : ""} <button class="admin-row-action" type="button" data-report-review="${report.id}" data-report-title="${escapeHtml(report.title)}">Duyệt</button></td>
+        <td>${report.file_url ? `<button class="admin-row-action" type="button" data-report-attachments="${report.id}">Tệp</button>` : ""} ${["SUBMITTED", "REVIEWING"].includes(report.status) ? `<button class="admin-row-action" type="button" data-report-review="${report.id}" data-report-title="${escapeHtml(report.title)}">Nhận xét</button>` : "—"}</td>
       </tr>
     `).join("");
   } catch (error) {
@@ -255,14 +278,18 @@ async function renderEvaluations() {
   const body = document.querySelector("[data-evaluation-rows]");
   if (!body) return;
   try {
-    const evaluations = normalizeList(await apiRequest("evaluations"));
+    evaluations = normalizeList(await apiRequest("evaluations"));
     if (!evaluations.length) {
       stateRow(body, "Chưa có phiếu đánh giá.", 5);
       return;
     }
     body.innerHTML = evaluations.map((evaluation) => {
       const student = teamProgress.flatMap((team) => team.members || []).find((member) => member.student_id === evaluation.student_id);
-      return `<tr><td>${escapeHtml(student?.student_name || (evaluation.team_id ? `Nhóm #${evaluation.team_id}` : `Sinh viên #${evaluation.student_id}`))}</td><td>#${evaluation.period_id}</td><td>${evaluation.total_score ?? "—"}</td><td>${evaluation.is_published ? "Đã công bố" : "Chưa công bố"}</td><td>${escapeHtml(evaluation.comment || "—")}</td></tr>`;
+      const details = (evaluation.details || []).map((detail) => `${escapeHtml(detail.criteria_name || `Tiêu chí #${detail.criteria_id}`)}: ${detail.score}`).join("<br>");
+      const actions = evaluation.is_published
+        ? "Đã khóa"
+        : `<button class="admin-row-action" type="button" data-edit-evaluation="${evaluation.id}">Sửa điểm</button><button class="admin-row-action" type="button" data-publish-evaluation="${evaluation.id}">Công bố</button><button class="admin-row-action" type="button" data-delete-evaluation="${evaluation.id}">Xóa</button>`;
+      return `<tr><td>${escapeHtml(student?.student_name || (evaluation.team_id ? `Nhóm #${evaluation.team_id}` : `Sinh viên #${evaluation.student_id}`))}<p class="muted">${details || "Chưa nhập điểm theo tiêu chí"}</p></td><td>#${evaluation.period_id}</td><td>${evaluation.total_score ?? "—"}</td><td>${evaluation.is_published ? "Đã công bố" : "Chưa công bố"}</td><td>${escapeHtml(evaluation.comment || "—")}</td><td>${actions}</td></tr>`;
     }).join("");
   } catch (error) {
     stateRow(body, `Không tải được đánh giá: ${error.message}`, 5);
@@ -327,10 +354,11 @@ async function submitReview(reviewStatus) {
   }
 }
 
-async function openEvaluationDialog() {
+async function openEvaluationDialog(evaluation = null) {
   const dialog = document.querySelector("[data-evaluation-dialog]");
   const form = document.querySelector("[data-evaluation-form]");
   if (!(dialog instanceof HTMLDialogElement) || !(form instanceof HTMLFormElement)) return;
+  const evaluationId = evaluation?.id ?? null;
   const members = new Map();
   teamProgress.forEach((team) => {
     (team.members || []).forEach((member) => members.set(member.student_id, member));
@@ -341,6 +369,47 @@ async function openEvaluationDialog() {
   form.elements.period_id.replaceChildren(
     ...periods.map((period) => new Option(period.name, String(period.id))),
   );
+  try {
+    evaluationCriteria = normalizeList(await apiRequest("evaluations/criteria"));
+  } catch (error) {
+    showToast(`Không tải được tiêu chí đánh giá: ${error.message}`, { kind: "error" });
+    return;
+  }
+  const criteriaContainer = form.querySelector("[data-evaluation-criteria]");
+  if (criteriaContainer) {
+    criteriaContainer.replaceChildren(...evaluationCriteria.map((criteria) => {
+      const field = document.createElement("label");
+      field.className = "form-field";
+      const title = document.createElement("span");
+      title.className = "form-label";
+      title.textContent = `${criteria.name} (trọng số ${criteria.weight})`;
+      const input = document.createElement("input");
+      input.className = "form-control";
+      input.type = "number";
+      input.min = "0";
+      input.max = "999.99";
+      input.step = "0.01";
+      input.name = `score_${criteria.id}`;
+      const detail = evaluation?.details?.find((item) => item.criteria_id === criteria.id);
+      input.value = detail?.score ?? "";
+      const comment = document.createElement("textarea");
+      comment.className = "form-control";
+      comment.name = `criteria_comment_${criteria.id}`;
+      comment.maxLength = 2000;
+      comment.rows = 2;
+      comment.placeholder = "Nhận xét tiêu chí (không bắt buộc)";
+      comment.value = detail?.comment || "";
+      field.append(title, input, comment);
+      return field;
+    }));
+  }
+  editingEvaluationId = evaluationId;
+  form.elements.student_id.value = evaluation?.student_id ? String(evaluation.student_id) : "";
+  form.elements.period_id.value = evaluation?.period_id ? String(evaluation.period_id) : "";
+  form.elements.comment.value = evaluation?.comment || "";
+  setText("[data-evaluation-title]", evaluationId ? "Cập nhật điểm đánh giá" : "Tạo đánh giá sinh viên");
+  const submitButton = form.querySelector('button[type="submit"]');
+  if (submitButton) submitButton.textContent = evaluationId ? "Cập nhật đánh giá" : "Lưu đánh giá";
   dialog.showModal();
 }
 
@@ -419,6 +488,51 @@ document.addEventListener("click", (event) => {
   if (diaryButton) openReview("diary", Number(diaryButton.dataset.diaryReview), diaryButton.dataset.diaryTitle);
   const reportButton = target?.closest("[data-report-review]");
   if (reportButton) openReview("report", Number(reportButton.dataset.reportReview), reportButton.dataset.reportTitle);
+  const attachmentButton = target?.closest("[data-report-attachments]");
+  if (attachmentButton) {
+    const reportId = Number(attachmentButton.dataset.reportAttachments);
+    void apiRequest(`attachments?report_id=${reportId}`)
+      .then(async (items) => {
+        if (!items.length) {
+          showToast("Báo cáo chưa có tệp đính kèm.", { kind: "error" });
+          return;
+        }
+        await downloadAttachment(items[items.length - 1].id, items[items.length - 1].file_name);
+      })
+      .catch((error) => showToast(error.message, { kind: "error" }));
+  }
+  const editEvaluation = target?.closest("[data-edit-evaluation]");
+  if (editEvaluation) {
+    const evaluation = evaluations.find((item) => item.id === Number(editEvaluation.dataset.editEvaluation));
+    if (evaluation) void openEvaluationDialog(evaluation);
+  }
+  const publishEvaluation = target?.closest("[data-publish-evaluation]");
+  if (publishEvaluation) {
+    void apiRequest(`evaluations/${publishEvaluation.dataset.publishEvaluation}/publish`, { method: "POST" })
+      .then(async () => {
+        showToast("Đã công bố phiếu đánh giá và gửi thông báo.");
+        await renderEvaluations();
+      })
+      .catch((error) => showToast(error.message, { kind: "error" }));
+  }
+  const deleteEvaluation = target?.closest("[data-delete-evaluation]");
+  if (deleteEvaluation) {
+    void confirmAction({
+      title: "Xóa phiếu đánh giá",
+      message: "Bạn có chắc muốn xóa phiếu đánh giá chưa công bố này?",
+      confirmLabel: "Xóa phiếu",
+      destructive: true,
+    }).then(async (confirmed) => {
+      if (!confirmed) return;
+      try {
+        await apiRequest(`evaluations/${deleteEvaluation.dataset.deleteEvaluation}`, { method: "DELETE" });
+        showToast("Đã xóa phiếu đánh giá.");
+        await renderEvaluations();
+      } catch (error) {
+        showToast(error.message, { kind: "error" });
+      }
+    });
+  }
   const notificationButton = target?.closest("[data-read-notification]");
   if (notificationButton) {
     void apiRequest(`notifications/${notificationButton.dataset.readNotification}/read`, { method: "PATCH" })
@@ -432,22 +546,44 @@ document.querySelector("[data-evaluation-form]")?.addEventListener("submit", asy
   event.preventDefault();
   const form = event.currentTarget;
   try {
-    await apiRequest("evaluations", {
-      method: "POST",
+    const details = evaluationCriteria.flatMap((criteria) => {
+      const score = form.elements.namedItem(`score_${criteria.id}`)?.value;
+      if (score === undefined || score === "") return [];
+      const comment = form.elements.namedItem(`criteria_comment_${criteria.id}`)?.value.trim();
+      return [{
+        criteria_id: criteria.id,
+        score: Number(score),
+        comment: comment || null,
+      }];
+    });
+    await apiRequest(editingEvaluationId ? `evaluations/${editingEvaluationId}` : "evaluations", {
+      method: editingEvaluationId ? "PUT" : "POST",
       body: {
         student_id: Number(form.elements.student_id.value),
         period_id: Number(form.elements.period_id.value),
         comment: form.elements.comment.value.trim() || null,
-        is_published: form.elements.is_published.checked,
-        details: [],
+        is_published: false,
+        details,
       },
     });
     document.querySelector("[data-evaluation-dialog]")?.close();
-    showToast("Đã lưu đánh giá.");
+    showToast(editingEvaluationId ? "Đã cập nhật đánh giá." : "Đã lưu đánh giá.");
+    editingEvaluationId = null;
     await renderEvaluations();
   } catch (error) {
     showToast(error.message, { kind: "error" });
   }
+});
+
+["[data-diary-student]", "[data-diary-date]", "[data-diary-status]"].forEach((selector) => {
+  document.querySelector(selector)?.addEventListener("change", () => void renderDiaries());
+});
+document.querySelector("[data-diary-clear-filters]")?.addEventListener("click", () => {
+  ["[data-diary-student]", "[data-diary-date]", "[data-diary-status]"].forEach((selector) => {
+    const control = document.querySelector(selector);
+    if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement) control.value = "";
+  });
+  void renderDiaries();
 });
 
 document.querySelectorAll("[data-logout]").forEach((button) => button.addEventListener("click", logout));

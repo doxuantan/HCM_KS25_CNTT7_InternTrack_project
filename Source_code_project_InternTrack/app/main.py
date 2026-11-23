@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.router import router as api_router
 from app.core.api_responses import install_api_response_handling
+from app.core.config import settings
 from app.db.database import Base, engine, get_db
 import app.models
 
@@ -17,10 +18,7 @@ app = FastAPI()
 install_api_response_handling(app)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-    ],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],

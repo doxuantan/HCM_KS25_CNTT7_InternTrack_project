@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class EvaluationDetailCreate(BaseModel):
     criteria_id: int = Field(gt=0)
-    score: Decimal = Field(ge=0)
+    score: Decimal = Field(ge=0, le=999.99)
     comment: str | None = Field(default=None, max_length=2000)
 
 
@@ -16,13 +16,15 @@ class EvaluationCreate(BaseModel):
     period_id: int = Field(gt=0)
     comment: str | None = Field(default=None, max_length=5000)
     is_published: bool = False
-    details: list[EvaluationDetailCreate] = []
+    details: list[EvaluationDetailCreate] = Field(default_factory=list)
 
 
 class EvaluationDetailResponse(BaseModel):
     criteria_id: int
     score: Decimal
     comment: str | None = None
+    criteria_name: str | None = None
+    weight: Decimal | None = None
 
 
 class EvaluationResponse(BaseModel):
@@ -35,6 +37,13 @@ class EvaluationResponse(BaseModel):
     comment: str | None = None
     is_published: bool
     created_at: datetime
-    details: list[EvaluationDetailResponse] = []
+    details: list[EvaluationDetailResponse] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class EvaluationCriteriaResponse(BaseModel):
+    id: int
+    name: str
+    description: str | None = None
+    weight: Decimal
