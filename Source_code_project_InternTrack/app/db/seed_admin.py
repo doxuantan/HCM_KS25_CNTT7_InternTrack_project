@@ -6,6 +6,8 @@ Run with:
 Requires APP_ENV=development and DEFAULT_ADMIN_PASSWORD in the environment.
 """
 
+import sys
+
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -89,15 +91,27 @@ def seed_default_admin(db: Session) -> bool:
     return True
 
 
-def main() -> None:
-    _require_development_environment()
-
-    db = SessionLocal()
+def main() -> int:
     try:
-        seed_default_admin(db)
-    finally:
-        db.close()
+        _require_development_environment()
+
+        db = SessionLocal()
+        try:
+            seed_default_admin(db)
+        finally:
+            db.close()
+        return 0
+    except SQLAlchemyError:
+        print(
+            "Seed failed: cannot connect to or operate on the database. "
+            "Check that MySQL is running and that DATABASE_URL in .env is correct.",
+            file=sys.stderr,
+        )
+        return 1
+    except (RuntimeError, ValueError) as exc:
+        print(f"Seed failed: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
