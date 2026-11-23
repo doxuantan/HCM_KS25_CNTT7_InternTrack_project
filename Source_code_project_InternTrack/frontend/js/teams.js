@@ -627,5 +627,7 @@ if (isStudentView()) {
   } catch (error) {
     const body = document.querySelector("[data-teams-rows]");
     if (body) body.replaceChildren(stateRow(`Không tải được danh sách nhóm: ${error.message}`, 5));
+  } finally {
+    document.querySelector("#main-content")?.setAttribute("aria-busy", "false");
   }
 }

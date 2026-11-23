@@ -24,14 +24,19 @@ from app.models import (
     Lecturer,
     Notification,
     Report,
+    Schedule,
     Student,
+    User,
     Team,
     TeamMember,
+    Task,
 )
 from app.models.diary_review import DiaryReviewStatus
 from app.models.internship_diary import DiaryStatus
 from app.models.internship_period import PeriodStatus
 from app.models.report import ReportStatus, ReportType
+from app.models.task import TaskPriority, TaskStatus, TaskType
+from app.models.task_assignment import AssignmentStatus, TaskAssignment
 from app.models.team import TeamStatus
 
 
@@ -212,6 +217,154 @@ def seed_teams_and_members(db: Session, period: InternshipPeriod) -> None:
         print("[ĐÃ CÓ] Sinh viên hiện tại đã được xếp nhóm trong kỳ này.")
 
 
+def seed_demo_schedules(db: Session, period: InternshipPeriod) -> None:
+    teams = db.scalars(
+        select(Team)
+        .where(Team.period_id == period.id)
+        .order_by(Team.id)
+    ).all()
+    if not teams:
+        print("[BỎ QUA] Chưa có nhóm để tạo lịch hoạt động.")
+        return
+
+    schedule_templates = (
+        (
+            "Họp khởi động kỳ thực tập",
+            "Trao đổi mục tiêu, quy tắc làm việc và phân công công việc.",
+            "Phòng họp trực tuyến",
+            datetime(2026, 11, 20, 9, 0),
+            datetime(2026, 11, 20, 10, 30),
+        ),
+        (
+            "Buổi đánh giá tiến độ tuần",
+            "Tổng hợp công việc và kế hoạch hoàn thiện trong tuần tiếp theo.",
+            "Phòng thực tập CNTT",
+            datetime(2026, 11, 27, 14, 0),
+            datetime(2026, 11, 27, 15, 0),
+        ),
+    )
+    created_count = 0
+    for team in teams:
+        lecturer = db.get(Lecturer, team.supervisor_id)
+        creator = db.get(User, lecturer.user_id) if lecturer else None
+        if creator is None:
+            continue
+        for title, description, location, start_time, end_time in schedule_templates:
+            existing = db.scalar(
+                select(Schedule.id).where(
+                    Schedule.team_id == team.id,
+                    Schedule.title == title,
+                )
+            )
+            if existing is not None:
+                continue
+            db.add(Schedule(
+                team_id=team.id,
+                created_by=creator.id,
+                title=title,
+                description=description,
+                location=location,
+                start_time=start_time,
+                end_time=end_time,
+            ))
+            created_count += 1
+    print(f"[SEED] Ensured {created_count} demo schedules.")
+
+
+def seed_demo_tasks(db: Session, period: InternshipPeriod) -> None:
+    teams = db.scalars(
+        select(Team)
+        .where(Team.period_id == period.id)
+        .order_by(Team.id)
+    ).all()
+    task_templates = (
+        (
+            "Hoàn thiện giao diện trang đăng nhập",
+            "Xây dựng giao diện đăng nhập responsive và kiểm tra validation biểu mẫu.",
+            TaskType.TEAM,
+            TaskPriority.HIGH,
+            TaskStatus.TODO,
+            AssignmentStatus.TODO,
+            0,
+            datetime(2026, 11, 16, 0, 0),
+            datetime(2026, 11, 30, 17, 0),
+            1,
+        ),
+        (
+            "Kiểm thử API quản lý thực tập",
+            "Viết và chạy kiểm thử cho các API quản lý kỳ thực tập và nhóm.",
+            TaskType.TEAM,
+            TaskPriority.MEDIUM,
+            TaskStatus.IN_PROGRESS,
+            AssignmentStatus.IN_PROGRESS,
+            35,
+            datetime(2026, 11, 17, 0, 0),
+            datetime(2026, 12, 4, 17, 0),
+            None,
+        ),
+    )
+    created_count = 0
+    for team in teams:
+        lecturer = db.get(Lecturer, team.supervisor_id)
+        creator = db.get(User, lecturer.user_id) if lecturer else None
+        if creator is None:
+            continue
+        members = db.scalars(
+            select(TeamMember)
+            .where(TeamMember.team_id == team.id)
+            .order_by(TeamMember.id)
+        ).all()
+        if not members:
+            continue
+        for (
+            title,
+            description,
+            task_type,
+            priority,
+            task_status,
+            assignment_status,
+            progress,
+            start_date,
+            deadline,
+            member_limit,
+        ) in task_templates:
+            task = db.scalar(
+                select(Task).where(Task.team_id == team.id, Task.title == title)
+            )
+            if task is None:
+                task = Task(
+                    team_id=team.id,
+                    title=title,
+                    description=description,
+                    task_type=task_type,
+                    priority=priority,
+                    status=task_status,
+                    start_date=start_date.date(),
+                    deadline=deadline,
+                    created_by=creator.id,
+                )
+                db.add(task)
+                db.flush()
+                created_count += 1
+            assigned_members = members[:member_limit] if member_limit else members
+            for member in assigned_members:
+                assignment = db.scalar(
+                    select(TaskAssignment.id).where(
+                        TaskAssignment.task_id == task.id,
+                        TaskAssignment.student_id == member.student_id,
+                    )
+                )
+                if assignment is None:
+                    db.add(TaskAssignment(
+                        task_id=task.id,
+                        student_id=member.student_id,
+                        assigned_by=creator.id,
+                        progress=progress,
+                        status=assignment_status,
+                    ))
+    print(f"[SEED] Ensured {created_count} demo tasks.")
+
+
 def seed_demo_records(db: Session, period: InternshipPeriod) -> None:
     memberships = db.execute(
         select(TeamMember, Team, Student)
@@ -329,6 +482,8 @@ def main() -> None:
         period = seed_period(db)
         seed_criteria(db)
         seed_teams_and_members(db, period)
+        seed_demo_schedules(db, period)
+        seed_demo_tasks(db, period)
         seed_demo_records(db, period)
         db.commit()
         print("\nSeed dữ liệu mẫu hoàn tất!")

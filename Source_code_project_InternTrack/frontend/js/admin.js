@@ -23,7 +23,7 @@ const VIEW_LABELS = Object.freeze({
   teams: "Nhóm thực tập",
   system: "Quản lý hệ thống",
 });
-const SEARCH_VIEWS = new Set(["users", "supervisors", "students", "periods"]);
+const SEARCH_VIEWS = new Set(["users", "supervisors", "students", "periods", "teams"]);
 
 const main = document.querySelector("#main-content");
 const alertBox = document.querySelector("[data-admin-alert]");
@@ -649,6 +649,75 @@ async function loadPeriodsView(force = false) {
   renderPeriods();
 }
 
+function renderTeamsView() {
+  const body = document.querySelector("[data-admin-teams-rows]");
+  if (!(body instanceof HTMLTableSectionElement)) {
+    return;
+  }
+  const term = getSearchTerm();
+  const filtered = (teamsCache || []).filter((team) =>
+    !term ||
+    `${team.team_name || ""} ${team.team_code || ""}`
+      .toLocaleLowerCase("vi-VN")
+      .includes(term),
+  );
+  if (!filtered.length) {
+    createStateRow(
+      body,
+      5,
+      (teamsCache || []).length
+        ? "Không tìm thấy nhóm phù hợp."
+        : "Backend chưa có nhóm thực tập nào.",
+    );
+    return;
+  }
+  body.replaceChildren(
+    ...filtered.map((team) => {
+      const row = document.createElement("tr");
+      const name = document.createElement("td");
+      const identity = document.createElement("span");
+      identity.className = "admin-user-cell";
+      const strong = document.createElement("strong");
+      strong.textContent = team.team_name || "—";
+      const code = document.createElement("span");
+      code.textContent = team.team_code || `ID ${team.id}`;
+      identity.append(strong, code);
+      name.append(identity);
+
+      const period = (periodsCache || []).find((item) => item.id === team.period_id);
+      const statusLabels = {
+        ACTIVE: "Đang hoạt động",
+        INACTIVE: "Không hoạt động",
+        COMPLETED: "Đã hoàn thành",
+      };
+      const actions = document.createElement("td");
+      const link = document.createElement("a");
+      link.className = "admin-row-action";
+      link.href = "teams.html";
+      link.textContent = "Quản lý";
+      actions.append(link);
+      row.append(
+        name,
+        createTextCell(period?.name || `ID ${team.period_id}`),
+        createTextCell(team.supervisor_name || `ID ${team.supervisor_id}`),
+        createTextCell(statusLabels[team.status] || team.status || "—"),
+        actions,
+      );
+      return row;
+    }),
+  );
+  body.setAttribute("aria-busy", "false");
+}
+
+async function loadTeamsView(force = false) {
+  const body = document.querySelector("[data-admin-teams-rows]");
+  if (body instanceof HTMLTableSectionElement) {
+    createStateRow(body, 5, "Đang tải nhóm thực tập...", "loading");
+  }
+  await Promise.all([getPeriods(force), getTeams(force)]);
+  renderTeamsView();
+}
+
 async function renderView(view, force = false) {
   clearAlert();
   if (main instanceof HTMLElement) {
@@ -661,6 +730,8 @@ async function renderView(view, force = false) {
       await loadUsersView(force);
     } else if (view === "periods") {
       await loadPeriodsView(force);
+    } else if (view === "teams") {
+      await loadTeamsView(force);
     }
   } catch (error) {
     showAlert(getErrorMessage(error));
@@ -673,6 +744,11 @@ async function renderView(view, force = false) {
       }
     } else if (view === "periods") {
       const body = document.querySelector("[data-periods-rows]");
+      if (body instanceof HTMLTableSectionElement) {
+        createStateRow(body, 5, getErrorMessage(error), "error");
+      }
+    } else if (view === "teams") {
+      const body = document.querySelector("[data-admin-teams-rows]");
       if (body instanceof HTMLTableSectionElement) {
         createStateRow(body, 5, getErrorMessage(error), "error");
       }
@@ -694,6 +770,7 @@ function updateSearchForView(view) {
     supervisors: "Tìm tên, email, mã giảng viên...",
     students: "Tìm tên, email, mã sinh viên...",
     periods: "Tìm kỳ thực tập...",
+    teams: "Tìm tên hoặc mã nhóm...",
   };
   searchInput.placeholder = placeholders[view] || "Tìm kiếm...";
 }
@@ -761,6 +838,8 @@ function setupNavigation() {
         renderUserViews();
       } else if (currentView === "periods") {
         renderPeriods();
+      } else if (currentView === "teams") {
+        renderTeamsView();
       }
     });
   }
