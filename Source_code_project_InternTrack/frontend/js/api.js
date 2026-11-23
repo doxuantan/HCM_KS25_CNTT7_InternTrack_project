@@ -4,7 +4,11 @@ const configuredApiUrl =
   document.querySelector('meta[name="api-base-url"]')?.getAttribute("content")?.trim() ||
   window.INTERTRACK_API_BASE_URL ||
   "http://localhost:8000/api/v1";
+<<<<<<< HEAD
 export const API_BASE_URL = configuredApiUrl.replace(/\/+$/, "");
+=======
+const API_BASE_URL = configuredApiUrl.replace(/\/+$/, "");
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 
 export class ApiError extends Error {
   constructor(message, status, payload = null) {
@@ -19,6 +23,7 @@ export function getAccessToken() {
   return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
 }
 
+<<<<<<< HEAD
 export function getAuthSessionPersistence() {
   if (localStorage.getItem(TOKEN_KEY)) {
     return "Đã chọn ghi nhớ phiên trên trình duyệt.";
@@ -29,6 +34,8 @@ export function getAuthSessionPersistence() {
   return "Chưa có phiên đăng nhập.";
 }
 
+=======
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 export function setAuthSession(accessToken, remember = false) {
   clearAuthSession();
   const storage = remember ? localStorage : sessionStorage;
@@ -42,7 +49,11 @@ export function clearAuthSession() {
 
 function redirectToLogin() {
   if (!window.location.pathname.endsWith("/login.html")) {
+<<<<<<< HEAD
     window.location.replace(new URL("./login.html", window.location.href));
+=======
+    window.location.replace(new URL("../login.html", import.meta.url));
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
   }
 }
 
@@ -106,10 +117,15 @@ export async function apiRequest(path, options = {}) {
 
   if (!response.ok) {
     const message =
+<<<<<<< HEAD
       typeof payload?.message === "string"
         ? payload.message
         : typeof payload?.detail === "string"
           ? payload.detail
+=======
+      typeof payload?.detail === "string"
+        ? payload.detail
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
         : `Yêu cầu thất bại (${response.status}).`;
 
     if (response.status === 401 && token) {
@@ -120,6 +136,7 @@ export async function apiRequest(path, options = {}) {
     throw new ApiError(message, response.status, payload);
   }
 
+<<<<<<< HEAD
   if (
     payload !== null &&
     typeof payload === "object" &&
@@ -130,5 +147,7 @@ export async function apiRequest(path, options = {}) {
     return payload.data;
   }
 
+=======
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
   return payload;
 }

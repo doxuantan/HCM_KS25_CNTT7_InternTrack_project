@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+<<<<<<< HEAD
 from app.api.v1.endpoints.attachments import router as attachments_router
 from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.diaries import router as diaries_router
@@ -12,10 +13,16 @@ from app.api.v1.endpoints.tasks import router as tasks_router
 from app.api.v1.endpoints.teams import router as teams_router
 from app.api.v1.endpoints.schedules import router as schedules_router
 from app.api.v1.endpoints.tasks import router as tasks_router
+=======
+from app.api.v1.endpoints.auth import router as auth_router
+from app.api.v1.endpoints.internships import router as internships_router
+from app.api.v1.endpoints.teams import router as teams_router
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 from app.api.v1.endpoints.users import router as users_router
 
 
 router = APIRouter(prefix="/api/v1")
+<<<<<<< HEAD
 router.include_router(attachments_router)
 router.include_router(auth_router)
 router.include_router(diaries_router)
@@ -28,3 +35,9 @@ router.include_router(tasks_router)
 router.include_router(teams_router)
 router.include_router(users_router)
 router.include_router(schedules_router)
+=======
+router.include_router(auth_router)
+router.include_router(internships_router)
+router.include_router(teams_router)
+router.include_router(users_router)
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18

@@ -1,9 +1,15 @@
 import { apiRequest, clearAuthSession, getAccessToken, setAuthSession } from "./api.js";
 
 const ROLE_HOME = Object.freeze({
+<<<<<<< HEAD
   ADMIN: "admin.html",
   SUPERVISOR: "supervisor/dashboard.html",
   STUDENT: "index.html",
+=======
+  ADMIN: new URL("../home.html", import.meta.url),
+  SUPERVISOR: new URL("../home.html", import.meta.url),
+  STUDENT: new URL("../index.html", import.meta.url),
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 });
 
 export async function login(email, password, remember = false) {
@@ -47,12 +53,20 @@ export function navigateByRole(role) {
   if (!destination) {
     throw new Error(`Role không được hỗ trợ: ${role}`);
   }
+<<<<<<< HEAD
   window.location.assign(new URL(destination, window.location.href));
+=======
+  window.location.assign(destination);
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 }
 
 export async function requireAuth() {
   if (!getAccessToken()) {
+<<<<<<< HEAD
     window.location.replace(new URL("./login.html", window.location.href));
+=======
+    window.location.replace(new URL("../login.html", import.meta.url));
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
     return null;
   }
 

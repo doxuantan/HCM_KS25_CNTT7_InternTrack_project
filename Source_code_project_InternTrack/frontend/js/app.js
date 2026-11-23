@@ -1,9 +1,13 @@
 import { loadComponents } from "./component-loader.js";
 import { logout, requireAuth } from "./auth.js";
 import { initializeStudentDashboard } from "./student-dashboard.js";
+<<<<<<< HEAD
 import { loadStudentTasks } from "./tasks.js";
 import { initializeSharedUi } from "./ui.js";
 import { initializeNotifications } from "./notifications.js";
+=======
+import { initializeStudentTeam } from "./student-team.js";
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 
 function getUserInitials(fullName) {
   const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -41,6 +45,32 @@ function setupSidebar() {
   });
 }
 
+<<<<<<< HEAD
+=======
+function setupAppLinks() {
+  const rootPath = document.body.dataset.appRoot || "./";
+  document.querySelectorAll("[data-app-link]").forEach((link) => {
+    const destination = link.getAttribute("href");
+    if (destination) {
+      link.setAttribute("href", `${rootPath}${destination}`);
+    }
+  });
+  document.querySelectorAll('[data-app-resource][src="logo.svg"]').forEach((image) => {
+    image.setAttribute("src", `${rootPath}logo.svg`);
+  });
+
+  document.querySelectorAll("[data-nav-page]").forEach((link) => {
+    const isCurrentPage = link.dataset.navPage === document.body.dataset.dashboard;
+    link.classList.toggle("is-active", isCurrentPage);
+    if (isCurrentPage) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 function setupAccountMenu(user) {
   const container = document.querySelector("[data-account-menu]");
   const toggle = container?.querySelector("[data-account-toggle]");
@@ -101,6 +131,7 @@ function setupAccountMenu(user) {
   });
 }
 
+<<<<<<< HEAD
 let isLoadingCurrentUser = false;
 
 try {
@@ -116,10 +147,24 @@ try {
     if (document.body.dataset.dashboard === "student") {
       initializeStudentDashboard(user);
       await loadStudentTasks();
+=======
+try {
+  const user = await requireAuth();
+  if (user) {
+    await loadComponents();
+    setupAppLinks();
+    setupSidebar();
+    setupAccountMenu(user);
+    if (document.body.dataset.dashboard === "student") {
+      await initializeStudentDashboard(user);
+    } else if (document.body.dataset.dashboard === "student-team") {
+      await initializeStudentTeam(user);
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
     }
   }
 } catch (error) {
   console.error("The application layout could not be initialized.", error);
+<<<<<<< HEAD
   const profile = document.querySelector("[data-student-profile]");
   if (
     isLoadingCurrentUser &&
@@ -129,6 +174,8 @@ try {
     profile.textContent = "Không thể tải thông tin cá nhân từ API. Vui lòng thử lại sau.";
     profile.setAttribute("role", "alert");
   }
+=======
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
   const main = document.querySelector("#main-content");
   if (main) {
     main.setAttribute("aria-busy", "false");

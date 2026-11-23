@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const VALID_TASK_STATUSES = new Set(["TODO", "IN_PROGRESS", "REVIEW", "DONE", "CANCELLED"]);
 const TASK_STATUS_LABELS = Object.freeze({
   TODO: "Chưa bắt đầu",
@@ -5,17 +6,29 @@ const TASK_STATUS_LABELS = Object.freeze({
   REVIEW: "Chờ duyệt",
   DONE: "Hoàn thành",
   CANCELLED: "Đã hủy",
+=======
+import { apiRequest } from "./api.js";
+
+const VALID_TASK_STATUSES = new Set(["TODO", "IN_PROGRESS", "DONE"]);
+const TASK_STATUS_LABELS = Object.freeze({
+  TODO: "Chưa bắt đầu",
+  IN_PROGRESS: "Đang thực hiện",
+  DONE: "Hoàn thành",
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 });
 const TASK_PRIORITIES = Object.freeze({
   LOW: { label: "Thấp", className: "student-priority-low" },
   MEDIUM: { label: "Trung bình", className: "student-priority-medium" },
   HIGH: { label: "Cao", className: "student-priority-high" },
 });
+<<<<<<< HEAD
 const USER_ROLE_LABELS = Object.freeze({
   ADMIN: "Quản trị viên",
   SUPERVISOR: "Giảng viên hướng dẫn",
   STUDENT: "Sinh viên",
 });
+=======
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 
 function isValidTask(task) {
   return (
@@ -65,6 +78,57 @@ function formatDeadline(deadline) {
   }).format(date);
 }
 
+<<<<<<< HEAD
+=======
+function formatPeriod(team) {
+  const period = team.period;
+  const startDate = formatDeadline(period?.start_date);
+  const endDate = formatDeadline(period?.end_date);
+  return period?.name
+    ? `${period.name} (${startDate} – ${endDate})`
+    : `${startDate} – ${endDate}`;
+}
+
+function renderTeamInfo(teams) {
+  const teamName = document.querySelector("[data-team-name]");
+  const period = document.querySelector("[data-internship-period]");
+  const supervisor = document.querySelector("[data-supervisor-name]");
+  const note = document.querySelector("[data-team-source-note]");
+
+  if (!Array.isArray(teams)) {
+    throw new TypeError("Team data must be an array.");
+  }
+  if (teams.length === 0) {
+    if (teamName) teamName.textContent = "Chưa được phân nhóm";
+    if (period) period.textContent = "Chưa có dữ liệu";
+    if (supervisor) supervisor.textContent = "Chưa có dữ liệu";
+    if (note) note.textContent = "Bạn chưa được phân vào nhóm thực tập nào.";
+    return;
+  }
+
+  const team = teams[0];
+  if (
+    team === null ||
+    typeof team !== "object" ||
+    typeof team.team_name !== "string" ||
+    !team.period ||
+    typeof team.period !== "object"
+  ) {
+    throw new TypeError("Team data is invalid.");
+  }
+
+  if (teamName) teamName.textContent = team.team_name;
+  if (period) period.textContent = formatPeriod(team);
+  if (supervisor) {
+    supervisor.textContent =
+      typeof team.supervisor?.full_name === "string"
+        ? team.supervisor.full_name
+        : "Chưa có dữ liệu";
+  }
+  if (note) note.textContent = "Thông tin nhóm trong kỳ thực tập gần nhất.";
+}
+
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 function createCell(content, className = "") {
   const cell = document.createElement("td");
   if (className) {
@@ -79,6 +143,7 @@ function createTaskRow(task, index) {
   row.append(createCell(String(index + 1)));
 
   const title = createCell(task.title.trim(), "student-task-title");
+<<<<<<< HEAD
   if (typeof task.description === "string" && task.description.trim()) {
     const description = document.createElement("div");
     description.className = "student-task-description muted";
@@ -91,6 +156,8 @@ function createTaskRow(task, index) {
   detailButton.dataset.taskDetailId = String(task.id);
   detailButton.textContent = "Chi tiết";
   title.append(detailButton);
+=======
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
   row.append(title, createCell(formatDeadline(task.deadline)));
 
   const priorityCell = document.createElement("td");
@@ -172,6 +239,7 @@ export function showTaskDashboardError() {
   renderTaskState("error", "Không thể tải dữ liệu công việc. Vui lòng thử lại sau.");
 }
 
+<<<<<<< HEAD
 function renderStudentProfile(user) {
   const profile = document.querySelector("[data-student-profile]");
   if (!(profile instanceof HTMLElement)) {
@@ -200,6 +268,8 @@ function renderStudentProfile(user) {
     : "API không trả về thông tin hồ sơ.";
 }
 
+=======
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
 export function renderTaskDashboard(tasks) {
   const metrics = calculateTaskMetrics(tasks);
   const taskRows = document.querySelector("[data-task-rows]");
@@ -260,11 +330,18 @@ export function renderTaskDashboard(tasks) {
   taskRows.setAttribute("aria-busy", "false");
 }
 
+<<<<<<< HEAD
 export function initializeStudentDashboard(user) {
   const studentName = document.querySelector("[data-student-name]");
   const mainContent = document.querySelector("#main-content");
 
   renderStudentProfile(user);
+=======
+export async function initializeStudentDashboard(user) {
+  const studentName = document.querySelector("[data-student-name]");
+  const mainContent = document.querySelector("#main-content");
+
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
   if (studentName) {
     studentName.textContent =
       typeof user.full_name === "string" && user.full_name.trim()
@@ -275,6 +352,29 @@ export function initializeStudentDashboard(user) {
     mainContent.setAttribute("aria-busy", "false");
   }
 
+<<<<<<< HEAD
+=======
+  try {
+    renderTeamInfo(await apiRequest("teams/me"));
+  } catch (error) {
+    console.error("Student team summary could not be loaded.", error);
+    for (const selector of [
+      "[data-team-name]",
+      "[data-internship-period]",
+      "[data-supervisor-name]",
+    ]) {
+      const element = document.querySelector(selector);
+      if (element) {
+        element.textContent = "Không thể tải dữ liệu";
+      }
+    }
+    const note = document.querySelector("[data-team-source-note]");
+    if (note) {
+      note.textContent = "Không thể tải thông tin nhóm. Vui lòng thử lại sau.";
+    }
+  }
+
+>>>>>>> c0d965d4a2cdd96a21dfeed751592df2c4323a18
   renderTaskState(
     "unavailable",
     "API công việc chưa được cung cấp. Các số liệu sẽ hiển thị khi backend hỗ trợ.",
