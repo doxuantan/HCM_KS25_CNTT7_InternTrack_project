@@ -214,22 +214,6 @@ async function getPeriods(force = false) {
   if (force) {
     periodsCache = null;
   }
-
-  async function getTeams(force = false) {
-    if (force) teamsCache = null;
-    if (teamsCache) return teamsCache;
-    if (teamsPromise) return teamsPromise;
-    teamsPromise = apiRequest("teams").then((teams) => {
-      if (!Array.isArray(teams)) throw new Error("API nhóm trả về dữ liệu không hợp lệ.");
-      return teams;
-    });
-    try {
-      teamsCache = await teamsPromise;
-      return teamsCache;
-    } finally {
-      teamsPromise = null;
-    }
-  }
   if (periodsCache) {
     return periodsCache;
   }
@@ -248,6 +232,31 @@ async function getPeriods(force = false) {
     return periodsCache;
   } finally {
     periodsPromise = null;
+  }
+}
+
+async function getTeams(force = false) {
+  if (force) {
+    teamsCache = null;
+  }
+  if (teamsCache) {
+    return teamsCache;
+  }
+  if (teamsPromise) {
+    return teamsPromise;
+  }
+
+  teamsPromise = apiRequest("teams").then((teams) => {
+    if (!Array.isArray(teams)) {
+      throw new Error("API nhóm trả về dữ liệu không hợp lệ.");
+    }
+    return teams;
+  });
+  try {
+    teamsCache = await teamsPromise;
+    return teamsCache;
+  } finally {
+    teamsPromise = null;
   }
 }
 
