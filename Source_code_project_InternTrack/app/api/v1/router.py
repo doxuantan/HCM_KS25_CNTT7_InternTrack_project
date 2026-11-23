@@ -11,7 +11,6 @@ from app.api.v1.endpoints.reports import router as reports_router
 from app.api.v1.endpoints.tasks import router as tasks_router
 from app.api.v1.endpoints.teams import router as teams_router
 from app.api.v1.endpoints.schedules import router as schedules_router
-from app.api.v1.endpoints.tasks import router as tasks_router
 from app.api.v1.endpoints.users import router as users_router
 
 
