@@ -29,10 +29,12 @@
 .supervisor-team-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 16px;
 }
 
 .supervisor-team-card {
+  min-width: 0;
   padding: 20px;
   border-radius: 12px;
 }
@@ -46,6 +48,7 @@
 .supervisor-progress-track {
   height: 9px;
   overflow: hidden;
+  margin: 14px 0 10px;
   border-radius: 999px;
   background: #edf2f7;
 }
@@ -63,17 +66,70 @@
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 12px;
-  padding: 11px 0;
-  border-top: 1px solid #edf1f6;
+  width: 100%;
+  min-height: 58px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--component-border, #e4e9f1);
+  border-radius: 10px;
+  background: var(--theme-input, #f8fafc);
+  color: var(--ink, #243149);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.supervisor-member-row:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent, #8b5cf6);
+  background: var(--theme-hover, #f3f5f9);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 14%);
+}
+
+.supervisor-member-row:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent, #8b5cf6) 40%, transparent);
+  outline-offset: 2px;
 }
 
 .supervisor-member-row strong {
   display: block;
 }
 
+.supervisor-member-row > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.supervisor-member-row > div strong {
+  overflow: hidden;
+  color: var(--ink, #243149);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .supervisor-member-row span {
-  color: #738097;
+  color: var(--muted, #738097);
   font-size: 11px;
+}
+
+.supervisor-member-row > strong {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgb(139 92 246 / 14%);
+  color: #b89aff;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+:root[data-theme="dark"] .supervisor-dashboard .supervisor-member-row,
+:root[data-theme="dark"] .supervisor-dashboard .supervisor-member-row > div strong {
+  color: #eef0f7;
 }
 
 .supervisor-list {
@@ -217,4 +273,91 @@
   .supervisor-dashboard .supervisor-stat-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.supervisor-dashboard .sidebar-logout {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #f0d7d9;
+  border-radius: 11px;
+  background: #fff7f7;
+  color: #aa3945;
+  font-weight: 700;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.supervisor-dashboard .sidebar-logout > span,
+.supervisor-dashboard .account-menu-item[data-logout] > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  background: rgb(195 66 78 / 10%);
+  color: #b83c49;
+  font-size: 15px;
+}
+
+.supervisor-dashboard .sidebar-logout:hover {
+  transform: translateY(-1px);
+  border-color: #e7b5ba;
+  background: #fff0f1;
+  box-shadow: 0 6px 16px rgb(149 47 60 / 10%);
+}
+
+.supervisor-dashboard .sidebar-logout:active {
+  transform: translateY(0);
+}
+
+.supervisor-dashboard .account-menu-item[data-logout] {
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 0;
+  border-top: 1px solid #f1e2e3;
+  border-radius: 0 0 10px 10px;
+  background: transparent;
+  color: #aa3945;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.supervisor-dashboard .account-menu-item[data-logout]:hover {
+  background: #fff2f2;
+  color: #912d38;
+}
+
+:root[data-theme="dark"] .supervisor-dashboard .sidebar-logout {
+  border-color: rgb(241 123 131 / 22%);
+  background: rgb(241 123 131 / 6%);
+  color: #ff9ba3;
+}
+
+:root[data-theme="dark"] .supervisor-dashboard .sidebar-logout > span,
+:root[data-theme="dark"] .supervisor-dashboard .account-menu-item[data-logout] > span {
+  background: rgb(241 123 131 / 13%);
+  color: #ff9ba3;
+}
+
+:root[data-theme="dark"] .supervisor-dashboard .sidebar-logout:hover {
+  border-color: rgb(255 143 151 / 48%);
+  background: rgb(241 123 131 / 13%);
+  box-shadow: 0 7px 18px rgb(90 20 30 / 20%);
+}
+
+:root[data-theme="dark"] .supervisor-dashboard .account-menu-item[data-logout] {
+  border-top-color: #33303b;
+  background: transparent;
+  color: #ff9ba3;
+}
+
+:root[data-theme="dark"] .supervisor-dashboard .account-menu-item[data-logout]:hover {
+  background: rgb(241 123 131 / 12%);
+  color: #ffc0c5;
 }

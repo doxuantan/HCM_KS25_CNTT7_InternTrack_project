@@ -527,3 +527,840 @@
     transition-duration: 0.01ms;
   }
 }
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --sidebar-width: 220px;
+  --ink: #f0f1f7;
+  --muted: #8790a4;
+  --line: #252938;
+  --accent: #8b5cf6;
+  --component-accent: #8b5cf6;
+  --component-border: #292d3b;
+  --component-ink: #eef0f7;
+  --component-muted: #8992a6;
+  --theme-surface: #141722;
+  --theme-input: #1b1e2b;
+  --theme-hover: #222638;
+  --theme-text: #eef0f7;
+  --theme-muted-text: #8992a6;
+  --theme-line: #292d3b;
+  --panel-bg: #141722;
+  --panel-muted: #11141e;
+  --border-color: #292d3b;
+  --muted-text: #8992a6;
+  --primary: #8b5cf6;
+  --primary-soft: #2a2140;
+  --success: #19c99a;
+  --warning: #f5a524;
+  --danger: #f36b79;
+  color: #eef0f7;
+  background: #0b0d14;
+}
+
+:root[data-theme="dark"] body:not(.home-page):not(.login-page) {
+  background:
+    radial-gradient(ellipse at 82% 0%, rgb(115 76 208 / 8%), transparent 36rem),
+    #0b0d14;
+  color: #eef0f7;
+}
+
+:root[data-theme="dark"] .sidebar {
+  border-color: #222532;
+  background: #10121c;
+  color: #eef0f7;
+}
+
+:root[data-theme="dark"] .brand {
+  color: #f4f3fa;
+}
+
+:root[data-theme="dark"] .brand-mark,
+:root[data-theme="dark"] .admin-dashboard .brand-mark {
+  background: linear-gradient(145deg, #9b6bff, #7045e8);
+  box-shadow: 0 5px 16px rgb(139 92 246 / 28%);
+}
+
+:root[data-theme="dark"] .workspace-mark,
+:root[data-theme="dark"] .admin-dashboard .workspace-mark {
+  background: #27213a;
+  color: #b89aff;
+}
+
+:root[data-theme="dark"] .workspace-switcher,
+:root[data-theme="dark"] .sidebar-help {
+  border-color: #292d3b;
+  background: #141722;
+}
+
+:root[data-theme="dark"] .navigation-label {
+  color: #727c93;
+}
+
+:root[data-theme="dark"] .nav-link,
+:root[data-theme="dark"] .admin-dashboard .admin-navigation .nav-link {
+  border-left: 2px solid transparent;
+  color: #929bb0;
+}
+
+:root[data-theme="dark"] .nav-link:hover,
+:root[data-theme="dark"] .admin-dashboard .admin-navigation .nav-link:hover {
+  background: #191c29;
+  color: #d7c6ff;
+}
+
+:root[data-theme="dark"] .nav-link.is-active,
+:root[data-theme="dark"] .admin-dashboard .admin-navigation .nav-link.is-active {
+  border-left-color: #9a6bff;
+  background: linear-gradient(90deg, rgb(139 92 246 / 17%), rgb(139 92 246 / 4%));
+  color: #c6adff;
+}
+
+:root[data-theme="dark"] .admin-dashboard .admin-navigation .nav-icon {
+  color: inherit;
+}
+
+:root[data-theme="dark"] .sidebar-logout,
+:root[data-theme="dark"] .admin-dashboard .sidebar-logout {
+  color: #f17b83;
+}
+
+:root[data-theme="dark"] .sidebar-logout:hover,
+:root[data-theme="dark"] .admin-dashboard .sidebar-logout:hover {
+  background: rgb(243 107 121 / 10%);
+}
+
+:root[data-theme="dark"] .topbar,
+:root[data-theme="dark"] .admin-dashboard .topbar {
+  border-color: #222532;
+  background: rgb(13 15 23 / 94%);
+  color: #eef0f7;
+}
+
+:root[data-theme="dark"] .topbar-context,
+:root[data-theme="dark"] .topbar-context span,
+:root[data-theme="dark"] .profile-details span,
+:root[data-theme="dark"] .profile-chevron {
+  color: #818ba0;
+}
+
+:root[data-theme="dark"] .topbar-context strong,
+:root[data-theme="dark"] .profile-details strong {
+  color: #f1f1f6;
+}
+
+:root[data-theme="dark"] .profile-button,
+:root[data-theme="dark"] .icon-button {
+  color: #dce0eb;
+}
+
+:root[data-theme="dark"] .profile-button:hover,
+:root[data-theme="dark"] .icon-button:hover {
+  background: #1b1e2b;
+}
+
+:root[data-theme="dark"] .account-menu,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .summary-card,
+:root[data-theme="dark"] .modal,
+:root[data-theme="dark"] .admin-dialog,
+:root[data-theme="dark"] .kanban-card,
+:root[data-theme="dark"] .supervisor-team-card {
+  border-color: #252938;
+  background: #141722;
+  color: #eef0f7;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 18%);
+}
+
+:root[data-theme="dark"] .account-menu-heading strong,
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] .admin-dashboard h1,
+:root[data-theme="dark"] .admin-dashboard .panel-heading h2,
+:root[data-theme="dark"] .student-dashboard .student-panel-heading h2,
+:root[data-theme="dark"] .student-dashboard .student-info-list dd,
+:root[data-theme="dark"] .supervisor-team-card h2,
+:root[data-theme="dark"] .project-name,
+:root[data-theme="dark"] .summary-value,
+:root[data-theme="dark"] .admin-user-cell strong,
+:root[data-theme="dark"] .admin-detail-list dd,
+:root[data-theme="dark"] .admin-account-list dd {
+  color: #f0f1f7;
+}
+
+:root[data-theme="dark"] .eyebrow,
+:root[data-theme="dark"] .admin-dashboard .eyebrow {
+  color: #ae83ff;
+}
+
+:root[data-theme="dark"] .page-description,
+:root[data-theme="dark"] .muted,
+:root[data-theme="dark"] .summary-label,
+:root[data-theme="dark"] .summary-note,
+:root[data-theme="dark"] .table-subtitle,
+:root[data-theme="dark"] .footer,
+:root[data-theme="dark"] .admin-user-cell span,
+:root[data-theme="dark"] .admin-table-footnote,
+:root[data-theme="dark"] .student-dashboard .student-progress-note,
+:root[data-theme="dark"] .student-dashboard .student-source-note,
+:root[data-theme="dark"] .student-dashboard .student-state,
+:root[data-theme="dark"] .student-dashboard .student-activity-empty {
+  color: #8790a4;
+}
+
+:root[data-theme="dark"] .admin-dashboard .button-primary,
+:root[data-theme="dark"] .button-primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, #9a64ff, #7548e8);
+  box-shadow: 0 6px 18px rgb(128 79 235 / 22%);
+  color: #fff;
+}
+
+:root[data-theme="dark"] .admin-dashboard .button-primary:hover:not(:disabled),
+:root[data-theme="dark"] .button-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #a777ff, #8357f0);
+  filter: none;
+}
+
+:root[data-theme="dark"] .button-secondary,
+:root[data-theme="dark"] .admin-row-action,
+:root[data-theme="dark"] .admin-inline-select,
+:root[data-theme="dark"] .form-control,
+:root[data-theme="dark"] .admin-search {
+  border-color: #303444;
+  background: #1a1d29;
+  color: #e6e8f0;
+}
+
+:root[data-theme="dark"] .button-secondary:hover:not(:disabled),
+:root[data-theme="dark"] .admin-row-action:hover:not(:disabled) {
+  border-color: #55427f;
+  background: #222234;
+}
+
+:root[data-theme="dark"] .admin-search input,
+:root[data-theme="dark"] .admin-search input::placeholder,
+:root[data-theme="dark"] .form-control::placeholder {
+  color: #8b94a8;
+}
+
+:root[data-theme="dark"] .form-control:focus,
+:root[data-theme="dark"] .admin-search:focus-within {
+  border-color: #9568fa;
+  box-shadow: 0 0 0 3px rgb(139 92 246 / 17%);
+}
+
+:root[data-theme="dark"] .admin-toolbar {
+  border-color: #252938;
+  background: #12151f;
+}
+
+:root[data-theme="dark"] .admin-filter label {
+  color: #8d96aa;
+}
+
+:root[data-theme="dark"] table,
+:root[data-theme="dark"] .data-table {
+  color: #dfe2eb;
+}
+
+:root[data-theme="dark"] thead,
+:root[data-theme="dark"] th,
+:root[data-theme="dark"] .data-table th {
+  border-color: #252938;
+  background: #191c28;
+  color: #8791a8;
+}
+
+:root[data-theme="dark"] td,
+:root[data-theme="dark"] .data-table td {
+  border-color: #252938;
+  color: #c5cad7;
+}
+
+:root[data-theme="dark"] tbody tr:hover,
+:root[data-theme="dark"] .data-table tbody tr:hover,
+:root[data-theme="dark"] .team-data-table tbody tr:hover,
+:root[data-theme="dark"] .supervisor-dashboard .admin-table tbody tr:hover,
+:root[data-theme="dark"] .student-dashboard .student-task-table tbody tr:hover {
+  background: #1a1d29;
+}
+
+:root[data-theme="dark"] .admin-panel,
+:root[data-theme="dark"] .team-table-panel,
+:root[data-theme="dark"] .admin-stat-card {
+  border-color: #252938;
+}
+
+:root[data-theme="dark"] .admin-stat-card:nth-child(4n + 1) {
+  border-color: rgb(157 100 255 / 54%);
+}
+
+:root[data-theme="dark"] .admin-stat-card:nth-child(4n + 2) {
+  border-color: rgb(32 201 220 / 48%);
+}
+
+:root[data-theme="dark"] .admin-stat-card:nth-child(4n + 3) {
+  border-color: rgb(238 73 166 / 46%);
+}
+
+:root[data-theme="dark"] .admin-stat-card:nth-child(4n) {
+  border-color: rgb(245 165 36 / 48%);
+}
+
+:root[data-theme="dark"] .admin-dashboard .admin-stat-icon-blue,
+:root[data-theme="dark"] .summary-icon-blue {
+  background: #173144;
+  color: #31c5e0;
+}
+
+:root[data-theme="dark"] .admin-dashboard .admin-stat-icon-violet,
+:root[data-theme="dark"] .summary-icon-violet {
+  background: #2a2140;
+  color: #bd9aff;
+}
+
+:root[data-theme="dark"] .admin-dashboard .admin-stat-icon-teal {
+  background: #143537;
+  color: #36d1cf;
+}
+
+:root[data-theme="dark"] .admin-dashboard .admin-stat-icon-green,
+:root[data-theme="dark"] .summary-icon-green {
+  background: #18372f;
+  color: #45d9a8;
+}
+
+:root[data-theme="dark"] .admin-dashboard .admin-stat-icon-orange,
+:root[data-theme="dark"] .summary-icon-orange {
+  background: #3a2a1b;
+  color: #ffb454;
+}
+
+:root[data-theme="dark"] .summary-icon-pink {
+  background: #3a2036;
+  color: #f17ac0;
+}
+
+:root[data-theme="dark"] .summary-icon {
+  box-shadow: 0 4px 14px rgb(0 0 0 / 18%);
+}
+
+:root[data-theme="dark"] .status-badge-success,
+:root[data-theme="dark"] .admin-status-active,
+:root[data-theme="dark"] .team-status-active,
+:root[data-theme="dark"] .student-status-done,
+:root[data-theme="dark"] .supervisor-status-active,
+:root[data-theme="dark"] .supervisor-status-done {
+  background: #15362f;
+  color: #42d4a3;
+}
+
+:root[data-theme="dark"] .status-badge-progress,
+:root[data-theme="dark"] .student-status-in-progress,
+:root[data-theme="dark"] .supervisor-status-in-progress {
+  background: #172f49;
+  color: #47b9ee;
+}
+
+:root[data-theme="dark"] .status-badge-pending,
+:root[data-theme="dark"] .student-status-todo,
+:root[data-theme="dark"] .team-status-inactive,
+:root[data-theme="dark"] .supervisor-status-todo {
+  background: #3c2c1b;
+  color: #f5ad48;
+}
+
+:root[data-theme="dark"] .status-badge-danger,
+:root[data-theme="dark"] .admin-status-inactive {
+  background: #3b2028;
+  color: #f47e89;
+}
+
+:root[data-theme="dark"] .team-member-count,
+:root[data-theme="dark"] .kanban-column header span {
+  background: #222638;
+  color: #b3bbcd;
+}
+
+:root[data-theme="dark"] .kanban-column {
+  border-color: #252938;
+  background: #11141e;
+}
+
+:root[data-theme="dark"] .kanban-card {
+  border-color: #2a2e3d;
+  background: #171a26;
+  color: #eff0f6;
+}
+
+:root[data-theme="dark"] .kanban-card h3 {
+  color: #f0f1f7;
+}
+
+:root[data-theme="dark"] .kanban-card p,
+:root[data-theme="dark"] .kanban-empty {
+  color: #8992a6;
+}
+
+:root[data-theme="dark"] .kanban-empty {
+  border-color: #35394a;
+}
+
+:root[data-theme="dark"] .progress-track,
+:root[data-theme="dark"] .supervisor-progress-track,
+:root[data-theme="dark"] .student-dashboard .student-progress-track,
+:root[data-theme="dark"] .student-dashboard .student-task-progress-track {
+  background: #282c3a;
+}
+
+:root[data-theme="dark"] .progress-track span,
+:root[data-theme="dark"] .supervisor-progress-track span,
+:root[data-theme="dark"] .student-dashboard .student-progress-track span,
+:root[data-theme="dark"] .student-dashboard .student-task-progress-track span {
+  background: linear-gradient(90deg, #8b5cf6, #20c9dc);
+}
+
+:root[data-theme="dark"] .student-dashboard [data-student-name],
+:root[data-theme="dark"] .student-dashboard .student-progress-value,
+:root[data-theme="dark"] .positive,
+:root[data-theme="dark"] .text-link,
+:root[data-theme="dark"] .admin-text-button,
+:root[data-theme="dark"] .admin-row-action {
+  color: #b89aff;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-info-list > div,
+:root[data-theme="dark"] .student-dashboard .student-table-scroll,
+:root[data-theme="dark"] .supervisor-member-row,
+:root[data-theme="dark"] .supervisor-list-item,
+:root[data-theme="dark"] .team-management-page .team-member-item,
+:root[data-theme="dark"] .team-management-page .team-detail-section-title {
+  border-color: #292d3b;
+}
+
+:root[data-theme="dark"] .supervisor-list-item:hover,
+:root[data-theme="dark"] .team-management-page .team-member-item {
+  background: #191c28;
+}
+
+:root[data-theme="dark"] .supervisor-list-item strong,
+:root[data-theme="dark"] .supervisor-team-card h2 {
+  color: #eef0f7;
+}
+
+:root[data-theme="dark"] .supervisor-list-item span,
+:root[data-theme="dark"] .supervisor-list-item time,
+:root[data-theme="dark"] .supervisor-member-row span,
+:root[data-theme="dark"] .student-dashboard .student-task-description,
+:root[data-theme="dark"] .student-dashboard .student-info-list dt {
+  color: #8992a6;
+}
+
+:root[data-theme="dark"] .supervisor-notification-unread {
+  border-left-color: #9a6bff;
+  background: rgb(139 92 246 / 8%);
+}
+
+:root[data-theme="dark"] .notification-button,
+:root[data-theme="dark"] .notification-dropdown,
+:root[data-theme="dark"] .notification-item,
+:root[data-theme="dark"] .notification-fallback-topbar {
+  border-color: #292d3b;
+  background: #141722;
+  color: #eef0f7;
+}
+
+:root[data-theme="dark"] .notification-item {
+  border-bottom-color: #292d3b;
+}
+
+:root[data-theme="dark"] .notification-item.is-unread {
+  background: #1c1a2a;
+}
+
+:root[data-theme="dark"] .notification-heading {
+  border-color: #292d3b;
+}
+
+:root[data-theme="dark"] .notification-heading button {
+  color: #b89aff;
+}
+
+:root[data-theme="dark"] .admin-account-list > div,
+:root[data-theme="dark"] .admin-detail-list > div,
+:root[data-theme="dark"] .admin-profile-fields {
+  border-color: #292d3b;
+}
+
+:root[data-theme="dark"] .admin-alert,
+:root[data-theme="dark"] .load-error {
+  border-color: #66313b;
+  background: #301b22;
+  color: #ff9aa2;
+}
+
+:root[data-theme="dark"] .admin-alert[data-kind="success"] {
+  border-color: #245c4b;
+  background: #15332b;
+  color: #58d8ae;
+}
+
+:root[data-theme="dark"] .admin-dialog::backdrop,
+:root[data-theme="dark"] .modal::backdrop {
+  background: rgb(4 5 10 / 78%);
+  backdrop-filter: blur(4px);
+}
+
+:root[data-theme="dark"] .theme-toggle,
+:root[data-theme="dark"] .login-theme-toggle {
+  border-color: #303444;
+  background: #181b27;
+  color: #c4a4ff;
+}
+
+:root[data-theme="dark"] body.home-page {
+  background:
+    radial-gradient(ellipse at 82% 28%, rgb(139 92 246 / 13%), transparent 34rem),
+    #0b0d14;
+  color: #eef0f7;
+}
+
+:root[data-theme="dark"] .home-header,
+:root[data-theme="dark"] .home-features,
+:root[data-theme="dark"] .home-access-note {
+  border-color: #252938;
+}
+
+:root[data-theme="dark"] .home-features {
+  background: #141722;
+}
+
+:root[data-theme="dark"] body.login-page,
+:root[data-theme="dark"] .login-form-side {
+  background: #0b0d14;
+}
+
+:root[data-theme="dark"] .login-showcase {
+  background:
+    radial-gradient(ellipse at 75% 20%, rgb(139 92 246 / 18%), transparent 34%),
+    linear-gradient(145deg, #111521 0%, #131725 58%, #1a1730 100%);
+}
+
+:root[data-theme="dark"] .login-showcase::before,
+:root[data-theme="dark"] .login-showcase::after {
+  border-color: rgb(185 155 255 / 12%);
+}
+
+:root[data-theme="dark"] .login-brand-copy small,
+:root[data-theme="dark"] .login-showcase-footer {
+  color: #9490aa;
+}
+
+:root[data-theme="dark"] .login-kicker {
+  color: #c3a9ff;
+}
+
+:root[data-theme="dark"] .login-kicker::before {
+  background: #9b6bff;
+}
+
+:root[data-theme="dark"] .login-showcase h1 span {
+  color: #b79aff;
+}
+
+:root[data-theme="dark"] .login-showcase-description,
+:root[data-theme="dark"] .login-feature-list {
+  color: #b2b7c8;
+}
+
+:root[data-theme="dark"] .login-feature-check {
+  border-color: rgb(155 107 255 / 38%);
+  background: rgb(139 92 246 / 14%);
+  color: #c3a9ff;
+}
+
+:root[data-theme="dark"] .login-input-wrap .form-control {
+  border-color: #303444;
+  background: #1a1d29;
+  color: #eef0f7;
+}
+
+:root[data-theme="dark"] .login-link:hover,
+:root[data-theme="dark"] .login-back-link:hover {
+  color: #c2a4ff;
+}
+
+:root[data-theme="dark"] ::selection {
+  background: rgb(139 92 246 / 35%);
+  color: #fff;
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #0f1119;
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  border: 2px solid #0f1119;
+  border-radius: 999px;
+  background: #34384a;
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #4a4f64;
+}
+
+@media (max-width: 760px) {
+  :root[data-theme="dark"] .sidebar {
+    width: min(280px, calc(100vw - 52px));
+    background: #10121c;
+  }
+
+  :root[data-theme="dark"] .topbar {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  :root[data-theme="dark"] .content,
+  :root[data-theme="dark"] .admin-content {
+    padding: 22px 16px 30px;
+  }
+
+  :root[data-theme="dark"] .admin-toolbar {
+    border-radius: 12px;
+  }
+}
+
+.nav-link,
+.button,
+.icon-button,
+.profile-button,
+.notification-button,
+.theme-toggle,
+.admin-row-action,
+.text-link,
+.summary-card,
+.admin-stat-card,
+.supervisor-team-card,
+.kanban-card,
+.team-member-item,
+.data-table tbody tr,
+.student-task-table tbody tr,
+.form-control,
+.admin-search {
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.nav-link:hover {
+  transform: translateX(3px);
+}
+
+.button:hover:not(:disabled),
+.icon-button:hover,
+.notification-button:hover,
+.admin-row-action:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.button:active:not(:disabled),
+.icon-button:active,
+.notification-button:active,
+.admin-row-action:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.summary-card:hover,
+.admin-stat-card:hover,
+.supervisor-team-card:hover,
+.kanban-card:hover,
+.team-member-item:hover {
+  transform: translateY(-4px);
+  border-color: rgb(153 105 255 / 48%);
+  box-shadow: 0 16px 34px rgb(0 0 0 / 24%);
+}
+
+.page-heading,
+.admin-page-heading,
+.student-page-heading {
+  animation: ui-rise-in 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.summary-grid > *,
+.admin-stat-grid > *,
+.supervisor-grid > *,
+.supervisor-team-grid > *,
+.student-dashboard-grid > *,
+.kanban-board > * {
+  animation: ui-rise-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+.summary-grid > :nth-child(2),
+.admin-stat-grid > :nth-child(2),
+.supervisor-grid > :nth-child(2),
+.supervisor-team-grid > :nth-child(2),
+.kanban-board > :nth-child(2) {
+  animation-delay: 55ms;
+}
+
+.summary-grid > :nth-child(3),
+.admin-stat-grid > :nth-child(3),
+.supervisor-grid > :nth-child(3),
+.supervisor-team-grid > :nth-child(3),
+.kanban-board > :nth-child(3) {
+  animation-delay: 110ms;
+}
+
+.summary-grid > :nth-child(4),
+.admin-stat-grid > :nth-child(4) {
+  animation-delay: 165ms;
+}
+
+.panel,
+.admin-panel {
+  animation: ui-fade-in 360ms ease-out both;
+}
+
+.data-table tbody tr,
+.student-task-table tbody tr {
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.data-table tbody tr:hover,
+.student-task-table tbody tr:hover {
+  transform: translateX(2px);
+}
+
+.progress-track span,
+.supervisor-progress-track span,
+.student-progress-track span,
+.student-task-progress-track span {
+  transform-origin: left center;
+  animation: ui-progress-glow 900ms ease-out both;
+}
+
+.notification-dot {
+  animation: ui-notification-pulse 2.4s ease-in-out infinite;
+}
+
+.notification-dropdown,
+.account-menu {
+  transform-origin: top right;
+  animation: ui-menu-in 160ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.theme-toggle:hover {
+  transform: rotate(-12deg);
+}
+
+.form-control:focus,
+.admin-search:focus-within {
+  transform: translateY(-1px);
+}
+
+@keyframes ui-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ui-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ui-progress-glow {
+  from { filter: brightness(1.35); }
+  to { filter: brightness(1); }
+}
+
+@keyframes ui-notification-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(243 107 121 / 38%); }
+  50% { box-shadow: 0 0 0 5px rgb(243 107 121 / 0%); }
+}
+
+@keyframes ui-menu-in {
+  from { opacity: 0; transform: translateY(-5px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:root[data-theme="dark"] .student-dashboard .student-stat-card,
+:root[data-theme="dark"] .student-dashboard .student-progress-panel,
+:root[data-theme="dark"] .student-dashboard .student-tasks-panel,
+:root[data-theme="dark"] .student-dashboard .student-info-panel,
+:root[data-theme="dark"] .student-dashboard .student-activity-panel {
+  border: 1px solid #303447;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-stat-card:nth-child(4n + 1) {
+  border-color: rgb(42 194 222 / 58%);
+}
+
+:root[data-theme="dark"] .student-dashboard .student-stat-card:nth-child(4n + 2) {
+  border-color: rgb(42 202 154 / 54%);
+}
+
+:root[data-theme="dark"] .student-dashboard .student-stat-card:nth-child(4n + 3) {
+  border-color: rgb(155 111 255 / 60%);
+}
+
+:root[data-theme="dark"] .student-dashboard .student-stat-card:nth-child(4n) {
+  border-color: rgb(245 165 68 / 56%);
+}
+
+:root[data-theme="dark"] .student-dashboard .student-progress-panel,
+:root[data-theme="dark"] .student-dashboard .student-tasks-panel {
+  border-color: #34384c;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-info-panel,
+:root[data-theme="dark"] .student-dashboard .student-activity-panel {
+  border-color: #34384c;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-table-scroll {
+  border: 1px solid #303447;
+  border-radius: 0 0 12px 12px;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-task-table th,
+:root[data-theme="dark"] .student-dashboard .student-task-table td {
+  border-bottom: 1px solid #2b3041;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-info-list > div {
+  border-color: #303447;
+}
+
+:root[data-theme="dark"] .student-dashboard .student-stat-card:hover,
+:root[data-theme="dark"] .student-dashboard .panel:hover {
+  border-color: #69509a;
+}

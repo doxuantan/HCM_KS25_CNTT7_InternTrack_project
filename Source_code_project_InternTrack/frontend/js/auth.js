@@ -72,5 +72,5 @@ export async function requireAuth() {
 
 export function logout() {
   clearAuthSession();
-  window.location.replace(new URL("./login.html", window.location.href));
+  window.location.replace(new URL("../login.html", import.meta.url));
 }
