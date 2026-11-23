@@ -80,14 +80,15 @@ def _task_stats(tasks: list[Task], now: datetime) -> dict:
 
 
 def _valid_team_tasks(db: Session, team_id: int) -> list[Task]:
-    tasks = db.scalars(select(Task).where(Task.team_id == team_id)).all()
-    return [
-        task for task in tasks
-        if task.status != TaskStatus.CANCELLED
-        and db.scalar(
-            select(TaskAssignment.id).where(TaskAssignment.task_id == task.id).limit(1)
-        ) is not None
-    ]
+    return db.scalars(
+        select(Task)
+        .join(TaskAssignment, TaskAssignment.task_id == Task.id)
+        .where(
+            Task.team_id == team_id,
+            Task.status != TaskStatus.CANCELLED,
+        )
+        .distinct()
+    ).all()
 
 
 def _valid_personal_tasks(db: Session, student_id: int) -> list[Task]:
@@ -261,21 +262,24 @@ def get_progress_overview(db: Session, user: User) -> dict:
     valid_tasks: list[Task]
 
     if user.role == UserRole.ADMIN:
-        valid_tasks = [
-            task for task in db.scalars(select(Task)).all()
-            if task.status != TaskStatus.CANCELLED
-            and db.scalar(
-                select(TaskAssignment.id).where(TaskAssignment.task_id == task.id).limit(1)
-            ) is not None
-        ]
+        valid_tasks = db.scalars(
+            select(Task)
+            .join(TaskAssignment, TaskAssignment.task_id == Task.id)
+            .where(Task.status != TaskStatus.CANCELLED)
+            .distinct()
+        ).all()
     elif user.role == UserRole.SUPERVISOR:
         lecturer_id = _lecturer_id(db, user)
-        team_ids = db.scalars(
-            select(Team.id).where(Team.supervisor_id == lecturer_id)
+        valid_tasks = db.scalars(
+            select(Task)
+            .join(TaskAssignment, TaskAssignment.task_id == Task.id)
+            .join(Team, Team.id == Task.team_id)
+            .where(
+                Team.supervisor_id == lecturer_id,
+                Task.status != TaskStatus.CANCELLED,
+            )
+            .distinct()
         ).all()
-        valid_tasks = []
-        for team_id in team_ids:
-            valid_tasks.extend(_valid_team_tasks(db, team_id))
     elif user.role == UserRole.STUDENT:
         student_id = _student_id(db, user)
         if student_id is None:
@@ -288,9 +292,15 @@ def get_progress_overview(db: Session, user: User) -> dict:
                 )
             ).all()
             if leader_team_ids:
-                valid_tasks = []
-                for team_id in leader_team_ids:
-                    valid_tasks.extend(_valid_team_tasks(db, team_id))
+                valid_tasks = db.scalars(
+                    select(Task)
+                    .join(TaskAssignment, TaskAssignment.task_id == Task.id)
+                    .where(
+                        Task.team_id.in_(leader_team_ids),
+                        Task.status != TaskStatus.CANCELLED,
+                    )
+                    .distinct()
+                ).all()
             else:
                 valid_tasks = _valid_personal_tasks(db, student_id)
     else:

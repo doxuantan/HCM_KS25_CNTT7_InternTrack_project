@@ -22,5 +22,5 @@ class ReportReview(Base):
     status = Column(Enum(ReportReviewStatus), nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
-    report = relationship("Report")
+    report = relationship("Report", back_populates="reviews")
     reviewer = relationship("User", foreign_keys=[reviewer_id])

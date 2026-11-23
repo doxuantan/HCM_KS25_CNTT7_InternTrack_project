@@ -42,3 +42,9 @@ class Report(Base):
     student = relationship("Student")
     team = relationship("Team")
     period = relationship("InternshipPeriod")
+    reviews = relationship(
+        "ReportReview",
+        back_populates="report",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

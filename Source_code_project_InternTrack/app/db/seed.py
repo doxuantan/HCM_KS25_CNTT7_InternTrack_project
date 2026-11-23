@@ -15,14 +15,23 @@ from sqlalchemy.orm import Session
 
 from app.db.database import SessionLocal
 from app.models import (
+    DiaryReview,
+    Evaluation,
     EvaluationCriteria,
+    EvaluationDetail,
+    InternshipDiary,
     InternshipPeriod,
     Lecturer,
+    Notification,
+    Report,
     Student,
     Team,
     TeamMember,
 )
+from app.models.diary_review import DiaryReviewStatus
+from app.models.internship_diary import DiaryStatus
 from app.models.internship_period import PeriodStatus
+from app.models.report import ReportStatus, ReportType
 from app.models.team import TeamStatus
 
 
@@ -203,6 +212,116 @@ def seed_teams_and_members(db: Session, period: InternshipPeriod) -> None:
         print("[ĐÃ CÓ] Sinh viên hiện tại đã được xếp nhóm trong kỳ này.")
 
 
+def seed_demo_records(db: Session, period: InternshipPeriod) -> None:
+    memberships = db.execute(
+        select(TeamMember, Team, Student)
+        .join(Team, Team.id == TeamMember.team_id)
+        .join(Student, Student.id == TeamMember.student_id)
+        .where(Team.period_id == period.id)
+        .order_by(Team.id, TeamMember.id)
+    ).all()
+    if not memberships:
+        print("[BỎ QUA] Chưa có thành viên nhóm để seed nhật ký, báo cáo và đánh giá.")
+        return
+
+    criteria = db.scalars(
+        select(EvaluationCriteria)
+        .where(EvaluationCriteria.is_active.is_(True))
+        .order_by(EvaluationCriteria.id)
+    ).all()
+    sample_date = min(max(date.today(), period.start_date), period.end_date)
+
+    for membership, team, student in memberships:
+        existing_diary = db.scalar(
+            select(InternshipDiary).where(
+                InternshipDiary.student_id == student.id,
+                InternshipDiary.work_date == sample_date,
+                InternshipDiary.work_content == "Hoàn thành công việc được giao và cập nhật tiến độ thực tập.",
+            )
+        )
+        if existing_diary is None:
+            existing_diary = InternshipDiary(
+                student_id=student.id,
+                work_date=sample_date,
+                work_content="Hoàn thành công việc được giao và cập nhật tiến độ thực tập.",
+                result="Đã hoàn thành các đầu việc trong ngày.",
+                lessons_learned="Chia nhỏ công việc giúp theo dõi tiến độ rõ ràng hơn.",
+                status=DiaryStatus.REVIEWED,
+            )
+            db.add(existing_diary)
+            db.flush()
+        has_review = db.scalar(
+            select(DiaryReview.id).where(DiaryReview.diary_id == existing_diary.id).limit(1)
+        )
+        if has_review is None:
+            supervisor_user_id = db.scalar(
+                select(Lecturer.user_id).where(Lecturer.id == team.supervisor_id)
+            )
+            if supervisor_user_id is not None:
+                db.add(DiaryReview(
+                    diary_id=existing_diary.id,
+                    reviewer_id=supervisor_user_id,
+                    content="Nhật ký đầy đủ, tiếp tục cập nhật tiến độ định kỳ.",
+                    status=DiaryReviewStatus.REVIEWED,
+                ))
+                existing_diary.status = DiaryStatus.REVIEWED
+
+        report = db.scalar(
+            select(Report).where(
+                Report.team_id == team.id,
+                Report.period_id == period.id,
+                Report.title == "Báo cáo tuần mẫu",
+            )
+        )
+        if report is None:
+            db.add(Report(
+                team_id=team.id,
+                period_id=period.id,
+                title="Báo cáo tuần mẫu",
+                report_type=ReportType.WEEKLY,
+                status=ReportStatus.DRAFT,
+            ))
+
+        evaluation = db.scalar(
+            select(Evaluation).where(
+                Evaluation.student_id == student.id,
+                Evaluation.period_id == period.id,
+            )
+        )
+        if evaluation is None and criteria:
+            supervisor_user_id = db.scalar(
+                select(Lecturer.user_id).where(Lecturer.id == team.supervisor_id)
+            )
+            if supervisor_user_id is not None:
+                evaluation = Evaluation(
+                    student_id=student.id,
+                    evaluator_id=supervisor_user_id,
+                    period_id=period.id,
+                    total_score=Decimal("8.50") * len(criteria),
+                    comment="Kết quả thực tập mẫu đã được công bố.",
+                    is_published=True,
+                )
+                db.add(evaluation)
+                db.flush()
+                db.add_all([
+                    EvaluationDetail(
+                        evaluation_id=evaluation.id,
+                        criteria_id=item.id,
+                        score=Decimal("8.50"),
+                    )
+                    for item in criteria
+                ])
+                if student.user_id is not None:
+                    db.add(Notification(
+                        user_id=student.user_id,
+                        title="Bảng đánh giá đã được công bố",
+                        content="Giảng viên đã công bố kết quả đánh giá thực tập của bạn.",
+                        notification_type=f"EVALUATION_PUBLISHED:{evaluation.id}",
+                    ))
+
+    print("[SEED] Ensured demo diaries, draft reports, and evaluations.")
+
+
 def main() -> None:
     db = SessionLocal()
 
@@ -210,6 +329,7 @@ def main() -> None:
         period = seed_period(db)
         seed_criteria(db)
         seed_teams_and_members(db, period)
+        seed_demo_records(db, period)
         db.commit()
         print("\nSeed dữ liệu mẫu hoàn tất!")
     except Exception as error:

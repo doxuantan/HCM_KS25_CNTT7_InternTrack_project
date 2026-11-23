@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Báo cáo thực tập | InterTrack</title>
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/student-dashboard.css">
+    <link rel="stylesheet" href="../css/task-workflows.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <script type="module" src="../js/reports.js"></script>
+  </head>
+  <body class="student-dashboard" data-allowed-roles="STUDENT">
+    <main class="content workflow-main" id="main-content" aria-busy="true">
+      <div class="page-heading student-page-heading">
+        <div><p class="eyebrow">Không gian sinh viên</p><h1>Báo cáo thực tập</h1><p class="page-description">Tải báo cáo PDF/DOCX lên để gửi giảng viên xem xét.</p></div>
+        <nav class="admin-toolbar" aria-label="Điều hướng sinh viên">
+          <a class="button button-secondary" href="../index.html">Tổng quan</a>
+          <a class="button button-secondary" href="diary.html">Nhật ký</a>
+          <a class="button button-secondary" href="evaluations.html">Kết quả đánh giá</a>
+        </nav>
+      </div>
+
+      <section class="panel student-tasks-panel">
+        <div class="panel-heading student-panel-heading"><h2>Tạo và nộp báo cáo</h2></div>
+        <form class="admin-form-grid" data-report-form>
+          <label class="form-field"><span class="form-label">Tiêu đề</span><input class="form-control" type="text" name="title" maxlength="200" required></label>
+          <label class="form-field"><span class="form-label">Loại báo cáo</span><select class="form-control" name="report_type"><option value="WEEKLY">Hàng tuần</option><option value="FINAL">Cuối kỳ</option></select></label>
+          <label class="form-field"><span class="form-label">Kỳ thực tập</span><select class="form-control" name="period_id" data-report-period required><option value="">Đang tải...</option></select></label>
+          <label class="form-field"><span class="form-label">Đối tượng</span><select class="form-control" name="team_id" data-report-team><option value="">Báo cáo cá nhân</option></select></label>
+          <label class="form-field admin-form-wide"><span class="form-label">Tệp PDF hoặc DOCX</span><input class="form-control" type="file" name="report_file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required></label>
+          <div class="admin-form-wide"><button class="button button-primary" type="submit">Tải lên và nộp</button></div>
+        </form>
+      </section>
+
+      <section class="panel student-tasks-panel">
+        <div class="panel-heading student-panel-heading"><div><h2>Báo cáo của tôi</h2><p class="muted">Trạng thái và nhận xét của người hướng dẫn.</p></div></div>
+        <div class="table-scroll student-table-scroll">
+          <table class="data-table student-task-table">
+            <thead><tr><th>Báo cáo / nhận xét</th><th>Loại</th><th>Ngày nộp</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <tbody data-report-rows><tr><td class="admin-table-state" colspan="5">Đang tải báo cáo...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -34,3 +34,9 @@ class InternshipDiary(Base):
 
     student = relationship("Student")
     task = relationship("Task")
+    reviews = relationship(
+        "DiaryReview",
+        back_populates="diary",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

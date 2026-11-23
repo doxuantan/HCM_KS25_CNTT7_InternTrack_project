@@ -62,16 +62,20 @@ async def upload_attachment(
 @router.get(
     "",
     response_model=list[AttachmentResponse],
-    summary="List task attachments",
+    summary="List linked record attachments",
 )
 def list_task_attachments(
-    task_id: int = Query(gt=0),
+    task_id: int | None = Query(default=None, gt=0),
+    diary_id: int | None = Query(default=None, gt=0),
+    report_id: int | None = Query(default=None, gt=0),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> list[Attachment]:
-    return attachment_service.list_task_attachments(
+    return attachment_service.list_target_attachments(
         db=db,
         task_id=task_id,
+        diary_id=diary_id,
+        report_id=report_id,
         current_user=current_user,
     )
 

@@ -9,8 +9,8 @@ export async function initializeSharedUi() {
   initializePromise = (async () => {
     if (!document.querySelector("[data-toast-region]")) {
       const [toastResponse, modalResponse] = await Promise.all([
-        fetch("components/toast.html"),
-        fetch("components/modal.html"),
+        fetch(new URL("../components/toast.html", import.meta.url)),
+        fetch(new URL("../components/modal.html", import.meta.url)),
       ]);
       if (!toastResponse.ok || !modalResponse.ok) {
         throw new Error("Không thể tải component thông báo và xác nhận.");

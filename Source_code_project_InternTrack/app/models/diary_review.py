@@ -22,5 +22,5 @@ class DiaryReview(Base):
     status = Column(Enum(DiaryReviewStatus), nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
-    diary = relationship("InternshipDiary")
+    diary = relationship("InternshipDiary", back_populates="reviews")
     reviewer = relationship("User", foreign_keys=[reviewer_id])
