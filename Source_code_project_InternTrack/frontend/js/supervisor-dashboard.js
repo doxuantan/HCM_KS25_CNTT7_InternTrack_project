@@ -1,6 +1,7 @@
 import { apiRequest } from "./api.js";
 import { requireAuth, logout } from "./auth.js";
 import { initializeSharedUi, showToast } from "./ui.js";
+import { initializeNotifications } from "./notifications.js";
 
 let currentUser = null;
 let teams = [];
@@ -508,6 +509,7 @@ if (currentUser) {
   setTexts("[data-user-name]", currentUser.full_name || "Giảng viên");
   setText("[data-user-initials]", (currentUser.full_name || "GV").split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase());
   await initializeSharedUi();
+  await initializeNotifications();
   await loadDashboard();
   const hashView = window.location.hash.slice(1);
   if (hashView) document.querySelector(`[data-supervisor-view="${hashView}"]`)?.click();
