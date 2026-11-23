@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <title>Lịch nhóm | InterTrack</title>
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script type="module" src="js/schedules.js"></script>
+  </head>
+  <body class="admin-dashboard" data-allowed-roles="ADMIN,SUPERVISOR,STUDENT">
+    <main class="content admin-content" id="main-content" aria-busy="true">
+      <div class="page-heading admin-page-heading">
+        <div><p class="eyebrow">Hoạt động nhóm</p><h1>Lịch họp và hoạt động</h1></div>
+        <button class="button button-primary" type="button" data-schedule-create>+ Tạo lịch</button>
+      </div>
+      <section class="panel admin-panel">
+        <div class="admin-toolbar">
+          <div class="admin-filter"><label for="schedule-search">Tìm kiếm</label><input class="form-control" id="schedule-search" type="search" placeholder="Tên, địa điểm..." data-schedule-search></div>
+          <div class="admin-filter"><label for="schedule-team-filter">Nhóm</label><select class="form-control" id="schedule-team-filter" data-schedule-team-filter><option value="">Tất cả nhóm</option></select></div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table admin-table">
+            <thead><tr><th>Lịch</th><th>Nhóm</th><th>Bắt đầu</th><th>Kết thúc</th><th>Địa điểm</th><th>Thao tác</th></tr></thead>
+            <tbody data-schedule-rows aria-busy="true"><tr><td colspan="6" class="admin-table-state">Đang tải lịch...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="modal admin-dialog" data-schedule-dialog>
+      <form class="admin-dialog-form" data-schedule-form>
+        <div class="modal-header"><h2 class="modal-title" data-schedule-dialog-title>Tạo lịch nhóm</h2><button class="modal-close" type="button" data-schedule-close aria-label="Đóng">×</button></div>
+        <div class="modal-body admin-form-grid">
+          <label class="form-field"><span class="form-label">Nhóm</span><select class="form-control" name="team_id" data-schedule-team required></select></label>
+          <label class="form-field"><span class="form-label">Tên lịch</span><input class="form-control" name="title" maxlength="200" required></label>
+          <label class="form-field"><span class="form-label">Bắt đầu</span><input class="form-control" name="start_time" type="datetime-local" required></label>
+          <label class="form-field"><span class="form-label">Kết thúc</span><input class="form-control" name="end_time" type="datetime-local" required></label>
+          <label class="form-field admin-form-wide"><span class="form-label">Địa điểm</span><input class="form-control" name="location" maxlength="255"></label>
+          <label class="form-field admin-form-wide"><span class="form-label">Mô tả</span><textarea class="form-control" name="description" rows="4"></textarea></label>
+        </div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-schedule-close>Hủy</button><button class="button button-primary" type="submit">Lưu lịch</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="modal admin-dialog" data-schedule-detail-dialog>
+      <div class="admin-dialog-form">
+        <div class="modal-header"><h2 class="modal-title" data-schedule-detail-title>Chi tiết lịch</h2><button class="modal-close" type="button" data-schedule-detail-close aria-label="Đóng">×</button></div>
+        <div class="modal-body">
+          <dl class="admin-detail-list">
+            <div><dt>Nhóm</dt><dd data-schedule-detail-team>—</dd></div>
+            <div><dt>Địa điểm</dt><dd data-schedule-detail-location>—</dd></div>
+            <div><dt>Bắt đầu</dt><dd data-schedule-detail-start>—</dd></div>
+            <div><dt>Kết thúc</dt><dd data-schedule-detail-end>—</dd></div>
+            <div class="task-detail-wide"><dt>Mô tả</dt><dd data-schedule-detail-description>—</dd></div>
+          </dl>
+        </div>
+      </div>
+    </dialog>
+  </body>
+</html>

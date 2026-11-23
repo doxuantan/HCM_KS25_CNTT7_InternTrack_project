@@ -2,6 +2,7 @@ import { API_BASE_URL, apiRequest, getAccessToken } from "./api.js";
 import { requireAuth } from "./auth.js";
 import { initializeSharedUi, showToast } from "./ui.js";
 import { renderTaskDashboard, showTaskDashboardError } from "./student-dashboard.js";
+import { initializeNotifications } from "./notifications.js";
 
 export function getTasks() {
   return apiRequest("tasks");
@@ -623,6 +624,7 @@ if (document.body?.dataset.myTasksPage !== undefined) {
   const user = await requireAuth();
   if (user) {
     await initializeSharedUi();
+    await initializeNotifications();
     await loadStudentTasks();
   }
   document.querySelector("#main-content")?.setAttribute("aria-busy", "false");
@@ -632,6 +634,7 @@ if (document.body?.dataset.supervisorTasksPage !== undefined) {
   const user = await requireAuth();
   if (user) {
     await initializeSharedUi();
+    await initializeNotifications();
     await loadSupervisorTeams();
     await loadSupervisorTasks();
   }

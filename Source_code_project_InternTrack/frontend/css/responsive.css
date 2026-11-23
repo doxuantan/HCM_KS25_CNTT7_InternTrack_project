@@ -1,0 +1,140 @@
+/* Shared responsive fixes for Task, Team, Progress and Schedule */
+@media (max-width: 760px) {
+  .topbar { gap: 8px !important; }
+  .topbar-spacer { display: none !important; }
+  .profile-button { padding: 4px 6px !important; }
+  .notification-menu { margin-left: auto; }
+  .notification-dropdown {
+    position: fixed !important;
+    top: 58px !important;
+    right: 10px !important;
+    left: 10px !important;
+    width: auto !important;
+  }
+  .admin-toolbar,
+  .kanban-toolbar { width: 100%; }
+  .admin-filter { min-width: 100% !important; flex: 1 1 100% !important; }
+  .admin-toolbar > .button,
+  .kanban-toolbar > .button { width: 100%; }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .data-table { min-width: 680px; }
+  .student-table-scroll .data-table { min-width: 620px; }
+  .page-heading,
+  .admin-page-heading { width: 100%; }
+  .admin-form-grid,
+  .admin-detail-list { grid-template-columns: 1fr !important; }
+  .admin-form-wide,
+  .task-detail-wide { grid-column: auto !important; }
+  .modal-footer { flex-direction: column-reverse; }
+  .modal-footer .button { width: 100%; }
+  .summary-grid,
+  .admin-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 430px) {
+  .summary-grid,
+  .admin-stat-grid { grid-template-columns: 1fr 1fr; }
+  .summary-card,
+  .admin-stat-card { min-width: 0; }
+  .profile-button .avatar { width: 34px; height: 34px; }
+  .notification-button { width: 34px; height: 34px; }
+  .brand-mobile { max-width: 100px; overflow: hidden; }
+  .kanban-board { grid-template-columns: 1fr; }
+  .kanban-column { min-height: 220px; }
+  .kanban-list { min-height: 180px; }
+  .supervisor-grid,
+  .supervisor-team-grid { grid-template-columns: 1fr; }
+}
+
+/* Notification dropdown */
+.notification-menu { position: relative; flex: 0 0 auto; }
+.notification-button {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line, #e5eaf1);
+  border-radius: 50%;
+  background: var(--panel-bg, #fff);
+  color: var(--ink, #172338);
+  cursor: pointer;
+}
+.notification-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.notification-dot {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 2px solid var(--panel-bg, #fff);
+  border-radius: 999px;
+  background: #d84a4a;
+  color: #fff;
+  font-size: 9px;
+  line-height: 14px;
+  text-align: center;
+}
+.notification-dropdown {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(380px, calc(100vw - 24px));
+  border: 1px solid var(--line, #e5eaf1);
+  border-radius: 12px;
+  background: var(--panel-bg, #fff);
+  box-shadow: 0 16px 40px rgb(23 35 56 / 16%);
+  overflow: hidden;
+}
+.notification-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line, #e5eaf1);
+}
+.notification-heading button {
+  border: 0;
+  background: transparent;
+  color: var(--accent, #287c72);
+  font-size: 11px;
+  cursor: pointer;
+}
+.notification-list { max-height: 420px; overflow-y: auto; }
+.notification-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line, #edf1f6);
+  background: var(--panel-bg, #fff);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.notification-item:disabled { opacity: 1; cursor: default; }
+.notification-item.is-unread { background: rgb(50 115 188 / 7%); }
+.notification-item-copy { min-width: 0; flex: 1; display: grid; gap: 4px; }
+.notification-item-copy strong { font-size: 13px; }
+.notification-item-copy span { color: var(--muted, #8490a3); font-size: 12px; }
+.notification-item-copy time { color: var(--muted, #8490a3); font-size: 10px; }
+.notification-unread-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: #2f74c7; }
+.notification-empty { margin: 0; padding: 24px 14px; color: var(--muted, #8490a3); text-align: center; }
+.notification-error { color: #b33a3a; }
+
+.notification-fallback-topbar {
+  position: sticky;
+  z-index: 70;
+  top: 0;
+  justify-content: flex-end;
+  height: 56px;
+  padding-right: 14px;
+  padding-left: 14px;
+  border-bottom: 1px solid var(--line, #e5eaf1);
+  background: var(--panel-bg, #fff);
+}

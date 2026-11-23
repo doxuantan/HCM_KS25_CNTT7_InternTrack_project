@@ -2,6 +2,7 @@ import { ApiError, apiRequest, getAuthSessionPersistence } from "./api.js";
 import { logout, requireAuth } from "./auth.js";
 import { confirmAction, initializeSharedUi, showToast } from "./ui.js";
 import { createUser, listUsers, setUserActive, updateUser } from "./users.js";
+import { initializeNotifications } from "./notifications.js";
 
 const ROLE_LABELS = Object.freeze({
   ADMIN: "Quản trị viên",
@@ -40,6 +41,8 @@ let usersCache = null;
 let usersPromise = null;
 let periodsCache = null;
 let periodsPromise = null;
+let teamsCache = null;
+let teamsPromise = null;
 let alertTimer = 0;
 
 function isRecord(value) {
@@ -210,6 +213,22 @@ async function getUsers(force = false) {
 async function getPeriods(force = false) {
   if (force) {
     periodsCache = null;
+  }
+
+  async function getTeams(force = false) {
+    if (force) teamsCache = null;
+    if (teamsCache) return teamsCache;
+    if (teamsPromise) return teamsPromise;
+    teamsPromise = apiRequest("teams").then((teams) => {
+      if (!Array.isArray(teams)) throw new Error("API nhóm trả về dữ liệu không hợp lệ.");
+      return teams;
+    });
+    try {
+      teamsCache = await teamsPromise;
+      return teamsCache;
+    } finally {
+      teamsPromise = null;
+    }
   }
   if (periodsCache) {
     return periodsCache;
@@ -466,11 +485,12 @@ async function loadOverview(force = false) {
   for (const name of ["users", "admins", "supervisors", "students", "periods"]) {
     setStat(name, null, "Đang tải dữ liệu...");
   }
-  setStat("teams", null, "Backend chưa cung cấp API nhóm.");
+  setStat("teams", null, "Đang tải dữ liệu...");
 
-  const [usersResult, periodsResult] = await Promise.allSettled([
+  const [usersResult, periodsResult, teamsResult] = await Promise.allSettled([
     getUsers(force),
     getPeriods(force),
+    getTeams(force),
   ]);
   if (usersResult.status === "fulfilled") {
     const users = usersResult.value;
@@ -500,6 +520,12 @@ async function loadOverview(force = false) {
     setStat("periods", periodsResult.value.length, "Số kỳ từ API backend");
   } else {
     setStat("periods", null, "Không tải được API kỳ thực tập.");
+  }
+
+  if (teamsResult.status === "fulfilled") {
+    setStat("teams", teamsResult.value.length, "Số nhóm từ API backend");
+  } else {
+    setStat("teams", null, "Không tải được API nhóm.");
   }
 }
 
@@ -1382,6 +1408,7 @@ async function initializeAdmin() {
       return;
     }
     await initializeSharedUi();
+    await initializeNotifications();
     setupAccount(adminUser);
     setupNavigation();
     setupUserActions();

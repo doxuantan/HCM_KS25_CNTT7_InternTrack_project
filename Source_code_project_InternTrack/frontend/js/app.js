@@ -3,6 +3,7 @@ import { logout, requireAuth } from "./auth.js";
 import { initializeStudentDashboard } from "./student-dashboard.js";
 import { loadStudentTasks } from "./tasks.js";
 import { initializeSharedUi } from "./ui.js";
+import { initializeNotifications } from "./notifications.js";
 
 function getUserInitials(fullName) {
   const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -111,6 +112,7 @@ try {
     await initializeSharedUi();
     setupSidebar();
     setupAccountMenu(user);
+    await initializeNotifications();
     if (document.body.dataset.dashboard === "student") {
       initializeStudentDashboard(user);
       await loadStudentTasks();
