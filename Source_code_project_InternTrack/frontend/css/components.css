@@ -1,5 +1,5 @@
 :root {
-  --component-accent: var(--accent, #287c72);
+  --component-accent: var(--accent, #7047e8);
   --component-border: var(--line, #e9edf3);
   --component-ink: var(--ink, #172338);
   --component-muted: var(--muted, #8490a3);

@@ -13,7 +13,7 @@
   --ink: #20283a;
   --muted: #8a93a5;
   --line: #edf0f5;
-  --accent: #6258e8;
+  --accent: #7047e8;
 }
 
 * {
@@ -947,12 +947,12 @@ td .avatar {
   --ink: #172338;
   --muted: #8490a3;
   --line: #e9edf4;
-  --accent: #287c72;
+  --accent: #7047e8;
 }
 
 body {
   background:
-    radial-gradient(ellipse at 82% 0%, rgb(224 239 236 / 48%), transparent 34rem),
+    radial-gradient(ellipse at 82% 0%, rgb(229 224 255 / 52%), transparent 34rem),
     #f5f7fb;
 }
 
@@ -971,12 +971,18 @@ body {
 
 .brand-mark {
   display: block;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   border-radius: 0;
   background: none;
   box-shadow: none;
+  filter: drop-shadow(0 3px 7px rgb(126 89 255 / 24%));
+}
+
+.brand-accent {
+  color: #22b7cc;
+  text-shadow: 0 0 14px rgb(34 211 238 / 18%);
 }
 
 .brand-copy {
@@ -1033,9 +1039,9 @@ body {
 }
 
 .nav-link.is-active {
-  border-color: rgb(96 189 169 / 14%);
-  background: linear-gradient(100deg, rgb(55 142 127 / 26%), rgb(55 142 127 / 9%));
-  color: #a7e4d7;
+  border-color: rgb(153 128 255 / 22%);
+  background: linear-gradient(100deg, rgb(112 71 232 / 26%), rgb(112 71 232 / 9%));
+  color: #d3c8ff;
 }
 
 .nav-icon {
@@ -1069,8 +1075,8 @@ body {
 }
 
 .help-icon {
-  background: rgb(81 176 157 / 16%);
-  color: #a7e4d7;
+  background: rgb(112 71 232 / 20%);
+  color: #c7b9ff;
 }
 
 .sidebar-help > span:nth-child(2) > span,
@@ -1127,8 +1133,8 @@ body {
 .avatar {
   width: 36px;
   height: 36px;
-  background: #e4f2ee;
-  color: #277c72;
+  background: #eeeaff;
+  color: #6343c8;
   font-size: 10px;
 }
 
@@ -1154,7 +1160,7 @@ body {
 
 .eyebrow {
   margin-bottom: 8px;
-  color: #398b7e;
+  color: #7054cf;
   font-size: 10px;
   letter-spacing: 1.1px;
 }
@@ -1181,14 +1187,14 @@ h1 {
 }
 
 .button-primary {
-  background: #287c72;
-  box-shadow: 0 7px 16px rgb(40 124 114 / 18%);
+  background: #7047e8;
+  box-shadow: 0 7px 16px rgb(112 71 232 / 20%);
 }
 
 .button-primary:hover {
   transform: translateY(-1px);
-  background: #206d64;
-  box-shadow: 0 9px 20px rgb(40 124 114 / 24%);
+  background: #5d38cf;
+  box-shadow: 0 9px 20px rgb(112 71 232 / 28%);
 }
 
 .summary-grid {
@@ -1283,13 +1289,13 @@ h1 {
 }
 
 .text-link {
-  color: #287c72;
+  color: #6346d8;
   font-size: 11px;
 }
 
 .text-link:hover,
 .footer a:hover {
-  color: #1d625a;
+  color: #4e35b2;
 }
 
 thead {

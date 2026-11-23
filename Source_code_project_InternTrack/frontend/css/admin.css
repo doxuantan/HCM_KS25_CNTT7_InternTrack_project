@@ -11,8 +11,12 @@
 }
 
 .admin-dashboard .brand-mark {
-  background: linear-gradient(145deg, #4488e8, #1753ae);
-  box-shadow: 0 5px 12px rgb(36 99 201 / 20%);
+  background: none;
+  box-shadow: none;
+}
+
+.admin-dashboard .brand-accent {
+  color: #168fa8;
 }
 
 .admin-dashboard .workspace-mark,

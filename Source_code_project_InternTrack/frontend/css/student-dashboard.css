@@ -7,8 +7,8 @@
   border: 1px solid #dfe7ef;
   border-radius: 18px;
   background:
-    radial-gradient(ellipse at 92% 10%, rgb(73 165 153 / 12%), transparent 34%),
-    linear-gradient(125deg, #fff 0%, #f5faf9 100%);
+    radial-gradient(ellipse at 92% 10%, rgb(122 91 235 / 11%), transparent 34%),
+    linear-gradient(125deg, #fff 0%, #f8f6ff 100%);
   box-shadow: 0 12px 30px rgb(22 43 67 / 6%);
 }
 
@@ -20,7 +20,7 @@
 }
 
 .student-dashboard [data-student-name] {
-  color: #287c72;
+  color: #7047e8;
 }
 
 .student-dashboard [data-student-profile] {
@@ -80,7 +80,7 @@
 
 .student-dashboard .student-progress-value {
   flex: 0 0 auto;
-  color: #287c72;
+  color: #7047e8;
   font-family: "Manrope", sans-serif;
   font-size: 25px;
   font-weight: 800;
@@ -94,7 +94,7 @@
   height: 10px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e9f0ef;
+  background: #eeeafb;
 }
 
 .student-dashboard .student-progress-track[hidden] {
@@ -106,7 +106,7 @@
   width: 0;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #287c72, #61b29f);
+  background: linear-gradient(90deg, #7047e8, #22b7cc);
   transition: width 250ms ease;
 }
 
@@ -244,7 +244,7 @@
   height: 20px;
   margin-bottom: 9px;
   border: 2px solid #dfe9e6;
-  border-top-color: #287c72;
+  border-top-color: #7047e8;
   border-radius: 50%;
   animation: student-loading 700ms linear infinite;
   content: "";
