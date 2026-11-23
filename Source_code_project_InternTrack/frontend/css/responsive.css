@@ -99,7 +99,7 @@
 .notification-heading button {
   border: 0;
   background: transparent;
-  color: var(--accent, #287c72);
+  color: var(--accent, #7047e8);
   font-size: 11px;
   cursor: pointer;
 }

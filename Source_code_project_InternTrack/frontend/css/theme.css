@@ -577,8 +577,13 @@
 
 :root[data-theme="dark"] .brand-mark,
 :root[data-theme="dark"] .admin-dashboard .brand-mark {
-  background: linear-gradient(145deg, #9b6bff, #7045e8);
-  box-shadow: 0 5px 16px rgb(139 92 246 / 28%);
+  background: none;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .brand-accent,
+:root[data-theme="dark"] .admin-dashboard .brand-accent {
+  color: #5cdeeb;
 }
 
 :root[data-theme="dark"] .workspace-mark,

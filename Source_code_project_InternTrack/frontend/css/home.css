@@ -2,7 +2,8 @@ body.home-page {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 82% 28%, rgb(91 178 158 / 13%), transparent 32%),
+    radial-gradient(ellipse at 82% 28%, rgb(122 91 235 / 12%), transparent 32%),
+    radial-gradient(ellipse at 14% 75%, rgb(34 183 204 / 8%), transparent 30%),
     #f6f8fb;
   color: #172338;
 }
@@ -35,6 +36,11 @@ body.home-page {
 .home-brand img {
   width: 40px;
   height: 40px;
+  filter: drop-shadow(0 3px 7px rgb(126 89 255 / 24%));
+}
+
+.home-brand .brand-accent {
+  color: #168fa8;
 }
 
 .home-nav,
@@ -59,7 +65,7 @@ body.home-page {
 
 .home-kicker {
   margin: 0 0 20px;
-  color: #287c72;
+  color: #7047e8;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -76,7 +82,7 @@ body.home-page {
 }
 
 .home-intro h1 span {
-  color: #287c72;
+  color: #6241cb;
 }
 
 .home-description {
@@ -109,7 +115,7 @@ body.home-page {
 
 .home-register-link {
   padding: 10px 4px;
-  color: #287c72;
+  color: #5e42d2;
   font-size: 13px;
   font-weight: 600;
 }
@@ -138,8 +144,8 @@ body.home-page {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 11px;
-  background: #eaf5f2;
-  color: #287c72;
+  background: #f0ecff;
+  color: #6948d1;
   font-size: 18px;
   font-weight: 700;
 }
