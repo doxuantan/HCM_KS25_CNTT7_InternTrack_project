@@ -217,6 +217,42 @@
       "value": "",
       "type": "default",
       "enabled": true
+    },
+    {
+      "key": "team_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "lecturer_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "student_profile_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "schedule_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "notification_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "member_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
     }
   ],
   "_postman_variable_scope": "environment",

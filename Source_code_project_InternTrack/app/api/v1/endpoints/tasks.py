@@ -20,6 +20,7 @@ from app.schemas.task import (
     TaskListResponse,
     TaskResponse,
     TaskReviewResponse,
+    TaskUpdate,
 )
 from app.services import task_service
 
@@ -60,6 +61,35 @@ def list_tasks(
         page=page,
         limit=limit,
     )
+
+
+@router.get("/{task_id}", response_model=TaskResponse)
+def get_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TaskResponse:
+    return task_service.get_task(db, task_id, current_user)
+
+
+@router.put("/{task_id}", response_model=TaskResponse)
+@router.patch("/{task_id}", response_model=TaskResponse, include_in_schema=False)
+def update_task(
+    task_id: int,
+    data: TaskUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> TaskResponse:
+    return task_service.update_task(db, task_id, data, current_user)
+
+
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    task_service.delete_task(db, task_id, current_user)
 
 
 @router.post(

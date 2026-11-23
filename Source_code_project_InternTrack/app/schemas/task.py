@@ -32,6 +32,30 @@ class TaskCreate(BaseModel):
         return self
 
 
+class TaskUpdate(BaseModel):
+    team_id: int | None = Field(default=None, gt=0)
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = None
+    task_type: TaskType | None = None
+    priority: TaskPriority | None = None
+    start_date: date | None = None
+    deadline: datetime | None = None
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    @model_validator(mode="after")
+    def validate_changes(self):
+        if not self.model_fields_set:
+            raise ValueError("At least one field must be provided.")
+        for field in ("title", "description", "task_type", "priority", "start_date", "deadline", "team_id"):
+            if field in self.model_fields_set and field not in ("description",) and getattr(self, field) is None:
+                raise ValueError(f"{field} cannot be null.")
+        if self.start_date is not None and self.deadline is not None:
+            if self.deadline.date() < self.start_date:
+                raise ValueError("Deadline must be on or after the task start date.")
+        return self
+
+
 class TaskAssign(BaseModel):
     student_id: int | None = Field(default=None, gt=0)
     student_ids: list[int] | None = Field(default=None, min_length=1, max_length=100)

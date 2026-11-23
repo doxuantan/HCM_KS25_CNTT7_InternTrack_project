@@ -25,6 +25,7 @@ from app.schemas.task import (
     TaskReviewUpdate,
     TaskReviewStatus,
     TaskResponse,
+    TaskUpdate,
 )
 from app.services.notification_service import notify_task_assigned
 
@@ -106,6 +107,105 @@ def create_task(db: Session, data: TaskCreate, user: User) -> Task:
     db.commit()
     db.refresh(task)
     return task
+
+
+def get_task(db: Session, task_id: int, user: User) -> Task:
+    task = _get_task(db, task_id)
+    if user.role == UserRole.ADMIN:
+        return task
+    if user.role == UserRole.SUPERVISOR:
+        _assert_task_manager(db, task, user)
+        return task
+    if user.role == UserRole.STUDENT:
+        student_id = db.scalar(
+            select(Student.id).where(Student.user_id == user.id)
+        )
+        if student_id is not None:
+            assigned = db.scalar(
+                select(TaskAssignment.id).where(
+                    TaskAssignment.task_id == task.id,
+                    TaskAssignment.student_id == student_id,
+                )
+            )
+            if assigned is not None:
+                return task
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Bạn không có quyền xem nhiệm vụ này.",
+    )
+
+
+def update_task(db: Session, task_id: int, data: TaskUpdate, user: User) -> Task:
+    task = _get_task(db, task_id)
+    _assert_task_manager(db, task, user)
+    update_data = data.model_dump(exclude_unset=True)
+
+    team_id = update_data.get("team_id", task.team_id)
+    team = db.get(Team, team_id)
+    if team is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Không tìm thấy nhóm.")
+    if user.role == UserRole.SUPERVISOR:
+        lecturer_id = db.scalar(
+            select(Lecturer.id).where(Lecturer.user_id == user.id)
+        )
+        if lecturer_id != team.supervisor_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Giảng viên không có quyền quản lý nhiệm vụ trong nhóm này.",
+            )
+
+    start_date = update_data.get("start_date", task.start_date)
+    deadline = update_data.get("deadline", task.deadline)
+    deadline = _local_naive_datetime(deadline)
+    if deadline.date() < start_date:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Hạn hoàn thành phải cùng hoặc sau ngày bắt đầu.",
+        )
+
+    if "team_id" in update_data:
+        for assignment in task.assignments:
+            is_member = db.scalar(
+                select(TeamMember.id).where(
+                    TeamMember.team_id == team_id,
+                    TeamMember.student_id == assignment.student_id,
+                )
+            )
+            if is_member is None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="Người được giao phải là thành viên của nhóm mới.",
+                )
+
+    for field, value in update_data.items():
+        if field == "deadline":
+            value = deadline
+        setattr(task, field, value)
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể cập nhật nhiệm vụ do dữ liệu liên kết không hợp lệ.",
+        ) from None
+    db.refresh(task)
+    return task
+
+
+def delete_task(db: Session, task_id: int, user: User) -> None:
+    task = _get_task(db, task_id)
+    _assert_task_manager(db, task, user)
+    db.delete(task)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Không thể xóa nhiệm vụ vì còn dữ liệu liên kết.",
+        ) from None
 
 
 def list_tasks(

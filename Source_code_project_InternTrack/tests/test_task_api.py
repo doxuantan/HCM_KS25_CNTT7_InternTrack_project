@@ -537,6 +537,56 @@ class TaskApiTests(unittest.TestCase):
         self.assertIn(first_id, student_ids)
         self.assertIn(second_id, student_ids)
 
+    def test_get_update_and_delete_task(self) -> None:
+        task_id = self._create_task(title="Original title")
+        self._assign_student(task_id)
+
+        detail = self.client.get(
+            f"/api/v1/tasks/{task_id}",
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(detail.status_code, 200, detail.text)
+        self.assertEqual(detail.json()["data"]["title"], "Original title")
+
+        denied_detail = self.client.get(
+            f"/api/v1/tasks/{task_id}",
+            headers=self._auth("outsider"),
+        )
+        self.assertEqual(denied_detail.status_code, 403, denied_detail.text)
+
+        updated = self.client.put(
+            f"/api/v1/tasks/{task_id}",
+            json={
+                "title": "Updated title",
+                "description": "Updated description",
+                "priority": "HIGH",
+            },
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["data"]["title"], "Updated title")
+        self.assertEqual(updated.json()["data"]["description"], "Updated description")
+        self.assertEqual(updated.json()["data"]["priority"], "HIGH")
+
+        student_update = self.client.patch(
+            f"/api/v1/tasks/{task_id}",
+            json={"title": "Student update"},
+            headers=self._auth("student"),
+        )
+        self.assertEqual(student_update.status_code, 403, student_update.text)
+
+        deleted = self.client.delete(
+            f"/api/v1/tasks/{task_id}",
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(deleted.status_code, 204, deleted.text)
+
+        missing = self.client.get(
+            f"/api/v1/tasks/{task_id}",
+            headers=self._auth("supervisor"),
+        )
+        self.assertEqual(missing.status_code, 404, missing.text)
+
     def test_task_comments_and_attachment_listing(self) -> None:
         task_id = self._create_task()
         comment = self.client.post(
