@@ -3,7 +3,7 @@ const TOKEN_KEY = "intertrack.access_token";
 const configuredApiUrl =
   document.querySelector('meta[name="api-base-url"]')?.getAttribute("content")?.trim() ||
   window.INTERTRACK_API_BASE_URL ||
-  "http://localhost:8000/api/v1";
+  "http://127.0.0.1:8000/api/v1";
 export const API_BASE_URL = configuredApiUrl.replace(/\/+$/, "");
 
 export class ApiError extends Error {
@@ -81,18 +81,24 @@ export async function apiRequest(path, options = {}) {
 
   let response;
   try {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
     response = await fetch(
       new URL(`${API_BASE_URL}/${path.replace(/^\/+/, "")}`, window.location.href),
       {
         ...requestOptions,
         headers,
+        signal: controller.signal,
         body:
           body === undefined || body instanceof FormData
             ? body
             : JSON.stringify(body),
       },
-    );
+    ).finally(() => window.clearTimeout(timeoutId));
   } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new ApiError("Máy chủ phản hồi quá lâu. Vui lòng thử lại.", 408);
+    }
     if (error instanceof TypeError) {
       throw new ApiError(
         "Không thể kết nối máy chủ. Vui lòng kiểm tra API, kết nối mạng và cấu hình CORS.",

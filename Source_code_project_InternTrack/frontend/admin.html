@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#153a72">
     <meta name="description" content="Bảng điều khiển quản trị hệ thống InterTrack.">
-    <meta name="api-base-url" content="http://localhost:8000/api/v1">
+    <meta name="api-base-url" content="http://127.0.0.1:8000/api/v1">
     <title>Quản trị hệ thống | InterTrack</title>
     <script src="js/theme.js"></script>
     <link rel="icon" type="image/svg+xml" href="logo.svg">
@@ -66,7 +66,7 @@
             <span class="nav-icon" aria-hidden="true">⌘</span>
             <span>Nhóm thực tập</span>
           </a>
-          <a class="nav-link" href="schedules.html" data-view-target="schedules">
+          <a class="nav-link" href="schedules.html">
             <span class="nav-icon" aria-hidden="true">▣</span>
             <span>Lịch hoạt động</span>
           </a>
@@ -429,16 +429,27 @@
               <div>
                 <p class="eyebrow">Quản lý thực tập</p>
                 <h1 id="teams-title">Nhóm thực tập</h1>
-                <p class="page-description">Chức năng sẽ khả dụng khi backend đăng ký API nhóm.</p>
+                <p class="page-description">Danh sách nhóm được tải trực tiếp từ API backend.</p>
               </div>
+              <a class="button button-primary" href="teams.html">Quản lý chi tiết</a>
             </div>
-            <section class="panel admin-unavailable">
-              <span class="admin-unavailable-icon" aria-hidden="true">⌘</span>
-              <h2>API nhóm thực tập chưa được cung cấp</h2>
-              <p>
-                Backend hiện chưa đăng ký endpoint quản lý nhóm trong API v1.
-                Không có dữ liệu hoặc thao tác nhóm nào được giả lập trên giao diện này.
-              </p>
+            <section class="panel admin-panel">
+              <div class="table-scroll">
+                <table class="data-table admin-table">
+                  <thead>
+                    <tr>
+                      <th>Nhóm</th>
+                      <th>Kỳ thực tập</th>
+                      <th>Giảng viên hướng dẫn</th>
+                      <th>Trạng thái</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody data-admin-teams-rows>
+                    <tr><td class="admin-table-state" colspan="5">Đang tải danh sách nhóm...</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </section>
           </section>
 

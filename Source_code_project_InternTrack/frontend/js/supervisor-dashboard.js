@@ -297,7 +297,7 @@ async function renderEvaluations() {
 }
 
 async function renderNotifications() {
-  const container = document.querySelector("[data-notification-list]");
+  const container = document.querySelector('[data-supervisor-panel="notifications"] [data-notification-list]');
   if (!container) return;
   try {
     const notifications = normalizeList(await apiRequest("notifications"));
@@ -425,6 +425,9 @@ document.querySelectorAll("[data-supervisor-view]").forEach((link) => {
     history.replaceState(null, "", `#${view}`);
     document.body.classList.remove("sidebar-open");
     window.scrollTo({ top: 0, behavior: "smooth" });
+    if (view === "notifications") {
+      void renderNotifications();
+    }
   });
 });
 
@@ -646,9 +649,9 @@ if (currentUser) {
   setText("[data-user-initials]", (currentUser.full_name || "GV").split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase());
   await initializeSharedUi();
   await initializeNotifications();
-  await loadDashboard();
   const hashView = window.location.hash.slice(1);
   if (hashView) document.querySelector(`[data-supervisor-view="${hashView}"]`)?.click();
+  await loadDashboard();
 }
 
 window.addEventListener("pageshow", (event) => {
