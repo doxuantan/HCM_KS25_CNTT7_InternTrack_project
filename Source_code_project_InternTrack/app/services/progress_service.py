@@ -138,7 +138,6 @@ def _assert_team_access(db: Session, team_id: int, user: User) -> Team:
             select(TeamMember.id).where(
                 TeamMember.team_id == team_id,
                 TeamMember.student_id == student_id,
-                TeamMember.is_leader.is_(True),
             )
         )
         if membership is not None:
@@ -209,10 +208,9 @@ def get_member_progress(db: Session, student_id: int, user: User) -> dict:
     if user.role == UserRole.STUDENT:
         own_student_id = _student_id(db, user)
         if own_student_id != student_id:
-            leader_team_ids = set(db.scalars(
+            own_team_ids = set(db.scalars(
                 select(TeamMember.team_id).where(
                     TeamMember.student_id == own_student_id,
-                    TeamMember.is_leader.is_(True),
                 )
             ).all())
             target_team_ids = set(db.scalars(
@@ -220,7 +218,7 @@ def get_member_progress(db: Session, student_id: int, user: User) -> dict:
                     TeamMember.student_id == student_id,
                 )
             ).all())
-            if leader_team_ids.isdisjoint(target_team_ids):
+            if own_team_ids.isdisjoint(target_team_ids):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Bạn không có quyền xem tiến độ của sinh viên này.",
