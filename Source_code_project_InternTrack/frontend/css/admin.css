@@ -548,6 +548,18 @@
   display: none !important;
 }
 
+.admin-dialog > .modal-header {
+  padding: 23px 23px 0;
+}
+
+.admin-dialog > .modal-body {
+  padding: 0 23px;
+}
+
+.admin-dialog > .modal-footer {
+  padding: 0 23px 23px;
+}
+
 .admin-dialog .modal-header {
   margin-bottom: 18px;
 }
@@ -869,6 +881,18 @@
 
   .admin-dialog-form {
     padding: 18px;
+  }
+
+  .admin-dialog > .modal-header {
+    padding: 18px 18px 0;
+  }
+
+  .admin-dialog > .modal-body {
+    padding: 0 18px;
+  }
+
+  .admin-dialog > .modal-footer {
+    padding: 0 18px 18px;
   }
 
   .admin-form-grid,
