@@ -58,6 +58,21 @@ def _assert_task_manager(db: Session, task: Task, user: User) -> None:
             if owns_team is not None:
                 return
 
+    if user.role == UserRole.STUDENT:
+        student_id = db.scalar(
+            select(Student.id).where(Student.user_id == user.id)
+        )
+        if student_id is not None:
+            is_team_leader = db.scalar(
+                select(TeamMember.id).where(
+                    TeamMember.team_id == task.team_id,
+                    TeamMember.student_id == student_id,
+                    TeamMember.is_leader.is_(True),
+                )
+            )
+            if is_team_leader is not None:
+                return
+
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Bạn không có quyền quản lý nhiệm vụ này.",
@@ -77,6 +92,28 @@ def create_task(db: Session, data: TaskCreate, user: User) -> Task:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Không tìm thấy nhóm của nhiệm vụ.",
         )
+
+    if user.role == UserRole.STUDENT:
+        student_id = db.scalar(
+            select(Student.id).where(Student.user_id == user.id)
+        )
+        is_team_leader = student_id is not None and db.scalar(
+            select(TeamMember.id).where(
+                TeamMember.team_id == team.id,
+                TeamMember.student_id == student_id,
+                TeamMember.is_leader.is_(True),
+            )
+        ) is not None
+        if not is_team_leader:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Chỉ nhóm trưởng mới được tạo nhiệm vụ cho nhóm.",
+            )
+        if data.task_type.value != "TEAM":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Nhóm trưởng chỉ được tạo nhiệm vụ thuộc nhóm.",
+            )
 
     deadline = _local_naive_datetime(data.deadline)
     if deadline.date() < data.start_date:
@@ -121,6 +158,15 @@ def get_task(db: Session, task_id: int, user: User) -> Task:
             select(Student.id).where(Student.user_id == user.id)
         )
         if student_id is not None:
+            is_team_leader = db.scalar(
+                select(TeamMember.id).where(
+                    TeamMember.team_id == task.team_id,
+                    TeamMember.student_id == student_id,
+                    TeamMember.is_leader.is_(True),
+                )
+            )
+            if is_team_leader is not None:
+                return task
             assigned = db.scalar(
                 select(TaskAssignment.id).where(
                     TaskAssignment.task_id == task.id,
@@ -139,6 +185,13 @@ def update_task(db: Session, task_id: int, data: TaskUpdate, user: User) -> Task
     task = _get_task(db, task_id)
     _assert_task_manager(db, task, user)
     update_data = data.model_dump(exclude_unset=True)
+
+    if user.role == UserRole.STUDENT and "team_id" in update_data:
+        if update_data["team_id"] != task.team_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Nhóm trưởng không được chuyển nhiệm vụ sang nhóm khác.",
+            )
 
     team_id = update_data.get("team_id", task.team_id)
     team = db.get(Team, team_id)
@@ -242,14 +295,33 @@ def list_tasks(
         )
         if student_id is None:
             return {"items": [], "total": 0, "page": page, "limit": limit, "total_pages": 0}
-        statement = statement.where(
+        leader_team_ids = db.scalars(
+            select(TeamMember.team_id).where(
+                TeamMember.student_id == student_id,
+                TeamMember.is_leader.is_(True),
+            )
+        ).all()
+        if leader_team_ids:
+            statement = statement.where(Task.team_id.in_(leader_team_ids))
+            if assignee is not None:
+                statement = statement.where(
+                    select(TaskAssignment.id)
+                    .where(
+                        TaskAssignment.task_id == Task.id,
+                        TaskAssignment.student_id == assignee,
+                    )
+                    .exists()
+                )
+                assignee = None
+        else:
+            statement = statement.where(
             select(TaskAssignment.id)
             .where(
                 TaskAssignment.task_id == Task.id,
                 TaskAssignment.student_id == student_id,
             )
             .exists()
-        )
+            )
     else:
         return {"items": [], "total": 0, "page": page, "limit": limit, "total_pages": 0}
 

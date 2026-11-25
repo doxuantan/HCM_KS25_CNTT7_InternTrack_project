@@ -99,6 +99,7 @@ class TeamMemberDetail(BaseModel):
     id: int
     team_id: int
     student_id: int
+    user_id: int
     is_leader: bool
     joined_at: datetime
     student_name: str | None = None
