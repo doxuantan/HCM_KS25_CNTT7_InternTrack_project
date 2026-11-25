@@ -334,7 +334,8 @@ async function configureStudentTaskForm(task) {
   const section = document.querySelector("[data-student-task-update-section]");
   const form = document.querySelector("[data-student-task-update-form]");
   if (!section || !(form instanceof HTMLFormElement)) return;
-  const isStudent = document.body?.dataset.myTasksPage !== undefined;
+  const isStudent = document.body?.dataset.myTasksPage !== undefined
+    || document.body?.dataset.dashboard === "student";
   const canUpdate = isStudent && task.status !== "DONE" && task.status !== "CANCELLED";
   section.hidden = !canUpdate;
   if (!canUpdate) return;

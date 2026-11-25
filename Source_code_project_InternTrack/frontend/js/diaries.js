@@ -44,25 +44,46 @@ function renderDiaries() {
 
   body.replaceChildren(...diaries.map((diary) => {
     const row = document.createElement("tr");
+    row.className = "diary-row";
+
+    const dateCell = cell(diary.work_date);
+    dateCell.className = "diary-date";
+    dateCell.dataset.label = "Ngày";
+
     const content = document.createElement("td");
-    content.textContent = diary.work_content;
+    content.className = "diary-content";
+    content.dataset.label = "Nội dung";
+    const workContent = document.createElement("strong");
+    workContent.textContent = diary.work_content;
+    content.append(workContent);
     if (diary.result) {
       const result = document.createElement("p");
-      result.className = "muted";
+      result.className = "diary-result";
       result.textContent = `Kết quả: ${diary.result}`;
       content.append(result);
     }
 
+    const difficultyCell = cell(diary.difficulties);
+    difficultyCell.className = "diary-difficulties";
+    difficultyCell.dataset.label = "Khó khăn";
+
     const reviewCell = document.createElement("td");
-    reviewCell.textContent = statusName(diary.status);
+    reviewCell.className = "diary-review";
+    reviewCell.dataset.label = "Trạng thái";
+    const status = document.createElement("span");
+    status.className = `diary-status diary-status-${String(diary.status).toLowerCase().replaceAll("_", "-")}`;
+    status.textContent = statusName(diary.status);
+    reviewCell.append(status);
     for (const review of diary.reviews || []) {
       const note = document.createElement("p");
-      note.className = "muted";
+      note.className = "diary-review-note";
       note.textContent = `${statusName(review.status)}: ${review.content}`;
       reviewCell.append(note);
     }
 
     const actions = document.createElement("td");
+    actions.className = "diary-actions";
+    actions.dataset.label = "Thao tác";
     const attachmentButton = document.createElement("button");
     attachmentButton.type = "button";
     attachmentButton.className = "admin-row-action";
@@ -79,9 +100,9 @@ function renderDiaries() {
     }
 
     row.append(
-      cell(diary.work_date),
+      dateCell,
       content,
-      cell(diary.difficulties),
+      difficultyCell,
       reviewCell,
       actions,
     );
