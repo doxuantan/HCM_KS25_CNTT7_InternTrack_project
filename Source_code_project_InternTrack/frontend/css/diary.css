@@ -1,0 +1,275 @@
+.workflow-main [data-diary-form] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 6px 22px 22px;
+}
+
+.workflow-main [data-diary-form] .form-control {
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+
+.workflow-main [data-diary-form] textarea.form-control {
+  min-height: 92px;
+}
+
+.workflow-main [data-diary-form] input[type="file"] {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.workflow-main [data-diary-form] input[type="file"]::file-selector-button {
+  min-height: 32px;
+  margin-right: 10px;
+  padding: 6px 10px;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+  background: #f1f4f9;
+  color: #4e5d73;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.workflow-main [data-diary-form] > .admin-form-wide:last-child {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.workflow-main [data-diary-form] > .admin-form-wide:last-child .button {
+  min-width: 150px;
+}
+
+.workflow-main [data-diary-status],
+.workflow-main [data-diary-date] {
+  background: #fbfcfe;
+}
+
+.workflow-main [data-diary-rows] .diary-row {
+  transition: background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.workflow-main [data-diary-rows] .diary-row:hover {
+  background: #fafbff;
+  box-shadow: inset 3px 0 0 #7047e8;
+}
+
+.workflow-main [data-diary-rows] td {
+  height: auto;
+  padding: 15px 16px;
+  vertical-align: top;
+  line-height: 1.55;
+}
+
+.workflow-main [data-diary-rows] .diary-date {
+  color: #4d5b70;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.workflow-main [data-diary-rows] .diary-date::before {
+  display: block;
+  margin-bottom: 3px;
+  color: #9aa4b3;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  content: "Ngày ghi";
+}
+
+.workflow-main [data-diary-rows] .diary-content strong {
+  display: block;
+  color: #303c52;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.workflow-main [data-diary-rows] .diary-result,
+.workflow-main [data-diary-rows] .diary-review-note {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-left: 3px solid #cfd9e8;
+  border-radius: 0 7px 7px 0;
+  background: #f6f8fb;
+  color: #66748a;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.workflow-main [data-diary-rows] .diary-difficulties {
+  color: #66748a;
+  font-size: 12px;
+  white-space: normal;
+}
+
+.workflow-main [data-diary-rows] .diary-status {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid #dce4ee;
+  border-radius: 999px;
+  background: #f4f6fa;
+  color: #66748a;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.workflow-main [data-diary-rows] .diary-status-submitted {
+  border-color: #bfe0f2;
+  background: #edf8fd;
+  color: #27769a;
+}
+
+.workflow-main [data-diary-rows] .diary-status-reviewed {
+  border-color: #bee0cf;
+  background: #edf8f2;
+  color: #287653;
+}
+
+.workflow-main [data-diary-rows] .diary-status-draft,
+.workflow-main [data-diary-rows] .diary-status-revision-required {
+  border-color: #ead7ad;
+  background: #fff7e8;
+  color: #9a671c;
+}
+
+.workflow-main [data-diary-rows] .diary-actions {
+  display: flex;
+  min-width: 112px;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.workflow-main [data-diary-rows] .diary-actions .admin-row-action {
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #f7f9fc;
+  color: #5266bc;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.workflow-main [data-diary-rows] [data-attachment-list] {
+  display: grid;
+  width: 100%;
+  flex-basis: 100%;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.workflow-main [data-diary-rows] [data-attachment-list] .admin-row-action {
+  width: 100%;
+  max-width: 180px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+:root[data-theme="dark"] .workflow-main [data-diary-form] .form-control,
+:root[data-theme="dark"] .workflow-main [data-diary-status],
+:root[data-theme="dark"] .workflow-main [data-diary-date] {
+  background: #171a27;
+}
+
+:root[data-theme="dark"] .workflow-main [data-diary-form] input[type="file"]::file-selector-button {
+  border-color: #3a4053;
+  background: #262a3a;
+  color: #d3d8e6;
+}
+
+:root[data-theme="dark"] .workflow-main [data-diary-rows] .diary-row:hover {
+  background: #191d2a;
+  box-shadow: inset 3px 0 0 #9a75ec;
+}
+
+:root[data-theme="dark"] .workflow-main [data-diary-rows] .diary-content strong,
+:root[data-theme="dark"] .workflow-main [data-diary-rows] .diary-date {
+  color: #e2e6ef;
+}
+
+:root[data-theme="dark"] .workflow-main [data-diary-rows] .diary-result,
+:root[data-theme="dark"] .workflow-main [data-diary-rows] .diary-review-note {
+  border-left-color: #555c70;
+  background: #1d212e;
+  color: #adb5c5;
+}
+
+:root[data-theme="dark"] .workflow-main [data-diary-rows] .diary-status,
+:root[data-theme="dark"] .workflow-main [data-diary-rows] .diary-actions .admin-row-action {
+  border-color: #3a4053;
+  background: #232637;
+  color: #c1a8ff;
+}
+
+@media (max-width: 900px) {
+  .workflow-main [data-diary-form] {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 760px) {
+  .workflow-main [data-diary-form] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workflow-main [data-diary-form] > .admin-form-wide {
+    grid-column: 1;
+  }
+
+  .workflow-main [data-diary-form] > .admin-form-wide:last-child .button {
+    width: 100%;
+  }
+
+  .workflow-main .table-scroll {
+    overflow: visible;
+  }
+
+  .workflow-main .student-task-table {
+    display: block;
+    min-width: 0;
+  }
+
+  .workflow-main .student-task-table thead {
+    display: none;
+  }
+
+  .workflow-main [data-diary-rows] {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .workflow-main [data-diary-rows] .diary-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid #e3e8ef;
+    border-radius: 13px;
+    background: #fff;
+  }
+
+  .workflow-main [data-diary-rows] td {
+    width: auto !important;
+    min-width: 0;
+    border: 0;
+  }
+
+  .workflow-main [data-diary-rows] .diary-content,
+  .workflow-main [data-diary-rows] .diary-review,
+  .workflow-main [data-diary-rows] .diary-actions {
+    grid-column: 1 / -1;
+  }
+
+  .workflow-main [data-diary-rows] .diary-actions {
+    min-width: 0;
+  }
+}
+
+:root[data-theme="dark"] .workflow-main [data-diary-rows] .diary-row {
+  border-color: #303447;
+  background: #171a27;
+}
