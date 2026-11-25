@@ -42,6 +42,7 @@ class TaskApiTests(unittest.TestCase):
                 UserRole.SUPERVISOR,
             )
             student = self._create_user(db, "student", UserRole.STUDENT)
+            leader = self._create_user(db, "leader", UserRole.STUDENT)
             outsider = self._create_user(db, "outsider", UserRole.STUDENT)
             inactive = self._create_user(db, "inactive", UserRole.STUDENT)
             inactive.is_active = False
@@ -52,6 +53,7 @@ class TaskApiTests(unittest.TestCase):
                 lecturer_code="L-02",
             )
             student_profile = Student(user_id=student.id, student_code="S-01")
+            leader_profile = Student(user_id=leader.id, student_code="S-04")
             outsider_profile = Student(user_id=outsider.id, student_code="S-02")
             inactive_profile = Student(user_id=inactive.id, student_code="S-03")
             period = InternshipPeriod(
@@ -65,6 +67,7 @@ class TaskApiTests(unittest.TestCase):
                     lecturer,
                     other_lecturer,
                     student_profile,
+                    leader_profile,
                     outsider_profile,
                     inactive_profile,
                     period,
@@ -87,7 +90,10 @@ class TaskApiTests(unittest.TestCase):
             )
             db.add_all([team, other_team])
             db.flush()
-            db.add(TeamMember(team_id=team.id, student_id=student_profile.id))
+            db.add_all([
+                TeamMember(team_id=team.id, student_id=student_profile.id),
+                TeamMember(team_id=team.id, student_id=leader_profile.id, is_leader=True),
+            ])
             db.commit()
 
             self.admin_id = admin.id
@@ -95,6 +101,7 @@ class TaskApiTests(unittest.TestCase):
             self.other_supervisor_id = other_supervisor.id
             self.student_id = student.id
             self.student_profile_id = student_profile.id
+            self.leader_profile_id = leader_profile.id
             self.outsider_profile_id = outsider_profile.id
             self.inactive_profile_id = inactive_profile.id
             self.team_id = team.id
@@ -105,6 +112,7 @@ class TaskApiTests(unittest.TestCase):
             "supervisor": self._token(self.supervisor_id),
             "other_supervisor": self._token(self.other_supervisor_id),
             "student": self._token(self.student_id),
+            "leader": self._token(leader.id),
             "outsider": self._token(self._user_id("outsider")),
         }
         self.app = FastAPI()
@@ -177,6 +185,53 @@ class TaskApiTests(unittest.TestCase):
             headers=self._auth("supervisor"),
         )
         self.assertEqual(response.status_code, 200, response.text)
+
+    def test_team_leader_can_create_and_assign_team_task(self) -> None:
+        created = self.client.post(
+            "/api/v1/tasks",
+            json=self._task_payload(title="Leader team task"),
+            headers=self._auth("leader"),
+        )
+        self.assertEqual(created.status_code, 201, created.text)
+        task_id = created.json()["data"]["id"]
+
+        assigned = self.client.put(
+            f"/api/v1/tasks/{task_id}/assign",
+            json={"student_ids": [self.student_profile_id, self.leader_profile_id]},
+            headers=self._auth("leader"),
+        )
+        self.assertEqual(assigned.status_code, 200, assigned.text)
+        assignment_ids = {
+            assignment["student_id"]
+            for assignment in assigned.json()["data"]["assignments"]
+        }
+        self.assertEqual(
+            assignment_ids,
+            {self.student_profile_id, self.leader_profile_id},
+        )
+
+        outsider_assignment = self.client.put(
+            f"/api/v1/tasks/{task_id}/assign",
+            json={"student_id": self.outsider_profile_id},
+            headers=self._auth("leader"),
+        )
+        self.assertEqual(outsider_assignment.status_code, 422, outsider_assignment.text)
+
+    def test_student_without_leader_role_cannot_create_or_assign_task(self) -> None:
+        denied_create = self.client.post(
+            "/api/v1/tasks",
+            json=self._task_payload(title="Unauthorized leader task"),
+            headers=self._auth("student"),
+        )
+        self.assertEqual(denied_create.status_code, 403, denied_create.text)
+
+        task_id = self._create_task(role="supervisor")
+        denied_assign = self.client.put(
+            f"/api/v1/tasks/{task_id}/assign",
+            json={"student_id": self.student_profile_id},
+            headers=self._auth("student"),
+        )
+        self.assertEqual(denied_assign.status_code, 403, denied_assign.text)
 
     def test_create_team_and_personal_tasks(self) -> None:
         team_task = self.client.post(

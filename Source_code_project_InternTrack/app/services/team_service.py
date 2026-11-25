@@ -348,6 +348,7 @@ def list_team_members(db: Session, team_id: int, user: User) -> list[dict]:
             TeamMember,
             Student.student_code,
             User.full_name,
+            User.id,
         )
         .join(Student, TeamMember.student_id == Student.id)
         .join(User, Student.user_id == User.id)
@@ -359,12 +360,13 @@ def list_team_members(db: Session, team_id: int, user: User) -> list[dict]:
             "id": member.id,
             "team_id": member.team_id,
             "student_id": member.student_id,
+            "user_id": user_id,
             "is_leader": member.is_leader,
             "joined_at": member.joined_at,
             "student_name": student_name,
             "student_code": student_code,
         }
-        for member, student_code, student_name in rows
+        for member, student_code, student_name, user_id in rows
     ]
 
 

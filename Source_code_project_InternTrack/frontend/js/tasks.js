@@ -120,6 +120,26 @@ export async function loadStudentTasks() {
   }
 }
 
+async function showLeaderTaskEntry(user) {
+  const entry = document.querySelector("[data-leader-task-entry]");
+  if (!entry) return;
+  try {
+    const teams = await apiRequest("teams");
+    if (!Array.isArray(teams) || !teams.length) return;
+    for (const team of teams) {
+      const members = await apiRequest(`teams/${team.id}/members`);
+      const studentProfileId = user?.student_profile?.id;
+      if (members.some((member) =>
+        member.student_id === studentProfileId && member.is_leader)) {
+        entry.hidden = false;
+        return;
+      }
+    }
+  } catch (error) {
+    entry.hidden = true;
+  }
+}
+
 let supervisorTasks = [];
 let studentTasks = [];
 let activeTaskId = null;
@@ -627,6 +647,7 @@ if (document.body?.dataset.myTasksPage !== undefined) {
     await initializeSharedUi();
     await initializeNotifications();
     await loadStudentTasks();
+    await showLeaderTaskEntry(user);
   }
   document.querySelector("#main-content")?.setAttribute("aria-busy", "false");
 }

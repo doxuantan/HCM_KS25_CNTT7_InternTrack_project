@@ -8,6 +8,9 @@ let users = [];
 let activeTeamId = null;
 let currentUser = null;
 const teamMembersCache = new Map();
+let studentTeam = null;
+let studentTeamMembers = [];
+let leaderTasks = [];
 
 function isStudentView() {
   return document.body.dataset.teamView === "student";
@@ -223,11 +226,14 @@ async function loadStudentTeam() {
     return;
   }
   const team = studentTeams[0];
+  studentTeam = team;
+  activeTeamId = team.id;
   document.querySelector("[data-student-team-name]").textContent = team.team_name;
   document.querySelector("[data-student-team-code]").textContent = team.team_code;
   document.querySelector("[data-student-team-supervisor]").textContent =
     team.supervisor_name ? `${team.supervisor_name}${team.supervisor_code ? ` (${team.supervisor_code})` : ""}` : `ID ${team.supervisor_id}`;
   const members = await apiRequest(`teams/${team.id}/members`);
+  studentTeamMembers = members;
   const body = document.querySelector("[data-student-team-members]");
   if (!members.length) {
     body.replaceChildren(stateRow("Chưa có thành viên.", 3));
@@ -249,6 +255,25 @@ async function loadStudentTeam() {
       }
       return row;
     }));
+  }
+  const studentProfileId = currentUser?.student_profile?.id;
+  const currentUserId = currentUser?.id;
+  const isLeader = members.some((member) =>
+    member.is_leader
+      && (
+        member.user_id === currentUserId
+        || (studentProfileId != null && member.student_id === studentProfileId)
+      ));
+  const panel = document.querySelector("[data-leader-task-panel]");
+  const pageEntry = document.querySelector("[data-create-leader-task-entry]");
+  if (isLeader) {
+    panel?.removeAttribute("hidden");
+    pageEntry?.removeAttribute("hidden");
+    pageEntry?.removeAttribute("disabled");
+    await loadLeaderTasks();
+  } else {
+    panel?.setAttribute("hidden", "");
+    pageEntry?.setAttribute("hidden", "");
   }
   document.querySelector("#main-content").setAttribute("aria-busy", "false");
 }
@@ -356,6 +381,101 @@ async function openLeaderDialog(teamId) {
     }));
   }
   document.querySelector("[data-leader-dialog]").showModal();
+}
+
+function formatTaskDeadline(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "—"
+    : new Intl.DateTimeFormat("vi-VN", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: "Asia/Ho_Chi_Minh",
+    }).format(date);
+}
+
+async function loadLeaderTasks() {
+  if (!studentTeam) return;
+  const body = document.querySelector("[data-leader-task-rows]");
+  try {
+    const payload = await apiRequest(`tasks?team=${studentTeam.id}&limit=100&sort=created_desc`);
+    leaderTasks = Array.isArray(payload) ? payload : payload.items || [];
+  } catch (error) {
+    leaderTasks = [];
+  }
+  if (!leaderTasks.length) {
+    body?.replaceChildren(stateRow("Nhóm chưa có task.", 6));
+    return;
+  }
+  const statusLabels = {
+    TODO: "Chưa bắt đầu",
+    IN_PROGRESS: "Đang thực hiện",
+    REVIEW: "Chờ duyệt",
+    DONE: "Hoàn thành",
+    CANCELLED: "Đã hủy",
+  };
+  const priorityLabels = { LOW: "Thấp", MEDIUM: "Trung bình", HIGH: "Cao" };
+  body?.replaceChildren(...leaderTasks.map((task) => {
+    const row = document.createElement("tr");
+    const assignees = task.assignments?.map((item) =>
+      item.student_name || item.student_code || `Sinh viên #${item.student_id}`) || [];
+    [
+      task.title,
+      assignees.join(", ") || "Chưa giao",
+      formatTaskDeadline(task.deadline),
+      priorityLabels[task.priority] || task.priority,
+      statusLabels[task.status] || task.status,
+    ].forEach((value) => {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.append(cell);
+    });
+    const actions = document.createElement("td");
+    const detail = document.createElement("button");
+    detail.type = "button";
+    detail.className = "admin-row-action";
+    detail.dataset.leaderTaskDetail = String(task.id);
+    detail.textContent = "Chi tiết";
+    actions.append(detail);
+    row.append(actions);
+    return row;
+  }));
+}
+
+function openLeaderTaskDialog() {
+  const dialog = document.querySelector("[data-leader-task-dialog]");
+  const form = document.querySelector("[data-leader-task-form]");
+  if (!(dialog instanceof HTMLDialogElement) || !(form instanceof HTMLFormElement)) return;
+  form.reset();
+  const today = new Date();
+  form.elements.start_date.value =
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  form.elements.student_ids.replaceChildren(...studentTeamMembers
+    .map((member) => new Option(
+      member.student_name ? `${member.student_name} (${member.student_code || member.student_id})` : `Sinh viên #${member.student_id}`,
+      String(member.student_id),
+    )));
+  dialog.showModal();
+}
+
+async function openLeaderTaskDetail(taskId) {
+  const task = await apiRequest(`tasks/${taskId}`);
+  const dialog = document.querySelector("[data-leader-task-detail]");
+  if (!(dialog instanceof HTMLDialogElement)) return;
+  document.querySelector("[data-leader-task-detail-title]").textContent = task.title;
+  document.querySelector("[data-leader-task-detail-status]").textContent =
+    ({ TODO: "Chưa bắt đầu", IN_PROGRESS: "Đang thực hiện", REVIEW: "Chờ duyệt", DONE: "Hoàn thành", CANCELLED: "Đã hủy" })[task.status] || task.status;
+  document.querySelector("[data-leader-task-detail-deadline]").textContent = formatTaskDeadline(task.deadline);
+  document.querySelector("[data-leader-task-detail-priority]").textContent =
+    ({ LOW: "Thấp", MEDIUM: "Trung bình", HIGH: "Cao" })[task.priority] || task.priority;
+  document.querySelector("[data-leader-task-detail-assignees]").textContent =
+    task.assignments?.length
+      ? task.assignments.map((item) => item.student_name || item.student_code || `Sinh viên #${item.student_id}`).join(", ")
+      : "Chưa giao";
+  document.querySelector("[data-leader-task-detail-description]").textContent =
+    task.description || "Không có mô tả.";
+  dialog.showModal();
 }
 
 async function openSupervisorDialog(teamId) {
@@ -509,6 +629,65 @@ document.querySelector("[data-supervisor-form]")?.addEventListener("submit", asy
   }
 });
 
+document.querySelector("[data-create-leader-task]")?.addEventListener("click", openLeaderTaskDialog);
+document.querySelector("[data-create-leader-task-entry]")?.addEventListener("click", openLeaderTaskDialog);
+
+document.querySelector("[data-leader-task-form]")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  if (!(form instanceof HTMLFormElement) || !studentTeam) return;
+  const selectedIds = Array.from(form.elements.student_ids.selectedOptions)
+    .map((option) => Number(option.value))
+    .filter((id) => id > 0);
+  if (!selectedIds.length) {
+    showToast("Vui lòng chọn ít nhất một thành viên để giao task.", { kind: "error" });
+    return;
+  }
+  const startDate = form.elements.start_date.value;
+  const deadline = form.elements.deadline.value;
+  if (!deadline || deadline.slice(0, 10) < startDate) {
+    showToast("Deadline phải cùng hoặc sau ngày bắt đầu.", { kind: "error" });
+    return;
+  }
+  if (new Date(deadline).getTime() <= Date.now()) {
+    showToast("Deadline không được nằm trong quá khứ.", { kind: "error" });
+    return;
+  }
+  try {
+    const created = await apiRequest("tasks", {
+      method: "POST",
+      body: {
+        team_id: studentTeam.id,
+        title: form.elements.title.value.trim(),
+        description: form.elements.description.value.trim() || null,
+        task_type: "TEAM",
+        priority: form.elements.priority.value,
+        start_date: startDate,
+        deadline,
+      },
+    });
+    await apiRequest(`tasks/${created.id}/assign`, {
+      method: "PUT",
+      body: { student_ids: selectedIds },
+    });
+    document.querySelector("[data-leader-task-dialog]")?.close();
+    form.reset();
+    showToast("Đã tạo và phân công task.");
+    await loadLeaderTasks();
+  } catch (error) {
+    showToast(error.message, { kind: "error" });
+  }
+});
+
+document.querySelector("[data-leader-task-rows]")?.addEventListener("click", (event) => {
+  const button = event.target instanceof Element
+    ? event.target.closest("[data-leader-task-detail]")
+    : null;
+  if (!(button instanceof HTMLButtonElement)) return;
+  void openLeaderTaskDetail(Number(button.dataset.leaderTaskDetail))
+    .catch((error) => showToast(error.message, { kind: "error" }));
+});
+
 document.querySelector("[data-teams-rows]")?.addEventListener("click", (event) => {
   const button = event.target instanceof Element ? event.target.closest("[data-team-action]") : null;
   if (!(button instanceof HTMLButtonElement)) return;
@@ -553,6 +732,8 @@ for (const [dialogSelector, closeSelector] of [
   ["[data-leader-dialog]", "[data-close-leader-dialog]"],
   ["[data-team-detail-dialog]", "[data-close-team-detail]"],
   ["[data-supervisor-dialog]", "[data-close-supervisor-dialog]"],
+  ["[data-leader-task-dialog]", "[data-close-leader-task]"],
+  ["[data-leader-task-detail]", "[data-close-leader-task-detail]"],
 ]) {
   const dialog = document.querySelector(dialogSelector);
   document.querySelectorAll(closeSelector).forEach((button) => button.addEventListener("click", () => dialog?.close()));

@@ -16,8 +16,11 @@
   <body class="student-dashboard" data-allowed-roles="STUDENT" data-team-view="student">
     <main class="content" id="main-content" aria-busy="true">
       <div class="page-heading student-page-heading">
-        <div><p class="eyebrow">Không gian sinh viên</p><h1>Nhóm thực tập của tôi</h1><p class="page-description">Thông tin chỉ đọc.</p></div>
-        <a class="button button-secondary" href="../index.html">Về bảng điều khiển</a>
+        <div><p class="eyebrow">Không gian sinh viên</p><h1>Nhóm thực tập của tôi</h1><p class="page-description">Nhóm trưởng có thể tạo và phân công task cho thành viên nhóm.</p></div>
+        <div class="admin-toolbar" style="margin:0;padding:0;border:0;background:transparent">
+          <button class="button button-primary" type="button" data-create-leader-task-entry hidden>Tạo và phân công task</button>
+          <a class="button button-secondary" href="../index.html">Về bảng điều khiển</a>
+        </div>
       </div>
       <section class="panel student-info-panel" data-student-team-panel>
         <dl class="student-info-list">
@@ -31,6 +34,46 @@
         <div class="panel-heading student-panel-heading"><div><h2>Thành viên nhóm</h2><p class="muted">Danh sách lấy trực tiếp từ backend</p></div></div>
         <div class="table-scroll"><table class="data-table"><thead><tr><th>Thành viên</th><th>Mã sinh viên</th><th>Vai trò</th></tr></thead><tbody data-student-team-members><tr><td colspan="3" role="status">Đang tải...</td></tr></tbody></table></div>
       </section>
+      <section class="panel student-tasks-panel" data-leader-task-panel hidden>
+        <div class="panel-heading student-panel-heading">
+          <div><h2>Task của nhóm</h2><p class="muted">Nhóm trưởng tạo và phân công công việc cho thành viên</p></div>
+          <button class="button button-primary" type="button" data-create-leader-task>Tạo task</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>Tên công việc</th><th>Người được giao</th><th>Deadline</th><th>Ưu tiên</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <tbody data-leader-task-rows><tr><td colspan="6" role="status">Đang tải task...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
     </main>
+    <dialog class="modal admin-dialog" data-leader-task-dialog>
+      <form class="admin-dialog-form" data-leader-task-form>
+        <div class="modal-header"><div><h2 class="modal-title">Tạo task cho nhóm</h2></div><button class="modal-close" type="button" data-close-leader-task aria-label="Đóng">×</button></div>
+        <div class="modal-body admin-form-grid">
+          <label class="form-field"><span class="form-label">Tên task</span><input class="form-control" name="title" maxlength="200" required></label>
+          <label class="form-field"><span class="form-label">Mức độ ưu tiên</span><select class="form-control" name="priority" required><option value="LOW">Thấp</option><option value="MEDIUM" selected>Trung bình</option><option value="HIGH">Cao</option></select></label>
+          <label class="form-field"><span class="form-label">Ngày bắt đầu</span><input class="form-control" name="start_date" type="date" required></label>
+          <label class="form-field"><span class="form-label">Deadline</span><input class="form-control" name="deadline" type="datetime-local" required></label>
+          <label class="form-field admin-form-wide"><span class="form-label">Người được giao</span><select class="form-control" name="student_ids" multiple size="5" required></select></label>
+          <label class="form-field admin-form-wide"><span class="form-label">Mô tả công việc</span><textarea class="form-control" name="description" rows="4"></textarea></label>
+        </div>
+        <div class="modal-footer"><button class="button button-secondary" type="button" data-close-leader-task>Hủy</button><button class="button button-primary" type="submit">Tạo và phân công</button></div>
+      </form>
+    </dialog>
+    <dialog class="modal admin-dialog task-detail-dialog" data-leader-task-detail>
+      <div class="admin-dialog-form">
+        <div class="modal-header"><div><h2 class="modal-title" data-leader-task-detail-title>Chi tiết task</h2></div><button class="modal-close" type="button" data-close-leader-task-detail aria-label="Đóng">×</button></div>
+        <div class="modal-body task-detail-body">
+          <dl class="admin-detail-list">
+            <div><dt>Trạng thái</dt><dd data-leader-task-detail-status>—</dd></div>
+            <div><dt>Deadline</dt><dd data-leader-task-detail-deadline>—</dd></div>
+            <div><dt>Ưu tiên</dt><dd data-leader-task-detail-priority>—</dd></div>
+            <div class="task-detail-wide"><dt>Người được giao</dt><dd data-leader-task-detail-assignees>—</dd></div>
+            <div class="task-detail-wide"><dt>Mô tả</dt><dd data-leader-task-detail-description>—</dd></div>
+          </dl>
+        </div>
+      </div>
+    </dialog>
   </body>
 </html>
